@@ -1,15 +1,45 @@
-all: parser
+# --- NOTES ---
+# $? = dependent files 
 
-parser.tab.c parser.tab.h:	parser.y
-	bison -t -v -d parser.y
+# Tell make which compiler to use
+CC = gcc
+# Which flags to pass to the compilation command
+CFLAGS = -G
+# Add header file dependencies
+DEBS = AST.h 
+# Define Include Directories
+INCLUDES = -I src
+# C source files
+SRC = lex.yy.c parser.tab.c
+# Set executable output name and directory
+BIN = bin/parser
 
-lex.yy.c: lexer.l parser.tab.h
-	flex lexer.l
+all: parser-run
+	@echo Building and Running Parser files
 
-parser: lex.yy.c parser.tab.c parser.tab.h symbolTable.h AST.h
-	gcc -o parser parser.tab.c lex.yy.c
-	./parser testProg.cmm
 
+
+# Generate bison C and H files
+parser.tab.c: parser.y
+	@echo Generating parser C and H files...
+	bison -t -v -d $?
+
+# Generate lexer C files 
+lex.yy.c: lexer.l
+	@echo Generating lexer C files...
+	flex $?
+
+# Build parser code
+parser: $(SRC)
+	@echo Building parser executable...
+	$(CC) $(INCLUDES) -o $(BIN) $?
+
+# Execute Parser code
+parser-run: parser
+	@echo Executing parser using testProg.cmm
+	bin/parser testProg.cmm
+
+# Remove all binaries, flex, and bison generated files
 clean:
 	rm -f parser lexer parser.tab.c lex.yy.c parser.tab.h parser.output
 	ls -l

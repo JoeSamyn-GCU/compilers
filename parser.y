@@ -36,9 +36,6 @@ char currentScope[50]; // global or the name of the function
 %token <string> OSB
 %token <string> CSB
 
-%printer { fprintf(yyoutput, "%s", $$); } ID;
-%printer { fprintf(yyoutput, "%d", $$); } NUMBER;
-
 %type <ast> Program DeclList Decl VarDecl Stmt StmtList Expr BinaryOp MathExpr
 
 %left PLUS MINUS
@@ -55,21 +52,21 @@ Program: DeclList   {
 					}
 ;
 
-DeclList:	Decl DeclList	{ 	
-								/* ---- SEMANTIC ACTIONS by PARSER ---- */
-								struct AST* decl = malloc(sizeof(struct AST));
-								decl = New_Tree("decl", $1, $2);
-							  	$$ = decl;
-							}
-	| Decl	{ 
-				/* ---- SEMANTIC ACTIONS by PARSER ---- */
-				struct AST* decl = malloc(sizeof(struct AST));
-				decl = New_Tree("decl", $1, NULL);
-				$$ = decl; 
-			}
+DeclList: Decl DeclList	{ 	
+							/* ---- SEMANTIC ACTIONS by PARSER ---- */
+							struct AST* decl = malloc(sizeof(struct AST));
+							decl = New_Tree("decl", $1, $2);
+							$$ = decl;
+						}
+| Decl	{ 
+			/* ---- SEMANTIC ACTIONS by PARSER ---- */
+			struct AST* decl = malloc(sizeof(struct AST));
+			decl = New_Tree("decl", $1, NULL);
+			$$ = decl; 
+		}
 ;
 
-Decl:	VarDecl
+Decl: VarDecl
 	| StmtList {}
 ;
 
@@ -84,44 +81,44 @@ VarDecl:	TYPE ID SEMICOLON	{
 								    $$ = New_Tree("Type", type, id);
 									printf("Adding Variable Decl to tree: Type %s %s\nLINE %d CHAR %d\n", $1, $2, lines, chars);
 								}
-| TYPE ID OSB NUMBER CSB SEMICOLON 	{
-										/* ---- SEMANTIC ACTIONS by PARSER ---- */
-										printf("RECOGNIZED RULE: Array Declaration\nTOKENS: %s %s %s %d %s\n", $1, $2, $3, $4, $5);
-										struct AST* array = malloc(sizeof(struct AST));
-										struct AST* type = malloc(sizeof(struct AST));
-										struct AST* id = malloc(sizeof(struct AST));
-										struct AST* num = malloc(sizeof(struct AST));
-										struct AST* type_parent = malloc(sizeof(struct AST));
-										char nums[100];
-										sprintf(nums, "%d", $4);
-										num = New_Tree(nums, NULL, NULL);
-										id = New_Tree($2, NULL, NULL);
-										type = New_Tree($1, NULL, NULL);
-										array = New_Tree("Array", id, num);
-										type_parent = New_Tree("Type", type, array);
-										$$ = type_parent;
-									}
-| TYPE ID 							{
-										/* ---- SEMANTIC ACTIONS by PARSER ---- */
-										/* ---- SYNTAX ERROR: no semicolon ---- */
-										printf("\033[0;31m");
-										printf("\nLine %d Character %d::SYNTAX ERROR::Missing semicolon after variable declaration\n", lines, chars);
-										printf("\033[0m");
-									}
-| TYPE ID OSB NUMBER CSB			{
-										/* ---- SEMANTIC ACTIONS by PARSER ---- */
-										/* ---- SYNTAX ERROR: no semicolon for array declaration ---- */
-										printf("\033[0;31m");
-										printf("\nLine %d Character %d::SYNTAX ERROR::Missing semicolon after array declaration\n", lines, chars);
-										printf("\033[0m");
-									}
-| TYPE ID OSB CSB SEMICOLON			{
-										/* ---- SEMANTIC ACTIONS by PARSER ---- */
-										/* ---- SYNTAX ERROR: no array size ---- */
-										printf("\033[0;31m");
-										printf("\nLine %d Character %d::SYNTAX ERROR::Array size was not declared\n", lines, chars);
-										printf("\033[0m");
-									}
+	| TYPE ID OSB NUMBER CSB SEMICOLON 	{
+											/* ---- SEMANTIC ACTIONS by PARSER ---- */
+											printf("RECOGNIZED RULE: Array Declaration\nTOKENS: %s %s %s %d %s\n", $1, $2, $3, $4, $5);
+											struct AST* array = malloc(sizeof(struct AST));
+											struct AST* type = malloc(sizeof(struct AST));
+											struct AST* id = malloc(sizeof(struct AST));
+											struct AST* num = malloc(sizeof(struct AST));
+											struct AST* type_parent = malloc(sizeof(struct AST));
+											char nums[100];
+											sprintf(nums, "%d", $4);
+											num = New_Tree(nums, NULL, NULL);
+											id = New_Tree($2, NULL, NULL);
+											type = New_Tree($1, NULL, NULL);
+											array = New_Tree("Array", id, num);
+											type_parent = New_Tree("Type", type, array);
+											$$ = type_parent;
+										}
+	| TYPE ID 							{
+											/* ---- SEMANTIC ACTIONS by PARSER ---- */
+											/* ---- SYNTAX ERROR: no semicolon ---- */
+											printf("\033[0;31m");
+											printf("\nLine %d Character %d::SYNTAX ERROR::Missing semicolon after variable declaration\n", lines, chars);
+											printf("\033[0m");
+										}
+	| TYPE ID OSB NUMBER CSB			{
+											/* ---- SEMANTIC ACTIONS by PARSER ---- */
+											/* ---- SYNTAX ERROR: no semicolon for array declaration ---- */
+											printf("\033[0;31m");
+											printf("\nLine %d Character %d::SYNTAX ERROR::Missing semicolon after array declaration\n", lines, chars);
+											printf("\033[0m");
+										}
+	| TYPE ID OSB CSB SEMICOLON			{
+											/* ---- SEMANTIC ACTIONS by PARSER ---- */
+											/* ---- SYNTAX ERROR: no array size ---- */
+											printf("\033[0;31m");
+											printf("\nLine %d Character %d::SYNTAX ERROR::Array size was not declared\n", lines, chars);
+											printf("\033[0m");
+										}
 ;
 
 StmtList:	

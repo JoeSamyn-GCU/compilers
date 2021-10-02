@@ -534,9 +534,9 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    51,    51,    58,    64,    72,    73,    76,    87,   104,
-     111,   118,   127,   128,   136,   137,   143,   150,   159,   169,
-     181,   189,   198,   204,   210,   216
+       0,    48,    48,    55,    61,    69,    70,    73,    84,   101,
+     108,   115,   124,   125,   133,   134,   140,   147,   156,   166,
+     178,   186,   195,   201,   207,   213
 };
 #endif
 
@@ -732,23 +732,7 @@ yy_symbol_value_print (FILE *yyo, int yytype, YYSTYPE const * const yyvaluep)
     YYPRINT (yyo, yytoknum[yytype], *yyvaluep);
 # endif
   YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
-  switch (yytype)
-    {
-    case 4: /* ID  */
-#line 39 "parser.y"
-         { fprintf(yyoutput, "%s", ((*yyvaluep).string)); }
-#line 741 "parser.tab.c"
-        break;
-
-    case 7: /* NUMBER  */
-#line 40 "parser.y"
-         { fprintf(yyoutput, "%d", ((*yyvaluep).number)); }
-#line 747 "parser.tab.c"
-        break;
-
-      default:
-        break;
-    }
+  YYUSE (yytype);
   YY_IGNORE_MAYBE_UNINITIALIZED_END
 }
 
@@ -1357,45 +1341,45 @@ yyreduce:
   switch (yyn)
     {
   case 2:
-#line 51 "parser.y"
+#line 48 "parser.y"
                     { 
 						(yyval.ast) = (yyvsp[0].ast);
 					 	printf("\n--- Abstract Syntax Tree ---\n\n");
 					 	print_tree((yyval.ast), 0);
 					}
-#line 1367 "parser.tab.c"
+#line 1351 "parser.tab.c"
     break;
 
   case 3:
-#line 58 "parser.y"
-                                { 	
-								/* ---- SEMANTIC ACTIONS by PARSER ---- */
-								struct AST* decl = malloc(sizeof(struct AST));
-								decl = New_Tree("decl", (yyvsp[-1].ast), (yyvsp[0].ast));
-							  	(yyval.ast) = decl;
-							}
-#line 1378 "parser.tab.c"
+#line 55 "parser.y"
+                        { 	
+							/* ---- SEMANTIC ACTIONS by PARSER ---- */
+							struct AST* decl = malloc(sizeof(struct AST));
+							decl = New_Tree("decl", (yyvsp[-1].ast), (yyvsp[0].ast));
+							(yyval.ast) = decl;
+						}
+#line 1362 "parser.tab.c"
     break;
 
   case 4:
-#line 64 "parser.y"
-                { 
-				/* ---- SEMANTIC ACTIONS by PARSER ---- */
-				struct AST* decl = malloc(sizeof(struct AST));
-				decl = New_Tree("decl", (yyvsp[0].ast), NULL);
-				(yyval.ast) = decl; 
-			}
-#line 1389 "parser.tab.c"
+#line 61 "parser.y"
+        { 
+			/* ---- SEMANTIC ACTIONS by PARSER ---- */
+			struct AST* decl = malloc(sizeof(struct AST));
+			decl = New_Tree("decl", (yyvsp[0].ast), NULL);
+			(yyval.ast) = decl; 
+		}
+#line 1373 "parser.tab.c"
     break;
 
   case 6:
-#line 73 "parser.y"
+#line 70 "parser.y"
                    {}
-#line 1395 "parser.tab.c"
+#line 1379 "parser.tab.c"
     break;
 
   case 7:
-#line 76 "parser.y"
+#line 73 "parser.y"
                                         { 
 									printf("\n RECOGNIZED RULE: Variable declaration %s %s\n", (yyvsp[-2].string), (yyvsp[-1].string));
 									
@@ -1407,95 +1391,95 @@ yyreduce:
 								    (yyval.ast) = New_Tree("Type", type, id);
 									printf("Adding Variable Decl to tree: Type %s %s\nLINE %d CHAR %d\n", (yyvsp[-2].string), (yyvsp[-1].string), lines, chars);
 								}
-#line 1411 "parser.tab.c"
+#line 1395 "parser.tab.c"
     break;
 
   case 8:
-#line 87 "parser.y"
-                                        {
-										/* ---- SEMANTIC ACTIONS by PARSER ---- */
-										printf("RECOGNIZED RULE: Array Declaration\nTOKENS: %s %s %s %d %s\n", (yyvsp[-5].string), (yyvsp[-4].string), (yyvsp[-3].string), (yyvsp[-2].number), (yyvsp[-1].string));
-										struct AST* array = malloc(sizeof(struct AST));
-										struct AST* type = malloc(sizeof(struct AST));
-										struct AST* id = malloc(sizeof(struct AST));
-										struct AST* num = malloc(sizeof(struct AST));
-										struct AST* type_parent = malloc(sizeof(struct AST));
-										char nums[100];
-										sprintf(nums, "%d", (yyvsp[-2].number));
-										num = New_Tree(nums, NULL, NULL);
-										id = New_Tree((yyvsp[-4].string), NULL, NULL);
-										type = New_Tree((yyvsp[-5].string), NULL, NULL);
-										array = New_Tree("Array", id, num);
-										type_parent = New_Tree("Type", type, array);
-										(yyval.ast) = type_parent;
-									}
-#line 1433 "parser.tab.c"
+#line 84 "parser.y"
+                                                {
+											/* ---- SEMANTIC ACTIONS by PARSER ---- */
+											printf("RECOGNIZED RULE: Array Declaration\nTOKENS: %s %s %s %d %s\n", (yyvsp[-5].string), (yyvsp[-4].string), (yyvsp[-3].string), (yyvsp[-2].number), (yyvsp[-1].string));
+											struct AST* array = malloc(sizeof(struct AST));
+											struct AST* type = malloc(sizeof(struct AST));
+											struct AST* id = malloc(sizeof(struct AST));
+											struct AST* num = malloc(sizeof(struct AST));
+											struct AST* type_parent = malloc(sizeof(struct AST));
+											char nums[100];
+											sprintf(nums, "%d", (yyvsp[-2].number));
+											num = New_Tree(nums, NULL, NULL);
+											id = New_Tree((yyvsp[-4].string), NULL, NULL);
+											type = New_Tree((yyvsp[-5].string), NULL, NULL);
+											array = New_Tree("Array", id, num);
+											type_parent = New_Tree("Type", type, array);
+											(yyval.ast) = type_parent;
+										}
+#line 1417 "parser.tab.c"
     break;
 
   case 9:
-#line 104 "parser.y"
-                                                                {
-										/* ---- SEMANTIC ACTIONS by PARSER ---- */
-										/* ---- SYNTAX ERROR: no semicolon ---- */
-										printf("\033[0;31m");
-										printf("\nLine %d Character %d::SYNTAX ERROR::Missing semicolon after variable declaration\n", lines, chars);
-										printf("\033[0m");
-									}
-#line 1445 "parser.tab.c"
+#line 101 "parser.y"
+                                                                        {
+											/* ---- SEMANTIC ACTIONS by PARSER ---- */
+											/* ---- SYNTAX ERROR: no semicolon ---- */
+											printf("\033[0;31m");
+											printf("\nLine %d Character %d::SYNTAX ERROR::Missing semicolon after variable declaration\n", lines, chars);
+											printf("\033[0m");
+										}
+#line 1429 "parser.tab.c"
     break;
 
   case 10:
-#line 111 "parser.y"
-                                                {
-										/* ---- SEMANTIC ACTIONS by PARSER ---- */
-										/* ---- SYNTAX ERROR: no semicolon for array declaration ---- */
-										printf("\033[0;31m");
-										printf("\nLine %d Character %d::SYNTAX ERROR::Missing semicolon after array declaration\n", lines, chars);
-										printf("\033[0m");
-									}
-#line 1457 "parser.tab.c"
+#line 108 "parser.y"
+                                                        {
+											/* ---- SEMANTIC ACTIONS by PARSER ---- */
+											/* ---- SYNTAX ERROR: no semicolon for array declaration ---- */
+											printf("\033[0;31m");
+											printf("\nLine %d Character %d::SYNTAX ERROR::Missing semicolon after array declaration\n", lines, chars);
+											printf("\033[0m");
+										}
+#line 1441 "parser.tab.c"
     break;
 
   case 11:
-#line 118 "parser.y"
-                                                {
-										/* ---- SEMANTIC ACTIONS by PARSER ---- */
-										/* ---- SYNTAX ERROR: no array size ---- */
-										printf("\033[0;31m");
-										printf("\nLine %d Character %d::SYNTAX ERROR::Array size was not declared\n", lines, chars);
-										printf("\033[0m");
-									}
-#line 1469 "parser.tab.c"
+#line 115 "parser.y"
+                                                        {
+											/* ---- SEMANTIC ACTIONS by PARSER ---- */
+											/* ---- SYNTAX ERROR: no array size ---- */
+											printf("\033[0;31m");
+											printf("\nLine %d Character %d::SYNTAX ERROR::Array size was not declared\n", lines, chars);
+											printf("\033[0m");
+										}
+#line 1453 "parser.tab.c"
     break;
 
   case 13:
-#line 128 "parser.y"
+#line 125 "parser.y"
                                 {
 							/* ---- SEMANTIC ACTIONS by PARSER ---- */
 							struct AST* s = malloc(sizeof(struct AST));
 							s = New_Tree("stmt", (yyvsp[-1].ast), (yyvsp[0].ast));
 							(yyval.ast) = s;
 						}
-#line 1480 "parser.tab.c"
+#line 1464 "parser.tab.c"
     break;
 
   case 14:
-#line 136 "parser.y"
+#line 133 "parser.y"
                         { printf("\nRECOGNIZED RULE: Semicolon\n");}
-#line 1486 "parser.tab.c"
+#line 1470 "parser.tab.c"
     break;
 
   case 15:
-#line 137 "parser.y"
+#line 134 "parser.y"
                                 {
 							
 							(yyval.ast) = (yyvsp[-1].ast);
 						}
-#line 1495 "parser.tab.c"
+#line 1479 "parser.tab.c"
     break;
 
   case 16:
-#line 143 "parser.y"
+#line 140 "parser.y"
                 { 
 					printf("\n RECOGNIZED RULE: Simplest expression\n"); 
 					// ---- SEMANTIC ACTIONS by PARSER ----
@@ -1503,11 +1487,11 @@ yyreduce:
 					id = New_Tree((yyvsp[0].string), NULL, NULL);
 					(yyval.ast) = id;
 				}
-#line 1507 "parser.tab.c"
+#line 1491 "parser.tab.c"
     break;
 
   case 17:
-#line 150 "parser.y"
+#line 147 "parser.y"
                     { 
 					printf("\n RECOGNIZED RULE: Assignment statement\n"); 
 					// ---- SEMANTIC ACTIONS by PARSER ----
@@ -1517,11 +1501,11 @@ yyreduce:
 					id_2 = New_Tree((yyvsp[0].string), NULL, NULL);
 					(yyval.ast) = New_Tree("=",id, id_2);
 				}
-#line 1521 "parser.tab.c"
+#line 1505 "parser.tab.c"
     break;
 
   case 18:
-#line 159 "parser.y"
+#line 156 "parser.y"
                         { 
 					printf("\n RECOGNIZED RULE: WRITE statement\n");
 
@@ -1532,11 +1516,11 @@ yyreduce:
 					write = New_Tree((yyvsp[-1].string), NULL, NULL);
 					(yyval.ast) = New_Tree("print",write,id);
 				}
-#line 1536 "parser.tab.c"
+#line 1520 "parser.tab.c"
     break;
 
   case 19:
-#line 169 "parser.y"
+#line 166 "parser.y"
                         {
 						/* ---- SEMANTIC ACTIONS by PARSER ---- */
 						printf("\n RECOGNIZED RULE: ID EQ MathExpr\nTOKENS: %s %s %s\n", (yyvsp[-2].string), (yyvsp[-1].string), (yyvsp[0].ast)->nodeType);
@@ -1546,11 +1530,11 @@ yyreduce:
 						eq = New_Tree("=", id, (yyvsp[0].ast));
 						(yyval.ast) = eq;
 					}
-#line 1550 "parser.tab.c"
+#line 1534 "parser.tab.c"
     break;
 
   case 20:
-#line 181 "parser.y"
+#line 178 "parser.y"
                                                 {
 									/* ---- SEMANTIC ACTIONS by PARSER ---- */
 									printf("\nRECOGNIZED RULE: Math Expression\nTOKENS: %s %s %s\n", (yyvsp[-2].ast)->nodeType, (yyvsp[-1].ast)->nodeType, (yyvsp[0].ast)->nodeType);
@@ -1559,11 +1543,11 @@ yyreduce:
 
 									(yyval.ast) = (yyvsp[-1].ast);
 								}
-#line 1563 "parser.tab.c"
+#line 1547 "parser.tab.c"
     break;
 
   case 21:
-#line 189 "parser.y"
+#line 186 "parser.y"
                                                         {
 									/* ---- SEMANTIC ACTIONS by PARSER ---- */
 									printf("\n RECOGNIZED RULE: NUMBER\nTOKENS: %d\n", (yyvsp[0].number));
@@ -1571,55 +1555,55 @@ yyreduce:
 									sprintf(num_s, "%d", (yyvsp[0].number));
 									(yyval.ast) = New_Tree(num_s, NULL, NULL);;
 								}
-#line 1575 "parser.tab.c"
+#line 1559 "parser.tab.c"
     break;
 
   case 22:
-#line 198 "parser.y"
+#line 195 "parser.y"
                         { 
 						printf("\n RECOGNIZED RULE: Operator\nTOKEN: %s\n", (yyvsp[0].string));
 						struct AST* op = malloc(sizeof(struct AST));
 						op = New_Tree((yyvsp[0].string), NULL, NULL);
 						(yyval.ast) =  op;
 					}
-#line 1586 "parser.tab.c"
+#line 1570 "parser.tab.c"
     break;
 
   case 23:
-#line 204 "parser.y"
+#line 201 "parser.y"
                                 {
 						printf("\n RECOGNIZED RULE: Operator\nTOKEN: %s\n", (yyvsp[0].string));
 						struct AST* op = malloc(sizeof(struct AST));
 						op = New_Tree((yyvsp[0].string), NULL, NULL);
 						(yyval.ast) =  op;
 					}
-#line 1597 "parser.tab.c"
+#line 1581 "parser.tab.c"
     break;
 
   case 24:
-#line 210 "parser.y"
+#line 207 "parser.y"
                                 {
 						printf("\n RECOGNIZED RULE: Operator\nTOKEN: %s\n", (yyvsp[0].string));
 						struct AST* op = malloc(sizeof(struct AST));
 						op = New_Tree((yyvsp[0].string), NULL, NULL);
 						(yyval.ast) =  op;
 					}
-#line 1608 "parser.tab.c"
+#line 1592 "parser.tab.c"
     break;
 
   case 25:
-#line 216 "parser.y"
+#line 213 "parser.y"
                                 {
 						printf("\n RECOGNIZED RULE: Operator\nTOKEN: %s\n", (yyvsp[0].string));
 						struct AST* op = malloc(sizeof(struct AST));
 						op = New_Tree((yyvsp[0].string), NULL, NULL);
 						(yyval.ast) =  op;
 					}
-#line 1619 "parser.tab.c"
+#line 1603 "parser.tab.c"
     break;
 
 
-#line 1623 "parser.tab.c"
+#line 1607 "parser.tab.c"
 
       default: break;
     }
@@ -1851,7 +1835,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 224 "parser.y"
+#line 221 "parser.y"
 
 
 int main(int argc, char**argv)
