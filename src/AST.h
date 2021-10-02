@@ -22,31 +22,14 @@ struct AST{
  * @param r node to assign to right child
  * @return new AST node pointer
  */
-struct AST * New_Tree(char nt[100], struct AST* l, struct AST* r){
-
-	// Allocate memory for struct
-	struct AST* ast = malloc(sizeof(struct AST));
-	
-	// Copy char arra into nodetype property
-	strcpy(ast->nodeType, nt);
-
-	// Assign left and right children
-	ast->left = l;
-	ast->right = r;
-
-	return ast;
-
-}
+struct AST * New_Tree(char nt[100], struct AST* l, struct AST* r);
 
 /**
  * Print spaces before node values to give tree appearance
  * 
  * @param level current level or depth of node being printed
  */
-void print_spaces(int level){
-	for(int i = 0; i < level; i++)
-		printf("    ");
-}
+void print_spaces(int level);
 
 /**
  * Print the AST using ASCII characters and console through recursion
@@ -54,28 +37,7 @@ void print_spaces(int level){
  * @param node current root
  * @param level starting depth or level
  */
-void print_tree(struct AST* node, int level){
-
-	if(node == NULL) return;
-
-	// Traverse right first
-	if(node->right != NULL){
-		print_tree(node->right, level+1);
-	}
-
-	
-
-	// print current node
-	print_spaces(level);
-	printf("%s\n", node->nodeType);
-
-	// traverse left tree
-	if(node->left != NULL){
-		print_tree(node->left, level+1);
-	}
-
-	
-}
+void print_tree(struct AST* node, int level);
 
 
 

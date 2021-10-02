@@ -5,12 +5,10 @@
 CC = gcc
 # Which flags to pass to the compilation command
 CFLAGS = -G
-# Add header file dependencies
-DEBS = AST.h 
 # Define Include Directories
 INCLUDES = -I src
 # C source files
-SRC = build/lex.yy.c build/parser.tab.c
+SRC = build/lex.yy.c build/parser.tab.c src/AST.c
 # Set executable output name and directory
 BIN = bin/gmm
 # List subdirectories
