@@ -10,36 +10,42 @@ DEBS = AST.h
 # Define Include Directories
 INCLUDES = -I src
 # C source files
-SRC = lex.yy.c parser.tab.c
+SRC = build/lex.yy.c build/parser.tab.c
 # Set executable output name and directory
-BIN = bin/parser
+BIN = bin/gmm
+# List subdirectories
+SUBDIRS = Lexer Parser
 
-all: parser-run
-	@echo Building and Running Parser files
+all: run
 
-
-
-# Generate bison C and H files
-parser.tab.c: parser.y
-	@echo Generating parser C and H files...
-	bison -t -v -d $?
+# ---- Build individual folders ---- #
 
 # Generate lexer C files 
-lex.yy.c: lexer.l
-	@echo Generating lexer C files...
-	flex $?
+lexer: 
+	@cd Lexer ; make
 
-# Build parser code
-parser: $(SRC)
-	@echo Building parser executable...
-	$(CC) $(INCLUDES) -o $(BIN) $?
+parser:
+	@cd Parser ; make
 
-# Execute Parser code
-parser-run: parser
-	@echo Executing parser using testProg.cmm
-	bin/parser testProg.cmm
+
+# Run program
+run:
+	@echo "###################################################"
+	@echo "###   Building and Running C-- Compiler files   ###"
+	@echo "###################################################"
+	@echo 
+	for i in $(SUBDIRS) ; do \
+		( cd $$i ; make) ; \
+	done
+	@echo Building executable...
+	$(CC) $(INCLUDES) -o $(BIN) $(SRC)
+	@echo
+	@echo
+	@echo Executing parser using testProg.cmm...
+	bin/gmm TestFiles/testProg.cmm
 
 # Remove all binaries, flex, and bison generated files
 clean:
-	rm -f parser lexer parser.tab.c lex.yy.c parser.tab.h parser.output
+	rm -rf build bin
+	mkdir build bin
 	ls -l
