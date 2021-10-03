@@ -1,425 +1,546 @@
-State 0 conflicts: 4 shift/reduce
-State 7 conflicts: 4 shift/reduce, 1 reduce/reduce
-State 10 conflicts: 3 shift/reduce
-State 12 conflicts: 1 shift/reduce
-State 31 conflicts: 1 shift/reduce
-State 33 conflicts: 4 shift/reduce
+Nonterminals useless in grammar
+
+    FunDeclList
+    FunDecl
+
+
+Rules useless in grammar
+
+   28 FunDeclList: FunDecl
+   29            | FunDecl FunDeclList
+
+   30 FunDecl: TYPE ID OPAR CPAR Block
+
+
+State 29 conflicts: 1 shift/reduce
+State 46 conflicts: 4 shift/reduce
 
 
 Grammar
 
     0 $accept: Program $end
 
-    1 Program: DeclList
+    1 Program: VarDeclList
 
-    2 DeclList: Decl DeclList
-    3         | Decl
+    2 VarDeclList: %empty
+    3            | VarDecl VarDeclList
 
-    4 Decl: VarDecl
-    5     | StmtList
+    4 VarDecl: TYPE ID SEMICOLON
+    5        | TYPE ID OSB NUMBER CSB SEMICOLON
+    6        | TYPE ID
+    7        | TYPE ID OSB NUMBER CSB
+    8        | TYPE ID OSB CSB SEMICOLON
+    9        | TYPE ID Tail
 
-    6 VarDecl: TYPE ID SEMICOLON
-    7        | TYPE ID OSB NUMBER CSB SEMICOLON
-    8        | TYPE ID
-    9        | TYPE ID OSB NUMBER CSB
-   10        | TYPE ID OSB CSB SEMICOLON
+   10 StmtList: %empty
+   11         | Stmt StmtList
 
-   11 StmtList: %empty
-   12         | Stmt StmtList
+   12 Stmt: READ ID SEMICOLON
+   13     | WRITE ID SEMICOLON
+   14     | WRITELN SEMICOLON
+   15     | Expr SEMICOLON
 
-   13 Stmt: SEMICOLON
-   14     | Expr SEMICOLON
-
-   15 Expr: ID
-   16     | ID EQ ID
-   17     | WRITE ID
+   16 Expr: ID
+   17     | WRITE MathExpr
    18     | ID EQ MathExpr
 
    19 MathExpr: MathExpr BinaryOp MathExpr
    20         | NUMBER
+   21         | ID
 
-   21 BinaryOp: PLUS
-   22         | MINUS
-   23         | MULT
-   24         | DIV
+   22 BinaryOp: PLUS
+   23         | MINUS
+   24         | MULT
+   25         | DIV
+
+   26 Tail: OPAR CPAR Block
+
+   27 Block: OCB VarDeclList StmtList CCB
 
 
 Terminals, with rules where they appear
 
     $end (0) 0
     error (256)
-    TYPE <string> (258) 6 7 8 9 10
-    ID <string> (259) 6 7 8 9 10 15 16 17 18
-    SEMICOLON <char> (260) 6 7 10 13 14
-    EQ <string> (261) 16 18
-    NUMBER <number> (262) 7 9 20
-    PLUS <string> (263) 21
-    WRITE <string> (264) 17
-    MINUS <string> (265) 22
-    MULT <string> (266) 23
-    DIV <string> (267) 24
-    OSB <string> (268) 7 9 10
-    CSB <string> (269) 7 9 10
+    TYPE <string> (258) 4 5 6 7 8 9
+    ID <string> (259) 4 5 6 7 8 9 12 13 16 18 21
+    SEMICOLON <string> (260) 4 5 8 12 13 14 15
+    EQ <string> (261) 18
+    NUMBER <number> (262) 5 7 20
+    PLUS <string> (263) 22
+    WRITE <string> (264) 13 17
+    WRITELN <string> (265) 14
+    MINUS <string> (266) 23
+    MULT <string> (267) 24
+    DIV <string> (268) 25
+    OSB <string> (269) 5 7 8
+    CSB <string> (270) 5 7 8
+    OCB <string> (271) 27
+    CCB <string> (272) 27
+    OPAR <string> (273) 26
+    CPAR <string> (274) 26
+    READ <string> (275) 12
 
 
 Nonterminals, with rules where they appear
 
-    $accept (15)
+    $accept (21)
         on left: 0
-    Program <ast> (16)
+    Program <ast> (22)
         on left: 1
         on right: 0
-    DeclList <ast> (17)
+    VarDeclList <ast> (23)
         on left: 2 3
-        on right: 1 2
-    Decl <ast> (18)
-        on left: 4 5
-        on right: 2 3
-    VarDecl <ast> (19)
-        on left: 6 7 8 9 10
-        on right: 4
-    StmtList <ast> (20)
-        on left: 11 12
-        on right: 5 12
-    Stmt <ast> (21)
-        on left: 13 14
-        on right: 12
-    Expr <ast> (22)
-        on left: 15 16 17 18
-        on right: 14
-    MathExpr <ast> (23)
-        on left: 19 20
-        on right: 18 19
-    BinaryOp <ast> (24)
-        on left: 21 22 23 24
+        on right: 1 3 27
+    VarDecl <ast> (24)
+        on left: 4 5 6 7 8 9
+        on right: 3
+    StmtList <ast> (25)
+        on left: 10 11
+        on right: 11 27
+    Stmt <ast> (26)
+        on left: 12 13 14 15
+        on right: 11
+    Expr <ast> (27)
+        on left: 16 17 18
+        on right: 15
+    MathExpr <ast> (28)
+        on left: 19 20 21
+        on right: 17 18 19
+    BinaryOp <ast> (29)
+        on left: 22 23 24 25
         on right: 19
+    Tail <ast> (30)
+        on left: 26
+        on right: 9
+    Block <ast> (31)
+        on left: 27
+        on right: 26
 
 
 State 0
 
     0 $accept: . Program $end
 
-    TYPE       shift, and go to state 1
-    ID         shift, and go to state 2
-    SEMICOLON  shift, and go to state 3
-    WRITE      shift, and go to state 4
+    TYPE  shift, and go to state 1
 
-    TYPE       [reduce using rule 11 (StmtList)]
-    ID         [reduce using rule 11 (StmtList)]
-    SEMICOLON  [reduce using rule 11 (StmtList)]
-    WRITE      [reduce using rule 11 (StmtList)]
-    $default   reduce using rule 11 (StmtList)
+    $default  reduce using rule 2 (VarDeclList)
 
-    Program   go to state 5
-    DeclList  go to state 6
-    Decl      go to state 7
-    VarDecl   go to state 8
-    StmtList  go to state 9
-    Stmt      go to state 10
-    Expr      go to state 11
+    Program      go to state 2
+    VarDeclList  go to state 3
+    VarDecl      go to state 4
 
 
 State 1
 
-    6 VarDecl: TYPE . ID SEMICOLON
-    7        | TYPE . ID OSB NUMBER CSB SEMICOLON
-    8        | TYPE . ID
-    9        | TYPE . ID OSB NUMBER CSB
-   10        | TYPE . ID OSB CSB SEMICOLON
+    4 VarDecl: TYPE . ID SEMICOLON
+    5        | TYPE . ID OSB NUMBER CSB SEMICOLON
+    6        | TYPE . ID
+    7        | TYPE . ID OSB NUMBER CSB
+    8        | TYPE . ID OSB CSB SEMICOLON
+    9        | TYPE . ID Tail
 
-    ID  shift, and go to state 12
+    ID  shift, and go to state 5
 
 
 State 2
 
-   15 Expr: ID .
-   16     | ID . EQ ID
-   18     | ID . EQ MathExpr
+    0 $accept: Program . $end
 
-    EQ  shift, and go to state 13
-
-    $default  reduce using rule 15 (Expr)
+    $end  shift, and go to state 6
 
 
 State 3
 
-   13 Stmt: SEMICOLON .
-
-    $default  reduce using rule 13 (Stmt)
-
-
-State 4
-
-   17 Expr: WRITE . ID
-
-    ID  shift, and go to state 14
-
-
-State 5
-
-    0 $accept: Program . $end
-
-    $end  shift, and go to state 15
-
-
-State 6
-
-    1 Program: DeclList .
+    1 Program: VarDeclList .
 
     $default  reduce using rule 1 (Program)
 
 
-State 7
+State 4
 
-    2 DeclList: Decl . DeclList
-    3         | Decl .
+    3 VarDeclList: VarDecl . VarDeclList
 
-    TYPE       shift, and go to state 1
-    ID         shift, and go to state 2
-    SEMICOLON  shift, and go to state 3
-    WRITE      shift, and go to state 4
+    TYPE  shift, and go to state 1
 
-    $end       reduce using rule 3 (DeclList)
-    $end       [reduce using rule 11 (StmtList)]
-    TYPE       [reduce using rule 11 (StmtList)]
-    ID         [reduce using rule 11 (StmtList)]
-    SEMICOLON  [reduce using rule 11 (StmtList)]
-    WRITE      [reduce using rule 11 (StmtList)]
-    $default   reduce using rule 3 (DeclList)
+    $default  reduce using rule 2 (VarDeclList)
 
-    DeclList  go to state 16
-    Decl      go to state 7
-    VarDecl   go to state 8
-    StmtList  go to state 9
-    Stmt      go to state 10
-    Expr      go to state 11
+    VarDeclList  go to state 7
+    VarDecl      go to state 4
 
 
-State 8
+State 5
 
-    4 Decl: VarDecl .
+    4 VarDecl: TYPE ID . SEMICOLON
+    5        | TYPE ID . OSB NUMBER CSB SEMICOLON
+    6        | TYPE ID .
+    7        | TYPE ID . OSB NUMBER CSB
+    8        | TYPE ID . OSB CSB SEMICOLON
+    9        | TYPE ID . Tail
 
-    $default  reduce using rule 4 (Decl)
+    SEMICOLON  shift, and go to state 8
+    OSB        shift, and go to state 9
+    OPAR       shift, and go to state 10
 
+    $default  reduce using rule 6 (VarDecl)
 
-State 9
-
-    5 Decl: StmtList .
-
-    $default  reduce using rule 5 (Decl)
-
-
-State 10
-
-   12 StmtList: Stmt . StmtList
-
-    ID         shift, and go to state 2
-    SEMICOLON  shift, and go to state 3
-    WRITE      shift, and go to state 4
-
-    ID         [reduce using rule 11 (StmtList)]
-    SEMICOLON  [reduce using rule 11 (StmtList)]
-    WRITE      [reduce using rule 11 (StmtList)]
-    $default   reduce using rule 11 (StmtList)
-
-    StmtList  go to state 17
-    Stmt      go to state 10
-    Expr      go to state 11
+    Tail  go to state 11
 
 
-State 11
-
-   14 Stmt: Expr . SEMICOLON
-
-    SEMICOLON  shift, and go to state 18
-
-
-State 12
-
-    6 VarDecl: TYPE ID . SEMICOLON
-    7        | TYPE ID . OSB NUMBER CSB SEMICOLON
-    8        | TYPE ID .
-    9        | TYPE ID . OSB NUMBER CSB
-   10        | TYPE ID . OSB CSB SEMICOLON
-
-    SEMICOLON  shift, and go to state 19
-    OSB        shift, and go to state 20
-
-    SEMICOLON  [reduce using rule 8 (VarDecl)]
-    $default   reduce using rule 8 (VarDecl)
-
-
-State 13
-
-   16 Expr: ID EQ . ID
-   18     | ID EQ . MathExpr
-
-    ID      shift, and go to state 21
-    NUMBER  shift, and go to state 22
-
-    MathExpr  go to state 23
-
-
-State 14
-
-   17 Expr: WRITE ID .
-
-    $default  reduce using rule 17 (Expr)
-
-
-State 15
+State 6
 
     0 $accept: Program $end .
 
     $default  accept
 
 
+State 7
+
+    3 VarDeclList: VarDecl VarDeclList .
+
+    $default  reduce using rule 3 (VarDeclList)
+
+
+State 8
+
+    4 VarDecl: TYPE ID SEMICOLON .
+
+    $default  reduce using rule 4 (VarDecl)
+
+
+State 9
+
+    5 VarDecl: TYPE ID OSB . NUMBER CSB SEMICOLON
+    7        | TYPE ID OSB . NUMBER CSB
+    8        | TYPE ID OSB . CSB SEMICOLON
+
+    NUMBER  shift, and go to state 12
+    CSB     shift, and go to state 13
+
+
+State 10
+
+   26 Tail: OPAR . CPAR Block
+
+    CPAR  shift, and go to state 14
+
+
+State 11
+
+    9 VarDecl: TYPE ID Tail .
+
+    $default  reduce using rule 9 (VarDecl)
+
+
+State 12
+
+    5 VarDecl: TYPE ID OSB NUMBER . CSB SEMICOLON
+    7        | TYPE ID OSB NUMBER . CSB
+
+    CSB  shift, and go to state 15
+
+
+State 13
+
+    8 VarDecl: TYPE ID OSB CSB . SEMICOLON
+
+    SEMICOLON  shift, and go to state 16
+
+
+State 14
+
+   26 Tail: OPAR CPAR . Block
+
+    OCB  shift, and go to state 17
+
+    Block  go to state 18
+
+
+State 15
+
+    5 VarDecl: TYPE ID OSB NUMBER CSB . SEMICOLON
+    7        | TYPE ID OSB NUMBER CSB .
+
+    SEMICOLON  shift, and go to state 19
+
+    $default  reduce using rule 7 (VarDecl)
+
+
 State 16
 
-    2 DeclList: Decl DeclList .
+    8 VarDecl: TYPE ID OSB CSB SEMICOLON .
 
-    $default  reduce using rule 2 (DeclList)
+    $default  reduce using rule 8 (VarDecl)
 
 
 State 17
 
-   12 StmtList: Stmt StmtList .
+   27 Block: OCB . VarDeclList StmtList CCB
 
-    $default  reduce using rule 12 (StmtList)
+    TYPE  shift, and go to state 1
+
+    $default  reduce using rule 2 (VarDeclList)
+
+    VarDeclList  go to state 20
+    VarDecl      go to state 4
 
 
 State 18
 
-   14 Stmt: Expr SEMICOLON .
+   26 Tail: OPAR CPAR Block .
 
-    $default  reduce using rule 14 (Stmt)
+    $default  reduce using rule 26 (Tail)
 
 
 State 19
 
-    6 VarDecl: TYPE ID SEMICOLON .
+    5 VarDecl: TYPE ID OSB NUMBER CSB SEMICOLON .
 
-    $default  reduce using rule 6 (VarDecl)
+    $default  reduce using rule 5 (VarDecl)
 
 
 State 20
 
-    7 VarDecl: TYPE ID OSB . NUMBER CSB SEMICOLON
-    9        | TYPE ID OSB . NUMBER CSB
-   10        | TYPE ID OSB . CSB SEMICOLON
+   27 Block: OCB VarDeclList . StmtList CCB
 
-    NUMBER  shift, and go to state 24
-    CSB     shift, and go to state 25
+    ID       shift, and go to state 21
+    WRITE    shift, and go to state 22
+    WRITELN  shift, and go to state 23
+    READ     shift, and go to state 24
+
+    $default  reduce using rule 10 (StmtList)
+
+    StmtList  go to state 25
+    Stmt      go to state 26
+    Expr      go to state 27
 
 
 State 21
 
-   16 Expr: ID EQ ID .
+   16 Expr: ID .
+   18     | ID . EQ MathExpr
+
+    EQ  shift, and go to state 28
 
     $default  reduce using rule 16 (Expr)
 
 
 State 22
 
+   13 Stmt: WRITE . ID SEMICOLON
+   17 Expr: WRITE . MathExpr
+
+    ID      shift, and go to state 29
+    NUMBER  shift, and go to state 30
+
+    MathExpr  go to state 31
+
+
+State 23
+
+   14 Stmt: WRITELN . SEMICOLON
+
+    SEMICOLON  shift, and go to state 32
+
+
+State 24
+
+   12 Stmt: READ . ID SEMICOLON
+
+    ID  shift, and go to state 33
+
+
+State 25
+
+   27 Block: OCB VarDeclList StmtList . CCB
+
+    CCB  shift, and go to state 34
+
+
+State 26
+
+   11 StmtList: Stmt . StmtList
+
+    ID       shift, and go to state 21
+    WRITE    shift, and go to state 22
+    WRITELN  shift, and go to state 23
+    READ     shift, and go to state 24
+
+    $default  reduce using rule 10 (StmtList)
+
+    StmtList  go to state 35
+    Stmt      go to state 26
+    Expr      go to state 27
+
+
+State 27
+
+   15 Stmt: Expr . SEMICOLON
+
+    SEMICOLON  shift, and go to state 36
+
+
+State 28
+
+   18 Expr: ID EQ . MathExpr
+
+    ID      shift, and go to state 37
+    NUMBER  shift, and go to state 30
+
+    MathExpr  go to state 38
+
+
+State 29
+
+   13 Stmt: WRITE ID . SEMICOLON
+   21 MathExpr: ID .
+
+    SEMICOLON  shift, and go to state 39
+
+    SEMICOLON  [reduce using rule 21 (MathExpr)]
+    $default   reduce using rule 21 (MathExpr)
+
+
+State 30
+
    20 MathExpr: NUMBER .
 
     $default  reduce using rule 20 (MathExpr)
 
 
-State 23
-
-   18 Expr: ID EQ MathExpr .
-   19 MathExpr: MathExpr . BinaryOp MathExpr
-
-    PLUS   shift, and go to state 26
-    MINUS  shift, and go to state 27
-    MULT   shift, and go to state 28
-    DIV    shift, and go to state 29
-
-    $default  reduce using rule 18 (Expr)
-
-    BinaryOp  go to state 30
-
-
-State 24
-
-    7 VarDecl: TYPE ID OSB NUMBER . CSB SEMICOLON
-    9        | TYPE ID OSB NUMBER . CSB
-
-    CSB  shift, and go to state 31
-
-
-State 25
-
-   10 VarDecl: TYPE ID OSB CSB . SEMICOLON
-
-    SEMICOLON  shift, and go to state 32
-
-
-State 26
-
-   21 BinaryOp: PLUS .
-
-    $default  reduce using rule 21 (BinaryOp)
-
-
-State 27
-
-   22 BinaryOp: MINUS .
-
-    $default  reduce using rule 22 (BinaryOp)
-
-
-State 28
-
-   23 BinaryOp: MULT .
-
-    $default  reduce using rule 23 (BinaryOp)
-
-
-State 29
-
-   24 BinaryOp: DIV .
-
-    $default  reduce using rule 24 (BinaryOp)
-
-
-State 30
-
-   19 MathExpr: MathExpr BinaryOp . MathExpr
-
-    NUMBER  shift, and go to state 22
-
-    MathExpr  go to state 33
-
-
 State 31
 
-    7 VarDecl: TYPE ID OSB NUMBER CSB . SEMICOLON
-    9        | TYPE ID OSB NUMBER CSB .
+   17 Expr: WRITE MathExpr .
+   19 MathExpr: MathExpr . BinaryOp MathExpr
 
-    SEMICOLON  shift, and go to state 34
+    PLUS   shift, and go to state 40
+    MINUS  shift, and go to state 41
+    MULT   shift, and go to state 42
+    DIV    shift, and go to state 43
 
-    SEMICOLON  [reduce using rule 9 (VarDecl)]
-    $default   reduce using rule 9 (VarDecl)
+    $default  reduce using rule 17 (Expr)
+
+    BinaryOp  go to state 44
 
 
 State 32
 
-   10 VarDecl: TYPE ID OSB CSB SEMICOLON .
+   14 Stmt: WRITELN SEMICOLON .
 
-    $default  reduce using rule 10 (VarDecl)
+    $default  reduce using rule 14 (Stmt)
 
 
 State 33
 
+   12 Stmt: READ ID . SEMICOLON
+
+    SEMICOLON  shift, and go to state 45
+
+
+State 34
+
+   27 Block: OCB VarDeclList StmtList CCB .
+
+    $default  reduce using rule 27 (Block)
+
+
+State 35
+
+   11 StmtList: Stmt StmtList .
+
+    $default  reduce using rule 11 (StmtList)
+
+
+State 36
+
+   15 Stmt: Expr SEMICOLON .
+
+    $default  reduce using rule 15 (Stmt)
+
+
+State 37
+
+   21 MathExpr: ID .
+
+    $default  reduce using rule 21 (MathExpr)
+
+
+State 38
+
+   18 Expr: ID EQ MathExpr .
+   19 MathExpr: MathExpr . BinaryOp MathExpr
+
+    PLUS   shift, and go to state 40
+    MINUS  shift, and go to state 41
+    MULT   shift, and go to state 42
+    DIV    shift, and go to state 43
+
+    $default  reduce using rule 18 (Expr)
+
+    BinaryOp  go to state 44
+
+
+State 39
+
+   13 Stmt: WRITE ID SEMICOLON .
+
+    $default  reduce using rule 13 (Stmt)
+
+
+State 40
+
+   22 BinaryOp: PLUS .
+
+    $default  reduce using rule 22 (BinaryOp)
+
+
+State 41
+
+   23 BinaryOp: MINUS .
+
+    $default  reduce using rule 23 (BinaryOp)
+
+
+State 42
+
+   24 BinaryOp: MULT .
+
+    $default  reduce using rule 24 (BinaryOp)
+
+
+State 43
+
+   25 BinaryOp: DIV .
+
+    $default  reduce using rule 25 (BinaryOp)
+
+
+State 44
+
+   19 MathExpr: MathExpr BinaryOp . MathExpr
+
+    ID      shift, and go to state 37
+    NUMBER  shift, and go to state 30
+
+    MathExpr  go to state 46
+
+
+State 45
+
+   12 Stmt: READ ID SEMICOLON .
+
+    $default  reduce using rule 12 (Stmt)
+
+
+State 46
+
    19 MathExpr: MathExpr . BinaryOp MathExpr
    19         | MathExpr BinaryOp MathExpr .
 
-    PLUS   shift, and go to state 26
-    MINUS  shift, and go to state 27
-    MULT   shift, and go to state 28
-    DIV    shift, and go to state 29
+    PLUS   shift, and go to state 40
+    MINUS  shift, and go to state 41
+    MULT   shift, and go to state 42
+    DIV    shift, and go to state 43
 
     PLUS      [reduce using rule 19 (MathExpr)]
     MINUS     [reduce using rule 19 (MathExpr)]
@@ -427,11 +548,4 @@ State 33
     DIV       [reduce using rule 19 (MathExpr)]
     $default  reduce using rule 19 (MathExpr)
 
-    BinaryOp  go to state 30
-
-
-State 34
-
-    7 VarDecl: TYPE ID OSB NUMBER CSB SEMICOLON .
-
-    $default  reduce using rule 7 (VarDecl)
+    BinaryOp  go to state 44

@@ -6,9 +6,9 @@ y = 2 - 2;
 y = 2 / 5;
 x = 5 * 5;
 write x;
+writeln;
+write 2 + 4;
 
 int arr[5];
 
-int y
-
-int m[];
+read m;

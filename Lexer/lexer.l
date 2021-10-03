@@ -47,6 +47,20 @@ ws          {delim}+
 			return WRITE;
 		}
 
+"read"	{
+			words++; chars += strlen(yytext);
+			printf("%s : KEYWORD READ\n", yytext);
+			yylval.string = strdup(yytext); 
+			return READ;
+		}
+
+"writeln" 	{
+				words++; chars += strlen(yytext);
+				printf("%s : KEYWORD WRITELN\n", yytext);
+				yylval.string = strdup(yytext); 
+				return WRITELN;
+			}
+
 {ID}	{
 			words++; chars += strlen(yytext);
 			printf("%s : IDENTIFIER\n",yytext);
@@ -108,6 +122,30 @@ ws          {delim}+
 			printf("%s : CSB\n", yytext);
 			yylval.string = strdup(yytext);
 			return CSB;
+		}
+"("		{
+			chars++;
+			printf("%s : OPAR\n", yytext);
+			yylval.string = strdup(yytext);
+			return OPAR;
+		}
+")"		{
+			chars++;
+			printf("%s : CPAR\n", yytext);
+			yylval.string = strdup(yytext);
+			return CPAR;
+		}
+"{"		{
+			chars++;
+			printf("%s : OCB\n", yytext);
+			yylval.string = strdup(yytext);
+			return OCB;
+		}
+"}"		{
+			chars++;
+			printf("%s : CCB\n", yytext);
+			yylval.string = strdup(yytext);
+			return CCB;
 		}
 		
 [\n]	{lines++; chars=0;}

@@ -56,11 +56,17 @@ extern int yydebug;
     NUMBER = 262,
     PLUS = 263,
     WRITE = 264,
-    MINUS = 265,
-    MULT = 266,
-    DIV = 267,
-    OSB = 268,
-    CSB = 269
+    WRITELN = 265,
+    MINUS = 266,
+    MULT = 267,
+    DIV = 268,
+    OSB = 269,
+    CSB = 270,
+    OCB = 271,
+    CCB = 272,
+    OPAR = 273,
+    CPAR = 274,
+    READ = 275
   };
 #endif
 
@@ -68,14 +74,14 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 19 "parser.y"
+#line 26 "parser.y"
 
 	int number;
 	char character;
 	char* string;
 	struct AST* ast;
 
-#line 79 "parser.tab.h"
+#line 85 "parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

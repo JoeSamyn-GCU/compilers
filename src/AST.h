@@ -3,7 +3,7 @@
 /**
  * Node Class used to hold AST Nodes
  */
-struct AST{
+typedef struct AST{
 	// Name of node or node type to be displayed when printing AST
 	char nodeType[100];
 
@@ -12,7 +12,7 @@ struct AST{
 
 	// Right Child Node
 	struct AST * right;
-};
+} AST;
 
 /**
  * Create new AST node for the tree
