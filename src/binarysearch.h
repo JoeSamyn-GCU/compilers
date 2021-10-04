@@ -6,6 +6,15 @@
 
 // Referenced somewhat from: https://www.codesdope.com/blog/article/binary-search-tree-in-c/
 
+/* 
+    Currently only implemented a binary tree to store integers.
+    Todo:
+        1. Set better data type (most likely a struct defined in the symbol table)
+        2. Add in a tree balancing algorithm (red/black)
+        3. Convert search to return data instead of true/false
+*/
+
+
 struct TreeNode {
     int data; // Replace with better data type later
     struct TreeNode* left;
@@ -24,7 +33,7 @@ struct TreeNode* new_node(int x)
 }
 
 struct TreeNode* insert(struct TreeNode* root, int data) {
-    if (root == NULL) { // can replace with a createNode method if needed
+    if (root == NULL) {
         struct TreeNode* node;
         node = new_node(data);
         return node;
@@ -82,10 +91,10 @@ struct TreeNode* delete(struct TreeNode* root, int key) {
 }
 
 
-// WRONG
+// Will need to be modified to return the data requested based on our key name
 int search(struct TreeNode* root, int target) {
     if(root == NULL) {
-        return 0; // can replace with a better message
+        return 0;
     }
     else if (target == root->data) {
         return 1;
@@ -101,11 +110,11 @@ int search(struct TreeNode* root, int target) {
 // Testing
 void inorder(struct TreeNode *root)
 {
-    if(root!=NULL) // checking if the root is not null
+    if(root!=NULL)
     {
-        inorder(root->left); // visiting left child
-        printf(" %d ", root->data); // printing data at root
-        inorder(root->right);// visiting right child
+        inorder(root->left);
+        printf(" %d ", root->data);
+        inorder(root->right)
     }
 }
 
