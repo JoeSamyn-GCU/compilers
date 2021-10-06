@@ -6,7 +6,7 @@
 struct AST * New_Tree(char nt[100], struct AST* l, struct AST* r){
 
 	// Allocate memory for struct
-	struct AST* ast = malloc(sizeof(struct AST));
+	struct AST* ast = (AST*)malloc(sizeof(struct AST));
 	
 	// Copy char arra into nodetype property
 	strcpy(ast->nodeType, nt);

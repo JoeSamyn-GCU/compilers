@@ -2,7 +2,7 @@
 # $? = dependent files 
 
 # Tell make which compiler to use
-CC = gcc
+CC = g++
 # Which flags to pass to the compilation command
 CFLAGS = -G
 # Define Include Directories

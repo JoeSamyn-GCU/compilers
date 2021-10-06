@@ -3,15 +3,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <vector>
 
-struct List {
-    /* Linked List implementation (or vectors or whatever we end up using) */
-};
-
-struct Table {
-    struct List* entry;
-    struct List* tables;
-    struct Table* parent;
+class Table {
+    public:
+        vector<class Listnode> entries;
+        vector<class Table> tables;
+        class Table* parent;
 };
 
 struct SymbolTable {
