@@ -10,7 +10,19 @@
 
 struct Entry {
     char* name;
-    char* type;
+    char* dtype;
+    char* scope; 
+    int nelements;
+    int nparams;
+    char* ptype;
+    char* pmode;
+    char returntype;
+    int uses;
+    int nline;
+    int nchar;
+    char* stype;
+    char* lexeme;
+    char* value;
 };
 
 
@@ -66,16 +78,5 @@ class Table {
             }
         }
 };
-
-struct SymbolTable {
-    class Table* root;
-};
-
-
-//struct List insert(/* whatever arguments we end up using*/) {}
-
-//struct List delete(/* whatever arguments we end up using*/) {}
-
-//struct List select(/* whatever arguments we end up using*/) {}
 
 #endif
