@@ -49,7 +49,7 @@ char currentScope[50]; // global or the name of the function
 %token <string> CPAR
 %token <string> READ
 
-%type <ast> Program VarDeclList VarDecl Stmt StmtList Expr BinaryOp MathExpr Tail FunDeclList FunDecl Block
+%type <ast> Program VarDeclList VarDecl Stmt StmtList Expr BinaryOp MathExpr Tail FunDecl Block Decl DeclList
 
 %left PLUS MINUS
 %left MULT DIV
@@ -58,24 +58,24 @@ char currentScope[50]; // global or the name of the function
 
 %%
 
-Program:	VarDeclList { 
+Program: DeclList   { 
+						/* ---- SEMANTIC ACTIONS by PARSER ---- */
 						printf("\n--- Abstract Syntax Tree ---\n\n");
-					 	print_tree($$, 0);
+						print_tree($$, 0);
 					}
 ;
 
-VarDeclList: 
-	| VarDecl VarDeclList	{ 	
-								/* ---- SEMANTIC ACTIONS by PARSER ---- */
-								struct AST* decl = malloc(sizeof(struct AST));
-								decl = New_Tree("decl", $1, $2);
-								$$ = decl;
-							}	
+DeclList: Decl { $$ = $1; }
+| Decl DeclList	{ 	
+					/* ---- SEMANTIC ACTIONS by PARSER ---- */
+					printf("%s\n\n\n\n", $2->nodeType);
+					insert_node_right($1, $2);
+					$$ = $1;
+				}	
 ;
 
-FunDeclList:	FunDecl
-	| FunDecl FunDeclList
-
+Decl: VarDecl { $$ = $1; }
+	| FunDecl { $$ = $1;}
 ;
 
 FunDecl:	TYPE ID OPAR CPAR Block 	{
@@ -88,17 +88,22 @@ FunDecl:	TYPE ID OPAR CPAR Block 	{
 											$$ = New_Tree(ftypeName, type, id);
 										}
 
+VarDeclList: VarDecl { $$ = $1; }
+| VarDecl VarDeclList	{
+							/* ---- SEMANTIC ACTIONS by PARSER ---- */
+							insert_node_right($1, $2);
+							$$ = $1;
+						}
+
 VarDecl: TYPE ID SEMICOLON	{ 
-									printf("\n RECOGNIZED RULE: Variable declaration %s %s\n", $1, $2);
-									
-								  	// ---- SEMANTIC ACTIONS by PARSER ----
-									struct AST* id = malloc(sizeof(struct AST));
-									struct AST* type = malloc(sizeof(struct AST));
-									id = New_Tree($2, NULL, NULL);
-									type = New_Tree($1, NULL, NULL);
-								    $$ = New_Tree(typeName, type, id);
-									printf("Adding Variable Decl to tree: Type %s %s\nLINE %d CHAR %d\n", $1, $2, lines, chars);
-								}
+								// ---- SEMANTIC ACTIONS by PARSER ----
+								struct AST* id = malloc(sizeof(struct AST));
+								struct AST* type = malloc(sizeof(struct AST));
+								id = New_Tree($2, NULL, NULL);
+								type = New_Tree($1, NULL, NULL);
+								$$ = New_Tree(typeName, type, id);
+								printf("Adding Variable Decl to tree: Type %s %s\nLINE %d CHAR %d\n", $1, $2, lines, chars);
+							}
 	| TYPE ID OSB NUMBER CSB SEMICOLON 	{
 											/* ---- SEMANTIC ACTIONS by PARSER ---- */
 											printf("RECOGNIZED RULE: Array Declaration\nTOKENS: %s %s %s %d %s\n", $1, $2, $3, $4, $5);
@@ -148,14 +153,16 @@ VarDecl: TYPE ID SEMICOLON	{
 										}
 ;
 
-StmtList:	
+StmtList: Stmt	{ $$ = $1; }
 	| Stmt StmtList		{
 							/* ---- SEMANTIC ACTIONS by PARSER ---- */
-							$$ = New_Tree("stmt", $1, $2);
+							insert_node_right($1, $2);
+							$$ = $1;
 						}
 ;
 
-Stmt:	READ ID SEMICOLON	{
+Stmt:	VarDecl { $$ = $1; }
+	| READ ID SEMICOLON	{
 							/* ---- SEMANTIC ACTIONS by PARSER ---- */
 							AST* id = malloc(sizeof(AST));
 							AST* read = malloc(sizeof(AST));
@@ -184,18 +191,17 @@ Stmt:	READ ID SEMICOLON	{
 								$$ = New_Tree(out,write,ln);
 							}
 	| Expr SEMICOLON	{
-							printf("\nTESTING: %s\n", $2);
 							$$ = $1;
 						}
 ;
 
-Expr:	ID      { 
-					printf("\n RECOGNIZED RULE: Simplest expression\n"); 
-					// ---- SEMANTIC ACTIONS by PARSER ----
-					struct AST* id = malloc(sizeof(struct AST));
-					id = New_Tree($1, NULL, NULL);
-					$$ = id;
-				}
+Expr:	ID  { 
+				printf("\n RECOGNIZED RULE: Simplest expression\n"); 
+				// ---- SEMANTIC ACTIONS by PARSER ----
+				struct AST* id = malloc(sizeof(struct AST));
+				id = New_Tree($1, NULL, NULL);
+				$$ = id;
+			}
 | WRITE MathExpr 	{
 					/* ---- SEMANTIC ACTIONS by PARSER ---- */
 					AST* write = malloc(sizeof(AST));

@@ -25,6 +25,15 @@ typedef struct AST{
 struct AST * New_Tree(char nt[100], struct AST* l, struct AST* r);
 
 /**
+ * Insert node into the next available null right child of the parent subtree
+ * 
+ * @param parent the starting node for the subtree
+ * @param node the node to insert into the parent subtree
+ * @return new tree with node added
+ */
+void insert_node_right(AST* parent, AST* node);
+
+/**
  * Print spaces before node values to give tree appearance
  * 
  * @param level current level or depth of node being printed

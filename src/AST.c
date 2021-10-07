@@ -19,6 +19,22 @@ struct AST * New_Tree(char nt[100], struct AST* l, struct AST* r){
 
 }
 
+void insert_node_right(AST* parent, AST* node){
+	if(parent == NULL){
+		printf("ERROR::Parent cannot be NULL");
+		return;
+	}
+
+	AST* curr = parent;
+
+	// search for next available left child
+	while(curr->right != NULL){
+		curr = curr->right;
+	}
+
+	curr->right = node;
+}
+
 void print_spaces(int level){
 	for(int i = 0; i < level; i++)
 		printf("    ");

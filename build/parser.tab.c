@@ -488,18 +488,18 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  6
+#define YYFINAL  8
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   38
+#define YYLAST   49
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  21
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  11
+#define YYNNTS  14
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  28
+#define YYNRULES  34
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  47
+#define YYNSTATES  57
 
 #define YYUNDEFTOK  2
 #define YYMAXUTOK   275
@@ -548,9 +548,10 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,    61,    61,    67,    68,    91,   102,   119,   126,   133,
-     140,   151,   152,   158,   166,   176,   186,   192,   199,   206,
-     218,   226,   233,   239,   245,   251,   257,   265,   271
+       0,    61,    61,    68,    69,    77,    78,    81,    91,    92,
+      98,   107,   124,   131,   138,   145,   156,   157,   164,   165,
+     173,   183,   193,   198,   205,   212,   224,   232,   239,   245,
+     251,   257,   263,   271,   277
 };
 #endif
 
@@ -562,8 +563,8 @@ static const char *const yytname[] =
   "$end", "error", "$undefined", "TYPE", "ID", "SEMICOLON", "EQ",
   "NUMBER", "PLUS", "WRITE", "WRITELN", "MINUS", "MULT", "DIV", "OSB",
   "CSB", "OCB", "CCB", "OPAR", "CPAR", "READ", "$accept", "Program",
-  "VarDeclList", "VarDecl", "StmtList", "Stmt", "Expr", "MathExpr",
-  "BinaryOp", "Tail", "Block", YY_NULLPTR
+  "DeclList", "Decl", "FunDecl", "VarDeclList", "VarDecl", "StmtList",
+  "Stmt", "Expr", "MathExpr", "BinaryOp", "Tail", "Block", YY_NULLPTR
 };
 #endif
 
@@ -578,7 +579,7 @@ static const yytype_int16 yytoknum[] =
 };
 # endif
 
-#define YYPACT_NINF (-28)
+#define YYPACT_NINF (-35)
 
 #define yypact_value_is_default(Yyn) \
   ((Yyn) == YYPACT_NINF)
@@ -592,11 +593,12 @@ static const yytype_int16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-       0,     4,    10,   -28,     0,    -3,   -28,   -28,   -28,     6,
-     -15,   -28,    -1,    13,    14,    22,   -28,     0,   -28,   -28,
-      -4,    20,     5,    24,    27,    15,    -4,    28,    21,    29,
-     -28,    11,   -28,    30,   -28,   -28,   -28,   -28,    11,   -28,
-     -28,   -28,   -28,   -28,    21,   -28,    11
+       1,     4,    13,   -35,     1,   -35,   -35,    -2,   -35,   -35,
+     -35,     7,    -4,   -35,    10,    16,    18,    30,   -35,    28,
+     -35,   -35,    32,    -3,    28,     6,    31,    25,    33,    35,
+     -35,    23,    -3,    36,   -35,    24,    26,    37,   -35,    15,
+     -35,    39,   -35,   -35,   -35,    18,   -35,    15,   -35,   -35,
+     -35,   -35,   -35,    26,   -35,   -35,    15
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -604,25 +606,26 @@ static const yytype_int8 yypact[] =
      means the default is an error.  */
 static const yytype_int8 yydefact[] =
 {
-       3,     0,     0,     2,     3,     7,     1,     4,     5,     0,
-       0,    10,     0,     0,     0,     8,     9,     3,    27,     6,
-      11,    17,     0,     0,     0,     0,    11,     0,     0,    22,
-      21,    18,    15,     0,    28,    12,    16,    22,    19,    14,
-      23,    24,    25,    26,     0,    13,    20
+       0,     0,     0,     2,     3,     6,     5,    12,     1,     4,
+      10,     0,     0,    15,     0,     0,     0,    13,    14,     0,
+       7,    11,     0,     0,     8,    12,    23,     0,     0,     0,
+      18,     0,    16,     0,     9,     0,     0,    28,    27,    24,
+      21,     0,    34,    17,    22,     0,    28,    25,    20,    29,
+      30,    31,    32,     0,    19,    33,    26
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -28,   -28,     3,   -28,    12,   -28,   -28,   -27,   -28,   -28,
-     -28
+     -35,   -35,    41,   -35,   -35,    22,   -14,    17,   -35,   -35,
+     -34,   -35,   -35,     2
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     2,     3,     4,    25,    26,    27,    31,    44,    11,
-      18
+      -1,     2,     3,     4,     5,    23,     6,    31,    32,    33,
+      39,    53,    13,    20
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -630,45 +633,50 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-      21,    38,     8,     1,    14,    22,    23,     7,     5,    29,
-       6,     9,    30,    12,    15,    10,    24,    46,    16,    40,
-      20,    13,    41,    42,    43,    37,    28,    19,    30,    32,
-      17,    33,    34,    36,    39,    45,     0,     0,    35
+      22,    26,    47,    10,     1,    24,    27,    28,     7,    30,
+      24,    10,    11,     8,    14,    16,    12,    29,    30,    56,
+      11,    18,    15,    49,    35,    17,    50,    51,    52,    37,
+      46,    22,    38,    38,    19,    21,    25,    36,    40,    41,
+      42,    44,    48,    45,    54,     9,    34,    55,     0,    43
 };
 
 static const yytype_int8 yycheck[] =
 {
-       4,    28,     5,     3,    19,     9,    10,     4,     4,     4,
-       0,    14,     7,     7,    15,    18,    20,    44,     5,     8,
-      17,    15,    11,    12,    13,     4,     6,     5,     7,     5,
-      16,     4,    17,     5,     5,     5,    -1,    -1,    26
+       3,     4,    36,     5,     3,    19,     9,    10,     4,    23,
+      24,     5,    14,     0,     7,    19,    18,    20,    32,    53,
+      14,     5,    15,     8,    18,    15,    11,    12,    13,     4,
+       4,     3,     7,     7,    16,     5,     4,     6,     5,     4,
+      17,     5,     5,    19,     5,     4,    24,    45,    -1,    32
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
-       0,     3,    22,    23,    24,     4,     0,    23,     5,    14,
-      18,    30,     7,    15,    19,    15,     5,    16,    31,     5,
-      23,     4,     9,    10,    20,    25,    26,    27,     6,     4,
-       7,    28,     5,     4,    17,    25,     5,     4,    28,     5,
-       8,    11,    12,    13,    29,     5,    28
+       0,     3,    22,    23,    24,    25,    27,     4,     0,    23,
+       5,    14,    18,    33,     7,    15,    19,    15,     5,    16,
+      34,     5,     3,    26,    27,     4,     4,     9,    10,    20,
+      27,    28,    29,    30,    26,    18,     6,     4,     7,    31,
+       5,     4,    17,    28,     5,    19,     4,    31,     5,     8,
+      11,    12,    13,    32,     5,    34,    31
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_int8 yyr1[] =
 {
-       0,    21,    22,    23,    23,    24,    24,    24,    24,    24,
-      24,    25,    25,    26,    26,    26,    26,    27,    27,    27,
-      28,    28,    28,    29,    29,    29,    29,    30,    31
+       0,    21,    22,    23,    23,    24,    24,    25,    26,    26,
+      27,    27,    27,    27,    27,    27,    28,    28,    29,    29,
+      29,    29,    29,    30,    30,    30,    31,    31,    31,    32,
+      32,    32,    32,    33,    34
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_int8 yyr2[] =
 {
-       0,     2,     1,     0,     2,     3,     6,     2,     5,     5,
-       3,     0,     2,     3,     3,     2,     2,     1,     2,     3,
-       3,     1,     1,     1,     1,     1,     1,     3,     4
+       0,     2,     1,     1,     2,     1,     1,     5,     1,     2,
+       3,     6,     2,     5,     5,     3,     1,     2,     1,     3,
+       3,     2,     2,     1,     2,     3,     3,     1,     1,     1,
+       1,     1,     1,     3,     4
 };
 
 
@@ -1365,42 +1373,89 @@ yyreduce:
     {
   case 2:
 #line 61 "parser.y"
-                            { 
+                    { 
+						/* ---- SEMANTIC ACTIONS by PARSER ---- */
 						printf("\n--- Abstract Syntax Tree ---\n\n");
-					 	print_tree((yyval.ast), 0);
+						print_tree((yyval.ast), 0);
 					}
-#line 1373 "parser.tab.c"
+#line 1382 "parser.tab.c"
+    break;
+
+  case 3:
+#line 68 "parser.y"
+               { (yyval.ast) = (yyvsp[0].ast); }
+#line 1388 "parser.tab.c"
     break;
 
   case 4:
-#line 68 "parser.y"
-                                { 	
-								/* ---- SEMANTIC ACTIONS by PARSER ---- */
-								struct AST* decl = malloc(sizeof(struct AST));
-								decl = New_Tree("decl", (yyvsp[-1].ast), (yyvsp[0].ast));
-								(yyval.ast) = decl;
-							}
-#line 1384 "parser.tab.c"
+#line 69 "parser.y"
+                { 	
+					/* ---- SEMANTIC ACTIONS by PARSER ---- */
+					printf("%s\n\n\n\n", (yyvsp[0].ast)->nodeType);
+					insert_node_right((yyvsp[-1].ast), (yyvsp[0].ast));
+					(yyval.ast) = (yyvsp[-1].ast);
+				}
+#line 1399 "parser.tab.c"
     break;
 
   case 5:
-#line 91 "parser.y"
-                                { 
-									printf("\n RECOGNIZED RULE: Variable declaration %s %s\n", (yyvsp[-2].string), (yyvsp[-1].string));
-									
-								  	// ---- SEMANTIC ACTIONS by PARSER ----
-									struct AST* id = malloc(sizeof(struct AST));
-									struct AST* type = malloc(sizeof(struct AST));
-									id = New_Tree((yyvsp[-1].string), NULL, NULL);
-									type = New_Tree((yyvsp[-2].string), NULL, NULL);
-								    (yyval.ast) = New_Tree(typeName, type, id);
-									printf("Adding Variable Decl to tree: Type %s %s\nLINE %d CHAR %d\n", (yyvsp[-2].string), (yyvsp[-1].string), lines, chars);
-								}
-#line 1400 "parser.tab.c"
+#line 77 "parser.y"
+              { (yyval.ast) = (yyvsp[0].ast); }
+#line 1405 "parser.tab.c"
     break;
 
   case 6:
-#line 102 "parser.y"
+#line 78 "parser.y"
+                  { (yyval.ast) = (yyvsp[0].ast);}
+#line 1411 "parser.tab.c"
+    break;
+
+  case 7:
+#line 81 "parser.y"
+                                                {
+											/* ---- SEMANTIC ACTIONS by PARSER ---- */
+											printf("\nRECOGNIZE RULE: Function Decl\n");
+											AST* type = malloc(sizeof(AST));
+											AST* id = malloc(sizeof(AST));
+											type = New_Tree((yyvsp[-4].string), NULL, NULL);
+											id = New_Tree((yyvsp[-3].string), NULL, (yyvsp[0].ast));
+											(yyval.ast) = New_Tree(ftypeName, type, id);
+										}
+#line 1425 "parser.tab.c"
+    break;
+
+  case 8:
+#line 91 "parser.y"
+                     { (yyval.ast) = (yyvsp[0].ast); }
+#line 1431 "parser.tab.c"
+    break;
+
+  case 9:
+#line 92 "parser.y"
+                        {
+							/* ---- SEMANTIC ACTIONS by PARSER ---- */
+							insert_node_right((yyvsp[-1].ast), (yyvsp[0].ast));
+							(yyval.ast) = (yyvsp[-1].ast);
+						}
+#line 1441 "parser.tab.c"
+    break;
+
+  case 10:
+#line 98 "parser.y"
+                                { 
+								// ---- SEMANTIC ACTIONS by PARSER ----
+								struct AST* id = malloc(sizeof(struct AST));
+								struct AST* type = malloc(sizeof(struct AST));
+								id = New_Tree((yyvsp[-1].string), NULL, NULL);
+								type = New_Tree((yyvsp[-2].string), NULL, NULL);
+								(yyval.ast) = New_Tree(typeName, type, id);
+								printf("Adding Variable Decl to tree: Type %s %s\nLINE %d CHAR %d\n", (yyvsp[-2].string), (yyvsp[-1].string), lines, chars);
+							}
+#line 1455 "parser.tab.c"
+    break;
+
+  case 11:
+#line 107 "parser.y"
                                                 {
 											/* ---- SEMANTIC ACTIONS by PARSER ---- */
 											printf("RECOGNIZED RULE: Array Declaration\nTOKENS: %s %s %s %d %s\n", (yyvsp[-5].string), (yyvsp[-4].string), (yyvsp[-3].string), (yyvsp[-2].number), (yyvsp[-1].string));
@@ -1418,11 +1473,11 @@ yyreduce:
 											type_parent = New_Tree(typeName, type, array);
 											(yyval.ast) = type_parent;
 										}
-#line 1422 "parser.tab.c"
+#line 1477 "parser.tab.c"
     break;
 
-  case 7:
-#line 119 "parser.y"
+  case 12:
+#line 124 "parser.y"
                                                                         {
 											/* ---- SEMANTIC ACTIONS by PARSER ---- */
 											/* ---- SYNTAX ERROR: no semicolon ---- */
@@ -1430,11 +1485,11 @@ yyreduce:
 											printf("\nLine %d Character %d::SYNTAX ERROR::Missing semicolon after variable declaration\n", lines, chars);
 											printf("\033[0m");
 										}
-#line 1434 "parser.tab.c"
+#line 1489 "parser.tab.c"
     break;
 
-  case 8:
-#line 126 "parser.y"
+  case 13:
+#line 131 "parser.y"
                                                         {
 											/* ---- SEMANTIC ACTIONS by PARSER ---- */
 											/* ---- SYNTAX ERROR: no semicolon for array declaration ---- */
@@ -1442,11 +1497,11 @@ yyreduce:
 											printf("\nLine %d Character %d::SYNTAX ERROR::Missing semicolon after array declaration\n", lines, chars);
 											printf("\033[0m");
 										}
-#line 1446 "parser.tab.c"
+#line 1501 "parser.tab.c"
     break;
 
-  case 9:
-#line 133 "parser.y"
+  case 14:
+#line 138 "parser.y"
                                                         {
 											/* ---- SEMANTIC ACTIONS by PARSER ---- */
 											/* ---- SYNTAX ERROR: no array size ---- */
@@ -1454,11 +1509,11 @@ yyreduce:
 											printf("\nLine %d Character %d::SYNTAX ERROR::Array size was not declared\n", lines, chars);
 											printf("\033[0m");
 										}
-#line 1458 "parser.tab.c"
+#line 1513 "parser.tab.c"
     break;
 
-  case 10:
-#line 140 "parser.y"
+  case 15:
+#line 145 "parser.y"
                                                                 {
 											/* ---- SEMANTIC ACTION by PARSER ---- */
 											printf("\nRECOGNIZED RULE: Function Tail\n");
@@ -1468,20 +1523,33 @@ yyreduce:
 											id = New_Tree((yyvsp[-1].string), NULL, (yyvsp[0].ast));
 											(yyval.ast) = New_Tree(ftypeName, type, id);
 										}
-#line 1472 "parser.tab.c"
+#line 1527 "parser.tab.c"
     break;
 
-  case 12:
-#line 152 "parser.y"
+  case 16:
+#line 156 "parser.y"
+                { (yyval.ast) = (yyvsp[0].ast); }
+#line 1533 "parser.tab.c"
+    break;
+
+  case 17:
+#line 157 "parser.y"
                                 {
 							/* ---- SEMANTIC ACTIONS by PARSER ---- */
-							(yyval.ast) = New_Tree("stmt", (yyvsp[-1].ast), (yyvsp[0].ast));
+							insert_node_right((yyvsp[-1].ast), (yyvsp[0].ast));
+							(yyval.ast) = (yyvsp[-1].ast);
 						}
-#line 1481 "parser.tab.c"
+#line 1543 "parser.tab.c"
     break;
 
-  case 13:
-#line 158 "parser.y"
+  case 18:
+#line 164 "parser.y"
+                { (yyval.ast) = (yyvsp[0].ast); }
+#line 1549 "parser.tab.c"
+    break;
+
+  case 19:
+#line 165 "parser.y"
                                 {
 							/* ---- SEMANTIC ACTIONS by PARSER ---- */
 							AST* id = malloc(sizeof(AST));
@@ -1490,11 +1558,11 @@ yyreduce:
 							read = New_Tree((yyvsp[-2].string), NULL, NULL);
 							(yyval.ast) = New_Tree(in, read, id);
 						}
-#line 1494 "parser.tab.c"
+#line 1562 "parser.tab.c"
     break;
 
-  case 14:
-#line 166 "parser.y"
+  case 20:
+#line 173 "parser.y"
                                         { 
 								printf("\n RECOGNIZED RULE: WRITE statement\n");
 
@@ -1505,11 +1573,11 @@ yyreduce:
 								write = New_Tree((yyvsp[-2].string), NULL, NULL);
 								(yyval.ast) = New_Tree(out,write,id);
 							}
-#line 1509 "parser.tab.c"
+#line 1577 "parser.tab.c"
     break;
 
-  case 15:
-#line 176 "parser.y"
+  case 21:
+#line 183 "parser.y"
                                         {
 								printf("\n RECOGNIZED RULE: WRITELN statement\n");
 
@@ -1520,32 +1588,31 @@ yyreduce:
 								write = New_Tree((yyvsp[-1].string), NULL, NULL);
 								(yyval.ast) = New_Tree(out,write,ln);
 							}
-#line 1524 "parser.tab.c"
+#line 1592 "parser.tab.c"
     break;
 
-  case 16:
-#line 186 "parser.y"
+  case 22:
+#line 193 "parser.y"
                                 {
-							printf("\nTESTING: %s\n", (yyvsp[0].string));
 							(yyval.ast) = (yyvsp[-1].ast);
 						}
-#line 1533 "parser.tab.c"
+#line 1600 "parser.tab.c"
     break;
 
-  case 17:
-#line 192 "parser.y"
-                { 
-					printf("\n RECOGNIZED RULE: Simplest expression\n"); 
-					// ---- SEMANTIC ACTIONS by PARSER ----
-					struct AST* id = malloc(sizeof(struct AST));
-					id = New_Tree((yyvsp[0].string), NULL, NULL);
-					(yyval.ast) = id;
-				}
-#line 1545 "parser.tab.c"
+  case 23:
+#line 198 "parser.y"
+            { 
+				printf("\n RECOGNIZED RULE: Simplest expression\n"); 
+				// ---- SEMANTIC ACTIONS by PARSER ----
+				struct AST* id = malloc(sizeof(struct AST));
+				id = New_Tree((yyvsp[0].string), NULL, NULL);
+				(yyval.ast) = id;
+			}
+#line 1612 "parser.tab.c"
     break;
 
-  case 18:
-#line 199 "parser.y"
+  case 24:
+#line 205 "parser.y"
                         {
 					/* ---- SEMANTIC ACTIONS by PARSER ---- */
 					AST* write = malloc(sizeof(AST));
@@ -1553,11 +1620,11 @@ yyreduce:
 					(yyval.ast) = New_Tree(out, write, (yyvsp[0].ast));
 					
 				}
-#line 1557 "parser.tab.c"
+#line 1624 "parser.tab.c"
     break;
 
-  case 19:
-#line 206 "parser.y"
+  case 25:
+#line 212 "parser.y"
                         {
 						/* ---- SEMANTIC ACTIONS by PARSER ---- */
 						printf("\n RECOGNIZED RULE: ID EQ MathExpr\nTOKENS: %s %s %s\n", (yyvsp[-2].string), (yyvsp[-1].string), (yyvsp[0].ast)->nodeType);
@@ -1567,11 +1634,11 @@ yyreduce:
 						eq = New_Tree("=", id, (yyvsp[0].ast));
 						(yyval.ast) = eq;
 					}
-#line 1571 "parser.tab.c"
+#line 1638 "parser.tab.c"
     break;
 
-  case 20:
-#line 218 "parser.y"
+  case 26:
+#line 224 "parser.y"
                                                 {
 									/* ---- SEMANTIC ACTIONS by PARSER ---- */
 									printf("\nRECOGNIZED RULE: Math Expression\nTOKENS: %s %s %s\n", (yyvsp[-2].ast)->nodeType, (yyvsp[-1].ast)->nodeType, (yyvsp[0].ast)->nodeType);
@@ -1580,11 +1647,11 @@ yyreduce:
 
 									(yyval.ast) = (yyvsp[-1].ast);
 								}
-#line 1584 "parser.tab.c"
+#line 1651 "parser.tab.c"
     break;
 
-  case 21:
-#line 226 "parser.y"
+  case 27:
+#line 232 "parser.y"
                                                         {
 									/* ---- SEMANTIC ACTIONS by PARSER ---- */
 									printf("\n RECOGNIZED RULE: NUMBER\nTOKENS: %d\n", (yyvsp[0].number));
@@ -1592,41 +1659,30 @@ yyreduce:
 									sprintf(num_s, "%d", (yyvsp[0].number));
 									(yyval.ast) = New_Tree(num_s, NULL, NULL);;
 								}
-#line 1596 "parser.tab.c"
+#line 1663 "parser.tab.c"
     break;
 
-  case 22:
-#line 233 "parser.y"
+  case 28:
+#line 239 "parser.y"
         {
 			/* ---- SEMANTIC ACTIONS by PARSER ---- */
 			(yyval.ast) = New_Tree((yyvsp[0].string), NULL, NULL);
 		}
-#line 1605 "parser.tab.c"
+#line 1672 "parser.tab.c"
     break;
 
-  case 23:
-#line 239 "parser.y"
+  case 29:
+#line 245 "parser.y"
                         { 
 						printf("\n RECOGNIZED RULE: Operator\nTOKEN: %s\n", (yyvsp[0].string));
 						struct AST* op = malloc(sizeof(struct AST));
 						op = New_Tree((yyvsp[0].string), NULL, NULL);
 						(yyval.ast) =  op;
 					}
-#line 1616 "parser.tab.c"
+#line 1683 "parser.tab.c"
     break;
 
-  case 24:
-#line 245 "parser.y"
-                                {
-						printf("\n RECOGNIZED RULE: Operator\nTOKEN: %s\n", (yyvsp[0].string));
-						struct AST* op = malloc(sizeof(struct AST));
-						op = New_Tree((yyvsp[0].string), NULL, NULL);
-						(yyval.ast) =  op;
-					}
-#line 1627 "parser.tab.c"
-    break;
-
-  case 25:
+  case 30:
 #line 251 "parser.y"
                                 {
 						printf("\n RECOGNIZED RULE: Operator\nTOKEN: %s\n", (yyvsp[0].string));
@@ -1634,10 +1690,10 @@ yyreduce:
 						op = New_Tree((yyvsp[0].string), NULL, NULL);
 						(yyval.ast) =  op;
 					}
-#line 1638 "parser.tab.c"
+#line 1694 "parser.tab.c"
     break;
 
-  case 26:
+  case 31:
 #line 257 "parser.y"
                                 {
 						printf("\n RECOGNIZED RULE: Operator\nTOKEN: %s\n", (yyvsp[0].string));
@@ -1645,21 +1701,32 @@ yyreduce:
 						op = New_Tree((yyvsp[0].string), NULL, NULL);
 						(yyval.ast) =  op;
 					}
-#line 1649 "parser.tab.c"
+#line 1705 "parser.tab.c"
     break;
 
-  case 27:
-#line 265 "parser.y"
+  case 32:
+#line 263 "parser.y"
+                                {
+						printf("\n RECOGNIZED RULE: Operator\nTOKEN: %s\n", (yyvsp[0].string));
+						struct AST* op = malloc(sizeof(struct AST));
+						op = New_Tree((yyvsp[0].string), NULL, NULL);
+						(yyval.ast) =  op;
+					}
+#line 1716 "parser.tab.c"
+    break;
+
+  case 33:
+#line 271 "parser.y"
                         {
 							/* ---- SEMANTIC ACTIONS by PARSER ---- */
 							printf("\nRECOGNIZE RULE: Function Decl\n");
 							(yyval.ast) = (yyvsp[0].ast);
 						}
-#line 1659 "parser.tab.c"
+#line 1726 "parser.tab.c"
     break;
 
-  case 28:
-#line 271 "parser.y"
+  case 34:
+#line 277 "parser.y"
                                         {
 										/* ---- SEMANTIC ACTIONS by PARSER ---- */
 										printf("\nRECOGNIZED RULE: Function Block\n");
@@ -1667,11 +1734,11 @@ yyreduce:
 										block = New_Tree("block", (yyvsp[-2].ast), (yyvsp[-1].ast));
 										(yyval.ast) = block;
 									}
-#line 1671 "parser.tab.c"
+#line 1738 "parser.tab.c"
     break;
 
 
-#line 1675 "parser.tab.c"
+#line 1742 "parser.tab.c"
 
       default: break;
     }
@@ -1903,7 +1970,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 279 "parser.y"
+#line 285 "parser.y"
 
 
 int main(int argc, char**argv)
