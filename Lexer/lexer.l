@@ -23,9 +23,9 @@ ws          {delim}+
 %%
 "/*"    				{
 							int c;
-							while((c = input()) != 0) {
+							while((c = yyinput()) != 0) {
 								if(c == '*') {
-									if((c = input()) == '/')
+									if((c = yyinput()) == '/')
 										break;
 									else
 										unput(c);

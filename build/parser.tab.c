@@ -1376,7 +1376,7 @@ yyreduce:
 #line 68 "parser.y"
                                 { 	
 								/* ---- SEMANTIC ACTIONS by PARSER ---- */
-								struct AST* decl = malloc(sizeof(struct AST));
+								struct AST* decl = (AST*)malloc(sizeof(struct AST));
 								decl = New_Tree("decl", (yyvsp[-1].ast), (yyvsp[0].ast));
 								(yyval.ast) = decl;
 							}
@@ -1389,8 +1389,8 @@ yyreduce:
 									printf("\n RECOGNIZED RULE: Variable declaration %s %s\n", (yyvsp[-2].string), (yyvsp[-1].string));
 									
 								  	// ---- SEMANTIC ACTIONS by PARSER ----
-									struct AST* id = malloc(sizeof(struct AST));
-									struct AST* type = malloc(sizeof(struct AST));
+									struct AST* id = (AST*)malloc(sizeof(struct AST));
+									struct AST* type = (AST*)malloc(sizeof(struct AST));
 									id = New_Tree((yyvsp[-1].string), NULL, NULL);
 									type = New_Tree((yyvsp[-2].string), NULL, NULL);
 								    (yyval.ast) = New_Tree(typeName, type, id);
@@ -1404,11 +1404,11 @@ yyreduce:
                                                 {
 											/* ---- SEMANTIC ACTIONS by PARSER ---- */
 											printf("RECOGNIZED RULE: Array Declaration\nTOKENS: %s %s %s %d %s\n", (yyvsp[-5].string), (yyvsp[-4].string), (yyvsp[-3].string), (yyvsp[-2].number), (yyvsp[-1].string));
-											struct AST* array = malloc(sizeof(struct AST));
-											struct AST* type = malloc(sizeof(struct AST));
-											struct AST* id = malloc(sizeof(struct AST));
-											struct AST* num = malloc(sizeof(struct AST));
-											struct AST* type_parent = malloc(sizeof(struct AST));
+											struct AST* array = (AST*)malloc(sizeof(struct AST));
+											struct AST* type = (AST*)malloc(sizeof(struct AST));
+											struct AST* id = (AST*)malloc(sizeof(struct AST));
+											struct AST* num = (AST*)malloc(sizeof(struct AST));
+											struct AST* type_parent = (AST*)malloc(sizeof(struct AST));
 											char nums[100];
 											sprintf(nums, "%d", (yyvsp[-2].number));
 											num = New_Tree(nums, NULL, NULL);
@@ -1462,8 +1462,8 @@ yyreduce:
                                                                 {
 											/* ---- SEMANTIC ACTION by PARSER ---- */
 											printf("\nRECOGNIZED RULE: Function Tail\n");
-											AST* type = malloc(sizeof(AST));
-											AST* id = malloc(sizeof(AST));
+											AST* type = (AST*)malloc(sizeof(AST));
+											AST* id = (AST*)malloc(sizeof(AST));
 											type = New_Tree((yyvsp[-2].string), NULL, NULL);
 											id = New_Tree((yyvsp[-1].string), NULL, (yyvsp[0].ast));
 											(yyval.ast) = New_Tree(ftypeName, type, id);
@@ -1484,8 +1484,8 @@ yyreduce:
 #line 158 "parser.y"
                                 {
 							/* ---- SEMANTIC ACTIONS by PARSER ---- */
-							AST* id = malloc(sizeof(AST));
-							AST* read = malloc(sizeof(AST));
+							AST* id = (AST*)malloc(sizeof(AST));
+							AST* read = (AST*)malloc(sizeof(AST));
 							id = New_Tree((yyvsp[-1].string), NULL, NULL);
 							read = New_Tree((yyvsp[-2].string), NULL, NULL);
 							(yyval.ast) = New_Tree(in, read, id);
@@ -1499,8 +1499,8 @@ yyreduce:
 								printf("\n RECOGNIZED RULE: WRITE statement\n");
 
 								/* ---- SEMANTIC ACTIONS by PARSER ---- */
-								struct AST* id = malloc(sizeof(struct AST));
-								struct AST* write = malloc(sizeof(struct AST));
+								struct AST* id = (AST*)malloc(sizeof(struct AST));
+								struct AST* write = (AST*)malloc(sizeof(struct AST));
 								id = New_Tree((yyvsp[-1].string), NULL, NULL);
 								write = New_Tree((yyvsp[-2].string), NULL, NULL);
 								(yyval.ast) = New_Tree(out,write,id);
@@ -1514,8 +1514,8 @@ yyreduce:
 								printf("\n RECOGNIZED RULE: WRITELN statement\n");
 
 								/* ---- SEMANTIC ACTIONS by PARSER ---- */
-								struct AST* write = malloc(sizeof(struct AST));
-								AST* ln = malloc(sizeof(AST));
+								struct AST* write = (AST*)malloc(sizeof(struct AST));
+								AST* ln = (AST*)malloc(sizeof(AST));
 								ln = New_Tree("\\n", NULL, NULL);
 								write = New_Tree((yyvsp[-1].string), NULL, NULL);
 								(yyval.ast) = New_Tree(out,write,ln);
@@ -1537,7 +1537,7 @@ yyreduce:
                 { 
 					printf("\n RECOGNIZED RULE: Simplest expression\n"); 
 					// ---- SEMANTIC ACTIONS by PARSER ----
-					struct AST* id = malloc(sizeof(struct AST));
+					struct AST* id = (AST*)malloc(sizeof(struct AST));
 					id = New_Tree((yyvsp[0].string), NULL, NULL);
 					(yyval.ast) = id;
 				}
@@ -1548,7 +1548,7 @@ yyreduce:
 #line 199 "parser.y"
                         {
 					/* ---- SEMANTIC ACTIONS by PARSER ---- */
-					AST* write = malloc(sizeof(AST));
+					AST* write = (AST*)malloc(sizeof(AST));
 					write = New_Tree((yyvsp[-1].string), NULL, NULL);
 					(yyval.ast) = New_Tree(out, write, (yyvsp[0].ast));
 					
@@ -1561,8 +1561,8 @@ yyreduce:
                         {
 						/* ---- SEMANTIC ACTIONS by PARSER ---- */
 						printf("\n RECOGNIZED RULE: ID EQ MathExpr\nTOKENS: %s %s %s\n", (yyvsp[-2].string), (yyvsp[-1].string), (yyvsp[0].ast)->nodeType);
-						struct AST* id = malloc(sizeof(struct AST));
-						struct AST* eq = malloc(sizeof(struct AST));
+						struct AST* id = (AST*)malloc(sizeof(struct AST));
+						struct AST* eq = (AST*)malloc(sizeof(struct AST));
 						id = New_Tree((yyvsp[-2].string), NULL, NULL);
 						eq = New_Tree("=", id, (yyvsp[0].ast));
 						(yyval.ast) = eq;
@@ -1608,7 +1608,7 @@ yyreduce:
 #line 239 "parser.y"
                         { 
 						printf("\n RECOGNIZED RULE: Operator\nTOKEN: %s\n", (yyvsp[0].string));
-						struct AST* op = malloc(sizeof(struct AST));
+						struct AST* op = (AST*)malloc(sizeof(struct AST));
 						op = New_Tree((yyvsp[0].string), NULL, NULL);
 						(yyval.ast) =  op;
 					}
@@ -1619,7 +1619,7 @@ yyreduce:
 #line 245 "parser.y"
                                 {
 						printf("\n RECOGNIZED RULE: Operator\nTOKEN: %s\n", (yyvsp[0].string));
-						struct AST* op = malloc(sizeof(struct AST));
+						struct AST* op = (AST*)malloc(sizeof(struct AST));
 						op = New_Tree((yyvsp[0].string), NULL, NULL);
 						(yyval.ast) =  op;
 					}
@@ -1630,7 +1630,7 @@ yyreduce:
 #line 251 "parser.y"
                                 {
 						printf("\n RECOGNIZED RULE: Operator\nTOKEN: %s\n", (yyvsp[0].string));
-						struct AST* op = malloc(sizeof(struct AST));
+						struct AST* op = (AST*)malloc(sizeof(struct AST));
 						op = New_Tree((yyvsp[0].string), NULL, NULL);
 						(yyval.ast) =  op;
 					}
@@ -1641,7 +1641,7 @@ yyreduce:
 #line 257 "parser.y"
                                 {
 						printf("\n RECOGNIZED RULE: Operator\nTOKEN: %s\n", (yyvsp[0].string));
-						struct AST* op = malloc(sizeof(struct AST));
+						struct AST* op = (AST*)malloc(sizeof(struct AST));
 						op = New_Tree((yyvsp[0].string), NULL, NULL);
 						(yyval.ast) =  op;
 					}
@@ -1663,7 +1663,7 @@ yyreduce:
                                         {
 										/* ---- SEMANTIC ACTIONS by PARSER ---- */
 										printf("\nRECOGNIZED RULE: Function Block\n");
-										AST* block = malloc(sizeof(AST));
+										AST* block = (AST*)malloc(sizeof(AST));
 										block = New_Tree("block", (yyvsp[-2].ast), (yyvsp[-1].ast));
 										(yyval.ast) = block;
 									}
