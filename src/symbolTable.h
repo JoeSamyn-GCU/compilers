@@ -23,6 +23,7 @@ class Table {
         }
         Table(Table* parent) {
             this->parent = parent;
+            parent->tables.push_back(this);
         }
         // entries methods
         void insertEntry(char* e) {
@@ -45,10 +46,10 @@ class Table {
             }
         }
         // Table methods (This one may be unneccessary)
-        void addTable() {
-            Table child = new Table(this);
-            tables.push_back(child);
-        }
+        // void addTable() {
+        //     Table child = new Table(this);
+        //     tables.push_back(child);
+        // }
 };
 
 struct SymbolTable {
