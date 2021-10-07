@@ -44,11 +44,10 @@ class Table {
                 }
             }
         }
-        // Table methods (this may be needed in separate class)
-        void addTable(char* tableName) {
-            Table child = new Table();
-            //child->parent = this;
-            //tables.push_back(tableName);
+        // Table methods (This one may be unneccessary)
+        void addTable() {
+            Table child = new Table(this);
+            tables.push_back(child);
         }
 };
 
