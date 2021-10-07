@@ -6,9 +6,17 @@
  * the src folder in the console and run the make command
  */
 #include <stdio.h>
-
+#include "symbolTable.h"
 #include "AST.h"
 
 int main() {
+    Entry test;
+    test.name = (char*)"x";
+    test.type = (char*)"int";
+    Table* table = new Table();
+    table->insertEntry((char*)"test");
+    table->printEntries();
     printf("Hello Compiler People!\nAdd Test Code Here..\n");
+    table->deleteEntry((char*)"test");
+    table->printEntries();
 }

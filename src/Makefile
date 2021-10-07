@@ -1,6 +1,6 @@
 # ---- Makefile used to build main test function ---- #
 
-CC = gcc
+CC = g++
 CFLAGS = -g
 SRC = AST.c main.c
 BIN = bin/main.exe
