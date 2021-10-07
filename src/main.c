@@ -14,9 +14,11 @@ int main() {
     test.name = (char*)"x";
     test.type = (char*)"int";
     Table* table = new Table();
-    table->insertEntry((char*)"test");
+    table->insertEntry(test);
+    struct Entry found = table->searchEntry((char*)"x");
+    printf("%s, %s\n",found.name,found.type);
     table->printEntries();
     printf("Hello Compiler People!\nAdd Test Code Here..\n");
-    table->deleteEntry((char*)"test");
+    table->deleteEntry((char*)'x');
     table->printEntries();
 }
