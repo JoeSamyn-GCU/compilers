@@ -33,12 +33,12 @@ ws          {delim}+
 							}
 						}
 						
-"int"	{
-			words++; chars += strlen(yytext);
-			printf("%s : TYPE\n", yytext);
-			yylval.string = strdup(yytext); 
-			return TYPE;
-		}
+"int"|"char"|"float"	{
+							words++; chars += strlen(yytext);
+							printf("%s : TYPE\n", yytext);
+							yylval.string = strdup(yytext); 
+							return TYPE;
+						}
 
 "write"	{
 			words++; chars += strlen(yytext);
@@ -59,6 +59,18 @@ ws          {delim}+
 				printf("%s : KEYWORD WRITELN\n", yytext);
 				yylval.string = strdup(yytext); 
 				return WRITELN;
+			}
+"return" 	{
+				words++; chars += strlen(yytext);
+				printf("%s : KEYWORD RETURN\n", yytext);
+				yylval.string = strdup(yytext); 
+				return RETURN;
+			}
+"while" 	{
+				words++; chars += strlen(yytext);
+				printf("%s : KEYWORD WHILE\n", yytext);
+				yylval.string = strdup(yytext); 
+				return WHILE;
 			}
 
 {ID}	{
@@ -146,6 +158,48 @@ ws          {delim}+
 			printf("%s : CCB\n", yytext);
 			yylval.string = strdup(yytext);
 			return CCB;
+		}
+","		{
+			chars++;
+			printf("%s : COMMA\n", yytext);
+			yylval.string = strdup(yytext);
+			return COMMA;
+		}
+"<"		{
+			chars++;
+			printf("%s : LT\n", yytext);
+			yylval.string = strdup(yytext);
+			return LT;
+		}
+">"		{
+			chars++;
+			printf("%s : GT\n", yytext);
+			yylval.string = strdup(yytext);
+			return GT;
+		}
+">="		{
+			chars += 2;
+			printf("%s : GTE\n", yytext);
+			yylval.string = strdup(yytext);
+			return GTE;
+		}
+"<="		{
+			chars += 2;
+			printf("%s : LTE\n", yytext);
+			yylval.string = strdup(yytext);
+			return LTE;
+		}
+"=="	{
+			chars += 2;
+			printf("%s : EQEQ\n", yytext);
+			yylval.string = strdup(yytext);
+			return EQEQ;
+		}
+"!="	{
+			chars += 2;
+			printf("%s : NOTEQ\n", yytext);
+			yylval.string = strdup(yytext);
+			return NOTEQ;
 		}
 		
 [\n]	{lines++; chars=0;}

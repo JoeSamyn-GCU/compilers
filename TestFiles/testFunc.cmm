@@ -1,5 +1,21 @@
-int main() {
+int main(int argc, char argv[]) {
     int x;
     x = 3;
-    write x;
+
+    int y;
+    y = x + 3;
+
+    write y;
+
+    while( x < 5) {
+        int i;
+        x = 1 + i;
+    }
+
+    return 1;
+}
+
+int f() {
+    int u;
+    u = 1 + 2;
 }

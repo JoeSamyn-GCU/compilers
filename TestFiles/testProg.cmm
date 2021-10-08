@@ -1,14 +1,1 @@
-int y;
 int x;
-x = 23;
-x = 2 + 2 - 3;
-y = 2 - 2;
-y = 2 / 5;
-x = 5 * 5;
-write x;
-writeln;
-write 2 + 4;
-
-int arr[5];
-
-read m;

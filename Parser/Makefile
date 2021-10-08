@@ -5,6 +5,6 @@ all: parser
 # Generate bison C and H files
 parser: parser.y
 	@echo Generating parser C and H files...
-	bison -t -v -d $?
+	bison -t -v -d -Dparse.trace $?
 	@mv parser.tab.c parser.tab.h ../build
 
