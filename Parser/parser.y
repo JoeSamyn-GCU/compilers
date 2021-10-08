@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <iostream>
 
 #include "AST.h"
 
@@ -78,7 +79,6 @@ Program: DeclList   {
 DeclList: Decl { $$ = $1; }
 | Decl DeclList	{ 	
 					/* ---- SEMANTIC ACTIONS by PARSER ---- */
-					printf("%s\n\n\n\n", $2->nodeType);
 					insert_node_right($1, $2);
 					$$ = $1;
 				}	
@@ -90,7 +90,7 @@ Decl: VarDecl { $$ = $1; }
 
 FunDecl:	TYPE ID OPAR CPAR Block 	{
 											/* ---- SEMANTIC ACTIONS by PARSER ---- */
-											printf("\nRECOGNIZE RULE: Function Decl\n");
+											std::cout << "\nRECOGNIZE RULE: Function Decl\n";
 											AST* type = (AST*)malloc(sizeof(AST));
 											AST* id = (AST*)malloc(sizeof(AST));
 											type = New_Tree($1, NULL, NULL);
@@ -107,8 +107,8 @@ VarDeclList: VarDecl { $$ = $1; }
 
 VarDecl: TYPE ID SEMICOLON	{ 
 								// ---- SEMANTIC ACTIONS by PARSER ----
-								struct AST* id = malloc(sizeof(struct AST));
-								struct AST* type = malloc(sizeof(struct AST));
+								struct AST* id = (AST*)malloc(sizeof(struct AST));
+								struct AST* type = (AST*)malloc(sizeof(struct AST));
 								id = New_Tree($2, NULL, NULL);
 								type = New_Tree($1, NULL, NULL);
 								$$ = New_Tree(typeName, type, id);
@@ -155,8 +155,8 @@ VarDecl: TYPE ID SEMICOLON	{
 	| TYPE ID Tail						{
 											/* ---- SEMANTIC ACTION by PARSER ---- */
 											printf("\nRECOGNIZED RULE: Function Tail\n");
-											AST* type = malloc(sizeof(AST));
-											AST* id = malloc(sizeof(AST));
+											AST* type = (AST*)malloc(sizeof(AST));
+											AST* id = (AST*)malloc(sizeof(AST));
 											type = New_Tree($1, $3->left, NULL);
 											id = New_Tree($2, NULL, $3->right);
 											$$ = New_Tree(ftypeName, type, id);
@@ -218,7 +218,7 @@ Stmt: %empty { $$ = New_Tree("", NULL, NULL); }
 Expr:	ID  { 
 				printf("\n RECOGNIZED RULE: Simplest expression\n"); 
 				// ---- SEMANTIC ACTIONS by PARSER ----
-				struct AST* id = malloc(sizeof(struct AST));
+				struct AST* id = (AST*)malloc(sizeof(struct AST));
 				id = New_Tree($1, NULL, NULL);
 				$$ = id;
 			}
@@ -231,7 +231,7 @@ Expr:	ID  {
 				}
 | ID EQ MathExpr 	{
 						/* ---- SEMANTIC ACTIONS by PARSER ---- */
-						printf("\n RECOGNIZED RULE: ID EQ MathExpr\nTOKENS: %s %s %s\n", $1, $2, $3->nodeType);
+						std::cout << "\n RECOGNIZED RULE: ID EQ MathExpr\nTOKENS: " << $1 << " " << $2 << " " << $3->nodeType << std::endl;
 						struct AST* id = (AST*)malloc(sizeof(struct AST));
 						struct AST* eq = (AST*)malloc(sizeof(struct AST));
 						id = New_Tree($1, NULL, NULL);
@@ -243,7 +243,8 @@ Expr:	ID  {
 
 MathExpr:	MathExpr BinaryOp MathExpr 	{
 									/* ---- SEMANTIC ACTIONS by PARSER ---- */
-									printf("\nRECOGNIZED RULE: Math Expression\nTOKENS: %s %s %s\n", $1->nodeType, $2->nodeType, $3->nodeType);
+									std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " << 
+								    $2->nodeType << " " << $3->nodeType << std::endl;
 									$2->left = $1;
 									$2->right = $3;
 
@@ -314,7 +315,7 @@ Tail: OPAR ParamDeclList CPAR Block 	{
 Block: OCB VarDeclList StmtList CCB 	{
 										/* ---- SEMANTIC ACTIONS by PARSER ---- */
 										printf("\nRECOGNIZED RULE: Block\n");
-										AST* block = malloc(sizeof(AST));
+										AST* block = (AST*)malloc(sizeof(AST));
 										block = New_Tree("block", $2, $3);
 										$$ = block;
 									}
@@ -331,8 +332,8 @@ ParamDeclList: ParamDecl COMMA ParamDeclList 	{
 ParamDecl: %empty
 | TYPE ID  	{
 				/* ---- SEMANTIC ACTIONS by PARSER ---- */
-				struct AST* id = malloc(sizeof(struct AST));
-				struct AST* type = malloc(sizeof(struct AST));
+				struct AST* id = (AST*)malloc(sizeof(struct AST));
+				struct AST* type = (AST*)malloc(sizeof(struct AST));
 				id = New_Tree($2, NULL, NULL);
 				type = New_Tree($1, NULL, NULL);
 				$$ = New_Tree(typeName, type, id);

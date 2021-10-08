@@ -8,7 +8,7 @@ CFLAGS = -G
 # Define Include Directories
 INCLUDES = -I src
 # C source files
-SRC = build/lex.yy.c build/parser.tab.c src/AST.c
+SRC = build/lex.yy.c build/parser.tab.c src/AST.cpp
 # Set executable output name and directory
 BIN = bin/gmm
 # List subdirectories
