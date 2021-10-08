@@ -171,7 +171,7 @@ StmtList: Stmt	{ $$ = $1; }
 						}
 ;
 
-Stmt: %empty { $$ = New_Tree("", NULL, NULL); }
+Stmt: /* empty */ { $$ = New_Tree("", NULL, NULL); }
 	| VarDecl { $$ = $1; }
 	| READ ID SEMICOLON	{
 							/* ---- SEMANTIC ACTIONS by PARSER ---- */
@@ -329,7 +329,7 @@ ParamDeclList: ParamDecl COMMA ParamDeclList 	{
 | ParamDecl		{ $$ = $1; }
 ;
 
-ParamDecl: %empty
+ParamDecl: /* empty */ 
 | TYPE ID  	{
 				/* ---- SEMANTIC ACTIONS by PARSER ---- */
 				struct AST* id = (AST*)malloc(sizeof(struct AST));
