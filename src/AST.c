@@ -35,6 +35,22 @@ void insert_node_right(AST* parent, AST* node){
 	curr->right = node;
 }
 
+void insert_node_left(AST* parent, AST* node){
+	if(parent == NULL){
+		printf("ERROR::Parent cannot be NULL");
+		return;
+	}
+
+	AST* curr = parent;
+
+	// search for next available left child
+	while(curr->left != NULL){
+		curr = curr->left;
+	}
+
+	curr->left = node;
+}
+
 void print_spaces(int level){
 	for(int i = 0; i < level; i++)
 		printf("    ");

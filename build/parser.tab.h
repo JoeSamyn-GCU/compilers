@@ -66,7 +66,16 @@ extern int yydebug;
     CCB = 272,
     OPAR = 273,
     CPAR = 274,
-    READ = 275
+    READ = 275,
+    RETURN = 276,
+    COMMA = 277,
+    GTE = 278,
+    LTE = 279,
+    GT = 280,
+    LT = 281,
+    EQEQ = 282,
+    NOTEQ = 283,
+    WHILE = 284
   };
 #endif
 
@@ -81,7 +90,7 @@ union YYSTYPE
 	char* string;
 	struct AST* ast;
 
-#line 85 "parser.tab.h"
+#line 94 "parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
