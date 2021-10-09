@@ -8,7 +8,7 @@
 #include <algorithm>
 
 
-struct Entry {
+typedef struct Entry {
     char* name;
     char* dtype;
     char* scope; 
@@ -23,60 +23,74 @@ struct Entry {
     char* stype;
     char* lexeme;
     char* value;
-};
+} Entry;
 
 
 class Table {
+
     public:
-        std::vector<struct Entry> entries; //replace with Entry struct
-        std::vector<class Table> tables;
-        class Table* parent;
+        /**
+         * Vector used to hold entries in the current scope table
+         */
+        std::vector<Entry*> entries; // TODO: Switch to hash table (unordered_map in C++)
 
-        Table() {
-            this->parent = NULL;
-        }
+        /**
+         * Vector used to hold all child scope tables
+         */
+        std::vector<Table*> tables; // TODO: Switch to hash table (unordered_map in C++)
 
-        Table(Table* parent) {
-            this->parent = parent;
-            parent->tables.push_back(this);
-        }
+        /**
+         * Pointer to parent scope table
+         */
+        Table* parent;
 
-        // entries methods
-        void insertEntry(Entry e) {
-            entries.push_back(e);
-            //printf("inserted");
-        }
+        /**
+         * Default constructor to initialize parent pointer
+         * 
+         * @param
+         * @return
+         */
+        Table();
 
-        void deleteEntry(char* name) {
-            auto searchEntry = [](const Entry & temp) {
-                return temp.name;
-            };
-            std::vector<struct Entry>::iterator it;
-            it = std::find_if(entries.begin(), entries.end(), searchEntry);
-            entries.erase(it);
-        }
+        /**
+         * Constructor used to initialize a table with a parent node
+         * 
+         * @param parent the parent of the new table object being created
+         * @return
+         */
+        Table(Table* parent);
 
-        struct Entry searchEntry(char* name) {
-            for (int i = 0; i < entries.size(); i++) {
-                if (entries.at(i).name == name) {
-                    return entries.at(i);
-                }
-            }
-            
-            Entry null; // Not great. It works for now
-            return null;
-        }
+        /**
+         * Insert new entry into the symbol table in the current tables scope
+         * 
+         * @param e Entry object to insert into the table
+         * @return
+         */
+        void insertEntry(Entry e);
+
+        /**
+         * Delete entry from the symbol table in the current scope
+         * 
+         * @param name name of entry to delete
+         * @return deleted entry
+         */
+        Entry* deleteEntry(char* name);
+
+        /**
+         * Search for an entry in the symbol table
+         * 
+         * @param name Name of the entry to search for
+         * @return the first Entry that matches the search criteria
+         */
+        Entry* searchEntry(char* name);
         
-        void printEntries() {
-            if (entries.size() == 0) {
-                printf("No Entries\n");
-            } 
-            else {
-                for (int i = 0; i < entries.size(); i++) {
-                    printf("%s\n",entries.at(i).name);
-                }
-            }
-        }
+        /**
+         * Print all entries in the current Scope table
+         * 
+         * @param
+         * @return
+         */
+        void printEntries();
 };
 
 #endif
