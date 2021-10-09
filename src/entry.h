@@ -8,6 +8,7 @@
  * Struct data structure used to hold an entry in the scoped symbol table
  */
 class Entry {
+    /* Properties */
     public:
         /**
          * Constructor to initialize object properties
@@ -87,6 +88,8 @@ class Entry {
          */
         std::string value;
 
+    /* Methods */
+    public:
         // TODO: Add print method that prints all properties in an entry object
         /**
          * Prints all not null properties in an entry object
