@@ -1,43 +1,30 @@
 #ifndef SYMBOLTABLE_H
 #define SYMBOLTABLE_H
 
-#include <stdio.h>
+#include <iostream>
 #include <stdlib.h>
+#include <unordered_map>
 #include <vector>
-#include <iterator>
-#include <algorithm>
+#include <string>
+#include <stdexcept>
 
+#include "entry.h"
 
-typedef struct Entry {
-    char* name;
-    char* dtype;
-    char* scope; 
-    int nelements;
-    int nparams;
-    char* ptype;
-    char* pmode;
-    char returntype;
-    int uses;
-    int nline;
-    int nchar;
-    char* stype;
-    char* lexeme;
-    char* value;
-} Entry;
-
-
+/**
+ * Scope table object used to hold all entries within a specific scope
+ */
 class Table {
 
     public:
         /**
          * Vector used to hold entries in the current scope table
          */
-        std::vector<Entry*> entries; // TODO: Switch to hash table (unordered_map in C++)
+        std::unordered_map<std::string, Entry*> entries;
 
         /**
          * Vector used to hold all child scope tables
          */
-        std::vector<Table*> tables; // TODO: Switch to hash table (unordered_map in C++)
+        std::vector<Table*> tables;
 
         /**
          * Pointer to parent scope table
@@ -48,7 +35,6 @@ class Table {
          * Default constructor to initialize parent pointer
          * 
          * @param
-         * @return
          */
         Table();
 
@@ -56,9 +42,15 @@ class Table {
          * Constructor used to initialize a table with a parent node
          * 
          * @param parent the parent of the new table object being created
-         * @return
          */
         Table(Table* parent);
+
+        /**
+         * Deconstructor used to clean up all pointers used in the object
+         * 
+         * @param
+         */
+        ~Table();
 
         /**
          * Insert new entry into the symbol table in the current tables scope
@@ -66,7 +58,7 @@ class Table {
          * @param e Entry object to insert into the table
          * @return
          */
-        void insertEntry(Entry e);
+        void insertEntry(Entry* e);
 
         /**
          * Delete entry from the symbol table in the current scope
@@ -87,10 +79,11 @@ class Table {
         /**
          * Print all entries in the current Scope table
          * 
-         * @param
+         * @param verbose if set to true, all properties in Entry object will be printed to console. 
+         * If false then just entry name and datatype is printed to console
          * @return
          */
-        void printEntries();
+        void printEntries(bool versbose = false);
 };
 
 #endif

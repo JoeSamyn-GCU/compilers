@@ -6,19 +6,22 @@
  * the src folder in the console and run the make command
  */
 #include <stdio.h>
+#include "entry.h"
 #include "symbolTable.h"
-#include "AST.h"
+#include "colors.h"
 
 int main() {
-    Entry test;
-    test.name = (char*)"x";
-    test.type = (char*)"int";
+
+    Entry* e1 = new Entry("Test Entry", "int");
+    Entry* e2 = new Entry("Test Entry", "int");
+
     Table* table = new Table();
-    table->insertEntry(test);
-    struct Entry found = table->searchEntry((char*)"x");
-    printf("%s, %s\n",found.name,found.type);
     table->printEntries();
-    printf("Hello Compiler People!\nAdd Test Code Here..\n");
-    table->deleteEntry((char*)'x');
-    table->printEntries();
+
+    delete e1;
+    delete e2;
+    delete table;
+    
+
+    return 0;
 }
