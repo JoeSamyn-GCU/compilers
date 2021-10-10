@@ -18,6 +18,7 @@ void Table::insertEntry(Entry* e) {
     
     // Check if entry exists, it does print error and return.
     // TODO: throw an invalid argument exception and catch it in the parser to signify DUPLICATE SYMBOL semantic error
+
     if(entries.find(e->name) != entries.end()) {
         std::cout << FRED("**ERROR::ENTRY ALREADY EXISTS:: Cannot enter duplicate entries into symbol table:: Entry Name: ") << e->name << std::endl;
         return;
@@ -30,45 +31,45 @@ void Table::insertEntry(Entry* e) {
 }
 
 Entry* Table::deleteEntry(char* name) {
-
     // If entry hash table is empty just return
     if( entries.size() == 0 ) {
         std::cout << FYEL("**WARNING::Entries hash table is empty. There is nothing to delete") << std::endl;
         return nullptr;
-    } 
-
-    auto search = entries.find(name);
-    if( search == entries.end()) {
+    }
+    Entry* e;
+    // Search the map for "name", if not found, display a warning and return nullptr
+    try {
+        e = entries.at(name);
+    }
+    // Expected if key not in range
+    catch (const std::out_of_range){
         std::cout << FYEL("**WARNING::Entries is not in the table. There is nothing to delete") << std::endl;
         return nullptr;
     }
-
-    std::cout << "\nENTRY DELETED" << std::endl << "--------------------------------------" << std::endl;
-    std::cout << search->first << "\t" << search->second->dtype << std::endl;
-    
+    // Since it has been found, erase and return value
     entries.erase(name);
-
-    return nullptr;
+    return e;
 }
 
 Entry* Table::searchEntry(char* name) {
-
-    // If entry hash table is empty just return
+    // TODO: ADD RECURSIVE SEARCH IN PARENT FUNCTION
+    // If entry hash table is empty, return nullptr
     if( entries.size() == 0 ) {
         std::cout << FYEL("**WARNING::Entries hash table is empty. There is nothing to search") << std::endl;
         return nullptr;
     }
     
-    auto search = entries.find(name);
-    if( search != entries.end()) {
-        std::cout << FYEL("**WARNING::Found entry in table") << std::endl;
-        return nullptr;
-    } else {
-        std::cout << FYEL("**WARNING::Entries is not in the table. ") << std::endl;
+    // Search the map for "name", if not found, display a warning and return nullptr
+    Entry* e;
+    try {
+        e = entries.at(name);
+    }
+    // Expected if key not in range
+    catch (const std::out_of_range){
+        std::cout << FYEL("**WARNING::Entry is not in the table.") << std::endl;
         return nullptr;
     }
-
-    return nullptr;
+    return e;
 }
 
 // TODO: Enable verbose printing

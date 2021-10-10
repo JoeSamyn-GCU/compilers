@@ -16,14 +16,20 @@ int main() {
     Entry* e2 = new Entry("Test Entry 2", "char");
 
     Table* table = new Table();
-
+    table->printEntries();
     table->insertEntry(e1);
     table->insertEntry(e2);
 
     table->printEntries();
+    Entry *e3 = table->searchEntry("Test Entry");
+    
+    std::cout<<"Searched and found "<<e3->name<<std::endl;
 
     table->deleteEntry("Test Entry");
-
+    table->deleteEntry("Test Entry");
+    
+    table->searchEntry("Test Entry");
+    
     table->printEntries();
 
     delete e1;
