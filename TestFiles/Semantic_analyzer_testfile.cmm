@@ -1,0 +1,87 @@
+int i;
+int j;
+int k[2];
+
+/* function A */
+
+int procA(){
+    int i;
+    int j;
+    int k[2];
+
+    write "in procA"; /* do you handle strings? */
+    writeln;
+    i = 10;
+    j = 11;
+    k[0] = 1; k[1]=2;
+    write "i="; write i; writeln;
+    write "j="; write j; writeln;
+    write "k="; write k; writeln;
+    i = procA2(k);
+    j = procA3(k,j);
+}
+
+int procA2(int i[2]) {
+    int i;
+
+    writeln "in procA2"; writeln;
+    i[0] = 120;
+    i[1] = 121;
+    write "i="; write i; writeln;
+    write "i[0]="; write i[0]; writeln;
+    write "i[1]="; write i[1]; writeln;
+    return i[0];
+}
+
+int procA3(int i[2],int j) {
+    int i;
+    int j;
+
+    writeln "in procA3"; writeln;
+    i := 130;
+    j := 131;
+    k[1] := 132;
+    write "i="; write i; writeln;
+    write "j="; write j; writeln;
+    write "j[0]="; write j[0]; writeln;
+    return j;
+}
+
+/*    procB    */
+
+int procedure procB(int  k[2]) {
+    int i[2];
+
+    writeln "in procB"; writeln;
+    i[0] = 20;
+    i[1] = 21;
+    write "i[0]="; write i[0]; writeln;
+    write "j="; write j; writeln;
+    write "k[1]="; write k[1]; writeln;
+    return i[1];
+}
+
+/*    main     */
+
+void main() {
+    int n;
+    write "in main"; writeln;
+    i = 1;
+    j = 2;
+    k[1] = 3; k[0] = 1;
+    write "i="; write i; writeln;
+    write "j="; write j; writeln;
+    write "k[1]="; write k[1]; writeln;
+    if (procA() > procB()) {
+        write "A"; write ">"; write "B"; writeln;
+    }
+    else {
+        n = procA() - procB();
+        while (n > 0{
+            n = n - 1;
+        }
+    }
+    write "E"; write "N"; write "D"; writeln;
+}
+
+main();

@@ -13,15 +13,22 @@
 int main() {
 
     Entry* e1 = new Entry("Test Entry", "int");
-    Entry* e2 = new Entry("Test Entry", "int");
+    Entry* e2 = new Entry("Test Entry 2", "char");
 
     Table* table = new Table();
+
+    table->insertEntry(e1);
+    table->insertEntry(e2);
+
+    table->printEntries();
+
+    table->deleteEntry("Test Entry");
+
     table->printEntries();
 
     delete e1;
     delete e2;
     delete table;
-    
 
     return 0;
 }
