@@ -9,7 +9,9 @@
 #include "entry.h"
 #include "symbolTable.h"
 #include "colors.h"
+// Global 
 
+// main 
 int main() {
 
     Entry* e1 = new Entry("Test Entry", "int");
@@ -25,6 +27,8 @@ int main() {
     table->deleteEntry("Test Entry");
 
     table->printEntries();
+    table->deleteEntry("some");
+
 
     delete e1;
     delete e2;

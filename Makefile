@@ -40,7 +40,7 @@ run:
 	@echo
 	@echo
 	@echo Executing parser using testProg.cmm...
-	bin/gmm TestFiles/testFunc.cmm
+	bin/gmm TestFiles/testfile.cmm
 
 # Remove all binaries, flex, and bison generated files
 clean:

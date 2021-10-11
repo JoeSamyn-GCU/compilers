@@ -16,6 +16,8 @@
 class Table {
 
     public:
+    // TODO: add table name
+    
         /**
          * Vector used to hold entries in the current scope table
          */
