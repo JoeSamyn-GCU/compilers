@@ -16,14 +16,17 @@ int main() {
     Entry* e2 = new Entry("Test Entry 2", "char");
 
     Table* table = new Table();
+    Table* childTable = new Table(table);
     table->printEntries();
-    table->insertEntry(e1);
+    childTable->insertEntry(e1);
     table->insertEntry(e2);
-
+    Entry* e3c = childTable->searchEntry("Test Entry");
+    std::cout<<"(c) Searched and found "<<e3c->name<<std::endl;
     table->printEntries();
     Entry *e3 = table->searchEntry("Test Entry");
-    
-    std::cout<<"Searched and found "<<e3->name<<std::endl;
+    if (e3 != nullptr) {
+        std::cout<<"Searched and found "<<e3->name<<std::endl;
+    }
 
     table->deleteEntry("Test Entry");
     table->deleteEntry("Test Entry");
@@ -35,6 +38,7 @@ int main() {
     delete e1;
     delete e2;
     delete table;
+    delete childTable;
 
     return 0;
 }

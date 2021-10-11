@@ -52,7 +52,15 @@ Entry* Table::deleteEntry(char* name) {
 }
 
 Entry* Table::searchEntry(char* name) {
-    // TODO: ADD RECURSIVE SEARCH IN PARENT FUNCTION
+    // Recursively call parent. If not null, return result
+    if (parent != nullptr) {
+        Entry* parentResult = parent->searchEntry(name);
+        if (parentResult != nullptr) {
+            std::cout << FYEL("**WARNING::Entry in parent table") << std::endl;
+            return parentResult;
+        }
+    }
+    
     // If entry hash table is empty, return nullptr
     if( entries.size() == 0 ) {
         std::cout << FYEL("**WARNING::Entries hash table is empty. There is nothing to search") << std::endl;
