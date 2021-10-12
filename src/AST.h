@@ -1,11 +1,12 @@
 //Abstract Syntax Tree Implementation
+#include <string>
 #include <string.h>
 /**
  * Node Class used to hold AST Nodes
  */
 typedef struct AST{
 	// Name of node or node type to be displayed when printing AST
-	char nodeType[100];
+	std::string nodeType;
 
 	// Left child node
 	struct AST * left;
@@ -22,7 +23,7 @@ typedef struct AST{
  * @param r node to assign to right child
  * @return new AST node pointer
  */
-struct AST * New_Tree(char nt[100], struct AST* l, struct AST* r);
+struct AST * New_Tree(std::string nt, struct AST* l, struct AST* r);
 
 /**
  * Insert node into the next available null right child of the parent subtree

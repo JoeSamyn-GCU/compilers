@@ -1,18 +1,17 @@
 # ---- Makefile used to build main test function ---- #
 
-CC = gcc
+CC = g++
 CFLAGS = -g
-SRC = AST.c main.c
+SRC = AST.cpp main.cpp symbolTable.cpp
 BIN = bin/main.exe
 
-all: run
+all: main
 
 main:
-	@echo
-	@echo #########################################
-	@echo ## 			Running Tests            ##
-	@echo #########################################
 	$(CC) $(CFLAGS) -o $(BIN) $(SRC)
-
-run: main
 	bin/main.exe
+
+
+clean:
+	@rm -rf bin
+	@mkdir bin

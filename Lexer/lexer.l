@@ -23,9 +23,9 @@ ws          {delim}+
 %%
 "/*"    				{
 							int c;
-							while((c = input()) != 0) {
+							while((c = yyinput()) != 0) {
 								if(c == '*') {
-									if((c = input()) == '/')
+									if((c = yyinput()) == '/')
 										break;
 									else
 										unput(c);
@@ -33,7 +33,7 @@ ws          {delim}+
 							}
 						}
 						
-"int"|"char"|"float"	{
+"int"|"char"|"float"|"void"	{
 							words++; chars += strlen(yytext);
 							printf("%s : TYPE\n", yytext);
 							yylval.string = strdup(yytext); 
@@ -71,6 +71,20 @@ ws          {delim}+
 				printf("%s : KEYWORD WHILE\n", yytext);
 				yylval.string = strdup(yytext); 
 				return WHILE;
+			}
+"if" 		{
+				words++;
+				chars += strlen(yytext);
+				printf("%s : KEYWORD IF\n", yytext);
+				yylval.string = strdup(yytext);
+				return IF;
+			}
+"else" 		{
+				words++;
+				chars += strlen(yytext);
+				printf("%s : KEYWORD ELSE\n", yytext);
+				yylval.string = strdup(yytext);
+				return ELSE;
 			}
 
 {ID}	{
@@ -200,6 +214,18 @@ ws          {delim}+
 			printf("%s : NOTEQ\n", yytext);
 			yylval.string = strdup(yytext);
 			return NOTEQ;
+		}
+"&&"	{
+			chars += 2;
+			printf("%s : AND\n", yytext);
+			yylval.string = strdup(yytext);
+			return AND;
+		}
+"||"	{
+			chars += 2;
+			printf("%s : OR\n", yytext);
+			yylval.string = strdup(yytext);
+			return OR;
 		}
 		
 [\n]	{lines++; chars=0;}

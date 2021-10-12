@@ -2,14 +2,15 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <iostream>
 
-struct AST * New_Tree(char nt[100], struct AST* l, struct AST* r){
+AST * New_Tree(std::string nt, struct AST* l, struct AST* r){
 
 	// Allocate memory for struct
-	struct AST* ast = malloc(sizeof(struct AST));
+	struct AST* ast = (AST*)malloc(sizeof(struct AST));
 	
 	// Copy char arra into nodetype property
-	strcpy(ast->nodeType, nt);
+	ast->nodeType = nt;
 
 	// Assign left and right children
 	ast->left = l;
@@ -69,7 +70,7 @@ void print_tree(struct AST* node, int level){
 
 	// print current node
 	print_spaces(level);
-	printf("%s\n", node->nodeType);
+	std::cout << node->nodeType << std::endl;
 
 	// traverse left tree
 	if(node->left != NULL){

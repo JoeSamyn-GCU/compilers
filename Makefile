@@ -2,13 +2,13 @@
 # $? = dependent files 
 
 # Tell make which compiler to use
-CC = gcc
+CC = g++
 # Which flags to pass to the compilation command
 CFLAGS = -G
 # Define Include Directories
 INCLUDES = -I src
 # C source files
-SRC = build/lex.yy.c build/parser.tab.c src/AST.c
+SRC = build/lex.yy.c build/parser.tab.c src/AST.cpp
 # Set executable output name and directory
 BIN = bin/gmm
 # List subdirectories
@@ -40,7 +40,7 @@ run:
 	@echo
 	@echo
 	@echo Executing parser using testProg.cmm...
-	bin/gmm TestFiles/testFunc.cmm
+	bin/gmm TestFiles/testfile.cmm
 
 # Remove all binaries, flex, and bison generated files
 clean:
