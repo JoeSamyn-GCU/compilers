@@ -60,7 +60,7 @@ class Table {
          * @param e Entry object to insert into the table
          * @return
          */
-        void insertEntry(Entry* e);
+        int insertEntry(Entry* e);
 
         /**
          * Delete entry from the symbol table in the current scope

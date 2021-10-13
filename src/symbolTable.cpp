@@ -14,20 +14,20 @@ Table::~Table() {
 
 }
 
-void Table::insertEntry(Entry* e) {
+int Table::insertEntry(Entry* e) {
     
     // Check if entry exists, it does print error and return.
     // TODO: throw an invalid argument exception and catch it in the parser to signify DUPLICATE SYMBOL semantic error
-
-    if(entries.find(e->name) != entries.end()) {
+    if(this->searchEntry(const_cast<char*>(e->name.data())) != nullptr) {
         std::cout << FRED("**ERROR::ENTRY ALREADY EXISTS:: Cannot enter duplicate entries into symbol table:: Entry Name: ") << e->name << std::endl;
-        return;
+        return 1;
     }
 
     // TODO: Add logic to run search in parent scopes first before inserting
 
     // If not found insert into entries table
     entries[e->name] = e;
+    return 0;
 }
 
 Entry* Table::deleteEntry(char* name) {

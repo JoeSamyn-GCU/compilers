@@ -5,6 +5,10 @@
 #include <string.h>
 #include <iostream>
 
+#include "entry.h"
+#include "symbolTable.h"
+#include "symbolTable.cpp"
+
 #include "AST.h"
 
 #define ftypeName "Function"
@@ -12,8 +16,8 @@
 #define in "Input"
 #define out "Output"
 #define blockName "block"
-
-
+Table* symbolTable = new Table();
+Table* current = symbolTable;
 extern int yylex();
 extern int yyparse();
 extern int lines;
@@ -96,6 +100,11 @@ Decl: VarDecl { $$ = $1; }
 ;
 
 FunDecl:	TYPE ID OPAR CPAR Block 	{
+											// ---- SYMBOL TABLE ACTIONS by PARSER ----
+											current = new Table(current);
+											Entry* e = new Entry($2, $1);
+											current->insertEntry(e);
+
 											/* ---- SEMANTIC ACTIONS by PARSER ---- */
 											std::cout << "\nRECOGNIZE RULE: Function Decl\n";
 											AST* type = (AST*)malloc(sizeof(AST));
@@ -114,7 +123,8 @@ VarDeclList: /* empty */ { $$ = NULL; }
 
 VarDecl: TYPE ID SEMICOLON		{ 
 								// ---- SYMBOL TABLE ACTIONS by PARSER ----
-								// insert into symbol table 
+								Entry* e = new Entry($2, $1);
+								current->insertEntry(e);
 
 								// ---- SEMANTIC ACTIONS by PARSER ----
 								struct AST* id = (AST*)malloc(sizeof(struct AST));
@@ -479,6 +489,9 @@ int main(int argc, char**argv)
 	  }
 	}
 	yyparse();
+	printf("--- Symbol Table ---!");
+	symbolTable->printEntries();
+	current->printEntries();
 }
 
 void yyerror(const char* s) {
