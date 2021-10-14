@@ -34,11 +34,11 @@ ws          {delim}+
 						}
 						
 "int"|"char"|"float"|"void"	{
-							words++; chars += strlen(yytext);
-							printf("%s : TYPE\n", yytext);
-							yylval.string = strdup(yytext); 
-							return TYPE;
-						}
+								words++; chars += strlen(yytext);
+								printf("%s : TYPE\n", yytext);
+								yylval.string = strdup(yytext); 
+								return TYPE;
+							}
 
 "write"	{
 			words++; chars += strlen(yytext);

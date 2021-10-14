@@ -6,6 +6,8 @@
 #include <iostream>
 
 #include "AST.h"
+#include "symbolTable.h"
+#include "semanticUtilities.h"
 
 #define ftypeName "Function"
 #define typeName "Type"
@@ -61,7 +63,7 @@ char currentScope[50]; // global or the name of the function
 %token <string> IF
 %token <string> ELSE
 %token <string> OR
-%token<string> AND
+%token <string> AND
 
 
 %type <ast> Program VarDeclList VarDecl Stmt StmtList Expr BinaryOp MathExpr Tail FunDecl Block Decl DeclList ParamDecl ParamDeclList RelExpr RelOp Matched Unmatched ArgList
@@ -74,7 +76,6 @@ char currentScope[50]; // global or the name of the function
 %%
 
 Program: DeclList   { 
-						/* ---- SEMANTIC ACTIONS by PARSER ---- */
 						printf("\n--- Abstract Syntax Tree ---\n\n");
 						print_tree($$, 0);
 
@@ -84,8 +85,7 @@ Program: DeclList   {
 ;
 
 DeclList: Decl { $$ = $1; }
-| Decl DeclList	{ 	
-					/* ---- SEMANTIC ACTIONS by PARSER ---- */
+| Decl DeclList	{
 					insert_node_right($1, $2);
 					$$ = $1;
 				}	
@@ -96,6 +96,7 @@ Decl: VarDecl { $$ = $1; }
 ;
 
 FunDecl:	TYPE ID OPAR CPAR Block 	{
+											// id check, empty function decl
 											/* ---- SEMANTIC ACTIONS by PARSER ---- */
 											std::cout << "\nRECOGNIZE RULE: Function Decl\n";
 											AST* type = (AST*)malloc(sizeof(AST));
@@ -104,15 +105,17 @@ FunDecl:	TYPE ID OPAR CPAR Block 	{
 											id = New_Tree($2, NULL, $5);
 											$$ = New_Tree(ftypeName, type, id);
 										}
+;
 
 VarDeclList: /* empty */ { $$ = NULL; }
 | VarDecl VarDeclList	{
-							/* ---- SEMANTIC ACTIONS by PARSER ---- */
 							insert_node_right($1, $2);
 							$$ = $1;
 						}
+;
 
-VarDecl: TYPE ID SEMICOLON		{ 
+VarDecl: TYPE ID SEMICOLON	{ 	// if 1 didn't insert <--------------
+
 								// ---- SYMBOL TABLE ACTIONS by PARSER ----
 								// insert into symbol table 
 
@@ -163,6 +166,7 @@ VarDecl: TYPE ID SEMICOLON		{
 											printf("\033[0m");
 										}
 	| TYPE ID Tail						{
+											// make sure id doesn't exist 
 											/* ---- SEMANTIC ACTION by PARSER ---- */
 											printf("\nRECOGNIZED RULE: Function Tail\n");
 											AST* type = (AST*)malloc(sizeof(AST));
@@ -175,7 +179,6 @@ VarDecl: TYPE ID SEMICOLON		{
 
 StmtList: Stmt	{ $$ = $1; }
 	| Stmt StmtList		{
-							/* ---- SEMANTIC ACTIONS by PARSER ---- */
 							insert_node_right($1, $2);
 							$$ = $1;
 						}
@@ -183,17 +186,25 @@ StmtList: Stmt	{ $$ = $1; }
 
 Stmt: /* empty */ { $$ = NULL; }
 	| READ ID SEMICOLON	{
+							// check if in the symbol table
+
 							/* ---- SEMANTIC ACTIONS by PARSER ---- */
+
+
 							AST* id = (AST*)malloc(sizeof(AST));
 							AST* read = (AST*)malloc(sizeof(AST));
 							id = New_Tree($2, NULL, NULL);
 							read = New_Tree($1, NULL, NULL);
 							$$ = New_Tree(in, read, id);
 						}
-	| WRITE ID 	SEMICOLON	{ 
+	| WRITE ID SEMICOLON	{ 
 								printf("\n RECOGNIZED RULE: WRITE statement\n");
 
+								// check if in the symbol table
+
 								/* ---- SEMANTIC ACTIONS by PARSER ---- */
+
+							
 								struct AST* id = (AST*)malloc(sizeof(struct AST));
 								struct AST* write = (AST*)malloc(sizeof(struct AST));
 								id = New_Tree($2, NULL, NULL);
@@ -202,8 +213,6 @@ Stmt: /* empty */ { $$ = NULL; }
 							}
 	| WRITELN SEMICOLON		{
 								printf("\n RECOGNIZED RULE: WRITELN statement\n");
-
-								/* ---- SEMANTIC ACTIONS by PARSER ---- */
 								struct AST* write = (AST*)malloc(sizeof(struct AST));
 								AST* ln = (AST*)malloc(sizeof(AST));
 								ln = New_Tree("\\n", NULL, NULL);
@@ -214,10 +223,13 @@ Stmt: /* empty */ { $$ = NULL; }
 							$$ = $1;
 						}
 	| RETURN MathExpr SEMICOLON	{
+									// check id of function return type matches return type of variable
 									/* ---- SEMANTIC ACTIONS by PARSER ---- */
 									$$ = New_Tree("return", NULL, $2);
 								}
 	| WHILE OPAR RelExpr CPAR Block		{
+											// not right now...
+
 											/* ---- SEMANTIC ACTIONS by PARSER ---- */
 											$$ = New_Tree($1, $3, $5);
 										}
@@ -226,6 +238,8 @@ Stmt: /* empty */ { $$ = NULL; }
 ;
 
 Matched: IF OPAR RelExpr CPAR Matched ELSE Matched 	{
+														// not right now...
+														
 														/* ---- SEMANTIC ACTIONS by PARSER ---- */
 														AST* cond = (AST*) malloc(sizeof(AST));
 														AST* e = (AST*) malloc(sizeof(AST));
@@ -240,11 +254,15 @@ Matched: IF OPAR RelExpr CPAR Matched ELSE Matched 	{
 ;
 
 Unmatched: IF OPAR RelExpr CPAR Block	{
+											// not right now...
+											
 											/* ---- SEMANTIC ACTIONS by PARSER ---- */
 											printf("\nRECOGNIZED RULE: IF STATEMENT\n");
 											$$ = New_Tree($1, $3, $5);
 										}
   | IF OPAR RelExpr CPAR Matched ELSE Unmatched	{
+													// not right now...
+													
 	  												/* ---- SEMANTIC ACTIONS by PARSER ---- */
 														AST* cond = (AST*) malloc(sizeof(AST));
 														AST* e = (AST*) malloc(sizeof(AST));
@@ -258,21 +276,28 @@ Unmatched: IF OPAR RelExpr CPAR Block	{
 ;
 
 Expr:	ID  { 
+				// throw error for id not declared
+
+				/* ---- Syntatic ACTIONS by PARSER ---- */
+
 				printf("\n RECOGNIZED RULE: Simplest expression\n"); 
-				// ---- SEMANTIC ACTIONS by PARSER ----
 				struct AST* id = (AST*)malloc(sizeof(struct AST));
 				id = New_Tree($1, NULL, NULL);
 				$$ = id;
 			}
 | WRITE MathExpr 	{
-					/* ---- SEMANTIC ACTIONS by PARSER ---- */
-					AST* write = (AST*)malloc(sizeof(AST));
-					write = New_Tree($1, NULL, NULL);
-					$$ = New_Tree(out, write, $2);
+						AST* write = (AST*)malloc(sizeof(AST));
+						write = New_Tree($1, NULL, NULL);
+						$$ = New_Tree(out, write, $2);
 					
-				}
+					}
 | ID EQ MathExpr 	{
-						/* ---- SEMANTIC ACTIONS by PARSER ---- */
+						// verified
+						// math expresion is returning the same type
+							// otherwise add the ascii value
+
+						/* ---- Syntatic ACTIONS by PARSER ---- */
+
 						std::cout << "\n RECOGNIZED RULE: ID EQ MathExpr\nTOKENS: " << $1 << " " << $2 << " " << $3->nodeType << std::endl;
 						struct AST* id = (AST*)malloc(sizeof(struct AST));
 						struct AST* eq = (AST*)malloc(sizeof(struct AST));
@@ -281,26 +306,54 @@ Expr:	ID  {
 						$$ = eq;
 					}
 |  ID OPAR ArgList CPAR {
+							// verify ID
+							// check arguments are the same
+								// vector of arguments to pass in and check
+								// clear after check
+								// make sure parameter and parameter number is correct
+
 							/* ---- SEMANTIC ACTIONS by PARSER ---- */
 							$$ = New_Tree($1, $3, NULL);
 						}
 | ID EQ ID OPAR ArgList CPAR 	{
-							/* ---- SEMANTIC ACTIONS by PARSER ---- */
-							AST* id_1 = (AST*) malloc(sizeof(AST));
-							AST* fun = (AST*) malloc(sizeof(AST));
-							id_1 = New_Tree($1, NULL, NULL);
-							fun = New_Tree($3, $5, NULL);
-							$$ = New_Tree($2, id_1, fun);
-						}
-| ID OSB MathExpr CSB EQ ID OPAR ArgList CPAR 	{
+									// check ids
+									// check function
+									// check arguments are the same
+										// vector of arguments to pass in and check
+										// clear after check
+										// make sure parameter and parameter number is correct
+									// can't be a void type function
+	
+									/* ---- SEMANTIC ACTIONS by PARSER ---- */
+
+									AST* id_1 = (AST*) malloc(sizeof(AST));
+									AST* fun = (AST*) malloc(sizeof(AST));
+									id_1 = New_Tree($1, NULL, NULL);
+									fun = New_Tree($3, $5, NULL);
+									$$ = New_Tree($2, id_1, fun);
+								}
+| ID OSB MathExpr CSB EQ ID OPAR ArgList CPAR 	{	// array assignment equals function
+													// check ids
+													// check function
+													// check arguments are the same
+														// vector of arguments to pass in and check
+														// clear after check
+														// make sure parameter and parameter number is correct
+
 													/* ---- SEMANTIC ACTIONS by PARSER ---- */
+
 													AST* id_1 = New_Tree($1, NULL, NULL);
 													AST* arr = New_Tree("ARRAY", id_1, $3);
 													AST* fun = New_Tree($6, $8, NULL);
 													$$ = New_Tree($5, arr, fun);
 												}
 | ID EQ ID OSB NUMBER CSB 	{
+								// check ids
+								// check to make sure array id exists
+								// make sure number is not null
+
 								/* ---- SEMANTIC ACTIONS by PARSER ---- */
+
 								AST* id_1 = (AST*) malloc(sizeof(AST));
 								AST* id_2 = (AST*) malloc(sizeof(AST));
 								AST* arr = (AST*) malloc(sizeof(AST));
@@ -314,7 +367,10 @@ Expr:	ID  {
 								$$ = New_Tree($2, id_1, arr);
 							}
 | ID OSB MathExpr CSB EQ MathExpr	{
+										// check id is an array type and declared
+
 										/* ---- SEMANTIC ACTIONS by PARSER ---- */
+
 										AST* id_1 = (AST*) malloc(sizeof(AST));
 										AST* arr = (AST*) malloc(sizeof(AST));
 										id_1 = New_Tree($1, NULL, NULL);
@@ -326,42 +382,43 @@ Expr:	ID  {
 
 ArgList: /* empty */ { $$ = NULL; }
 | MathExpr	{
-				/* ---- SEMANTIC ACTIONS by PARSER ---- */
 				$$ = $1;
 			}
 | MathExpr COMMA ArgList	{
-								/* ---- SEMANTIC ACTIONS by PARSER ---- */
 								$$ = New_Tree("ARG", $1, $3);
 							}
 
 
 MathExpr:	MathExpr BinaryOp MathExpr 	{
-									/* ---- SEMANTIC ACTIONS by PARSER ---- */
-									std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " << 
-								    $2->nodeType << " " << $3->nodeType << std::endl;
-									$2->left = $1;
-									$2->right = $3;
+											std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " << 
+											$2->nodeType << " " << $3->nodeType << std::endl;
+											$2->left = $1;
+											$2->right = $3;
 
-									$$ = $2;
-								}
+											$$ = $2;
+										}
 |	OPAR MathExpr CPAR	{
-							/* ---- SEMANTIC ACTIONS by PARSER ---- */
 							$$ = $2;
 						}
 | NUMBER						{
-									/* ---- SEMANTIC ACTIONS by PARSER ---- */
 									printf("\n RECOGNIZED RULE: NUMBER\nTOKENS: %d\n", $1);
 									char num_s[100];
 									sprintf(num_s, "%d", $1);
 									$$ = New_Tree(num_s, NULL, NULL);;
 								}
 | ID	{
+			// check id exists
+
 			/* ---- SEMANTIC ACTIONS by PARSER ---- */
+
 			printf("\nRECOGNIZED RULE: ID\n");
 			$$ = New_Tree($1, NULL, NULL);
 		}
 | ID OSB MathExpr CSB 	{
+							// check id exists
+
 							/* ---- SEMANTIC ACTIONS by PARSER ---- */
+
 							AST* id = (AST*) malloc(sizeof(AST));
 							id = New_Tree($1, NULL, NULL);
 							$$ = New_Tree("ARRAY", id, $3);
@@ -405,40 +462,34 @@ RelOp: GTE	{ $$ = New_Tree($1, NULL, NULL); }
 
 
 RelExpr: MathExpr RelOp MathExpr	{
-										/* ---- SEMANTIC ACTIONS by PARSER ---- */
 										printf("\nRECOGNIZED RULE: Relational Expression\n");
 										$$ = New_Tree($2->nodeType, $1, $3);
 									}
 | RelExpr AND RelExpr 	{
-							/* ---- SEMANTIC ACTIONS by PARSER ---- */
 							printf("\nRECOGNIZED RULE: Relational Expression\n");
 							$$ = New_Tree($2, $1, $3);
 						}	
 | RelExpr OR RelExpr	{
-							/* ---- SEMANTIC ACTIONS by PARSER ---- */
 							printf("\nRECOGNIZED RULE: Relational Expression\n");
 							$$ = New_Tree($2, $1, $3);
 						}
 | MathExpr { $$ = $1; }
 
 Tail: OPAR ParamDeclList CPAR Block 	{
-											/* ---- SEMANTIC ACTIONS by PARSER ---- */
 											printf("\nRECOGNIZE RULE: Function Decl\n");
 											$$ = New_Tree("params_holder", $2, $4);
 										}
 ;
 
 Block: OCB VarDeclList StmtList CCB 	{
-										/* ---- SEMANTIC ACTIONS by PARSER ---- */
-										printf("\nRECOGNIZED RULE: Block\n");
-										AST* block = (AST*)malloc(sizeof(AST));
-										block = New_Tree("block", $2, $3);
-										$$ = block;
-									}
+											printf("\nRECOGNIZED RULE: Block\n");
+											AST* block = (AST*)malloc(sizeof(AST));
+											block = New_Tree("block", $2, $3);
+											$$ = block;
+										}
 ;
 
 ParamDeclList: ParamDecl COMMA ParamDeclList 	{
-													/* ---- SEMANTIC ACTIONS by PARSER ---- */
 													insert_node_left($1, $3);
 													$$ = $1;
 												}
@@ -447,7 +498,10 @@ ParamDeclList: ParamDecl COMMA ParamDeclList 	{
 
 ParamDecl: /* empty */ { $$ = NULL; }
 | TYPE ID  	{
+				// check to make sure variable is not already a parameter
+
 				/* ---- SEMANTIC ACTIONS by PARSER ---- */
+
 				struct AST* id = (AST*)malloc(sizeof(struct AST));
 				struct AST* type = (AST*)malloc(sizeof(struct AST));
 				id = New_Tree($2, NULL, NULL);
@@ -455,15 +509,17 @@ ParamDecl: /* empty */ { $$ = NULL; }
 				$$ = New_Tree(typeName, type, id);
 			}
 | TYPE ID OSB CSB 	{
+						// check to make sure variable is not already a parameter
+
 						/* ---- SEMANTIC ACTIONS by PARSER ---- */
+
 						AST* id = New_Tree($2, NULL, NULL);
 						AST* type = New_Tree($1, NULL, NULL);
 						$$ = New_Tree("array", type, id);
 					}	
 %%
 
-int main(int argc, char**argv)
-{
+int main(int argc, char**argv) {
 /*
 	#ifdef YYDEBUG
 		yydebug = 1;
