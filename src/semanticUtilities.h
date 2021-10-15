@@ -2,6 +2,7 @@
 #define SEMANTICUTILITIES_H
 
 #include "symbolTable.h"
+#include "colors.h"
 #include <string>
 
 
@@ -28,17 +29,35 @@
  */
 
 
-bool compareTypes(string a, string b) {
+bool compareIdTypes(std::string a, std::string b) {
     a = searchEntry(a);
     b = searchEntry(b);
     
     return std::strcmp(a.dtype, b.dtype);
 }
 
-bool checkExistance(string id) {
+bool compareIdMathExpr(std::string a, std::string b) {
+    a = searchEntry(a);
+    return std::strcmp(a.dtype, b);
+}
+
+bool checkArgs(std::string a, std::string b) {
+    std::string arrayType = searchEntry(a).dtype;
+    std::stringstream ss(b);
+    std::string word;
+    bool typesMatch;
+
+    while (ss >> word) 
+        typesMatch == std::strcmp(arrayType, word);
+    
+    return typesMatch;
+}
+
+bool checkExistance(std::string id) {
     if( searchEntry(id) != nullptr )
         return true;
     else
+        std::cout << FRED("**ERROR::ENTRY DOES NOT EXISTS:: Cannot find ") << FRED(id) << FRED("in symbol table") << std::endl;
         return false;
 }
 
