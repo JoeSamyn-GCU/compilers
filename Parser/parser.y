@@ -24,6 +24,7 @@ extern FILE* yyin;
 
 void yyerror(const char* s);
 char currentScope[50]; // global or the name of the function
+string mathType;
 %}
 
 %union {
@@ -276,7 +277,9 @@ Unmatched: IF OPAR RelExpr CPAR Block	{
 ;
 
 Expr:	ID  { 
-				// throw error for id not declared
+				/* ---- Semantic ACTIONS by PARSER ---- */
+
+				checkExistance($1); // <---- error statement in function
 
 				/* ---- Syntatic ACTIONS by PARSER ---- */
 
@@ -292,9 +295,17 @@ Expr:	ID  {
 					
 					}
 | ID EQ MathExpr 	{
+						/* ---- Semantic ACTIONS by PARSER ---- */
+
 						// verified
 						// math expresion is returning the same type
 							// otherwise add the ascii value
+
+						if( checkExistance($1) && compareIdMathExpr($1, mathType)) {
+							
+							// IR code jazz
+
+						}
 
 						/* ---- Syntatic ACTIONS by PARSER ---- */
 
@@ -306,16 +317,27 @@ Expr:	ID  {
 						$$ = eq;
 					}
 |  ID OPAR ArgList CPAR {
+							/* ---- Semantic ACTIONS by PARSER ---- */
+
 							// verify ID
 							// check arguments are the same
 								// vector of arguments to pass in and check
 								// clear after check
 								// make sure parameter and parameter number is correct
 
-							/* ---- SEMANTIC ACTIONS by PARSER ---- */
+							if( checkExistance($1) && checkArgs( $1, $3 )) {
+
+								// IR code jazz
+
+							}
+
+							/* ---- Syntatic ACTIONS by PARSER ---- */
+
 							$$ = New_Tree($1, $3, NULL);
 						}
 | ID EQ ID OPAR ArgList CPAR 	{
+									/* ---- SEMANTIC ACTIONS by PARSER ---- */
+
 									// check ids
 									// check function
 									// check arguments are the same
@@ -324,7 +346,7 @@ Expr:	ID  {
 										// make sure parameter and parameter number is correct
 									// can't be a void type function
 	
-									/* ---- SEMANTIC ACTIONS by PARSER ---- */
+									/* ---- Syntatic ACTIONS by PARSER ---- */
 
 									AST* id_1 = (AST*) malloc(sizeof(AST));
 									AST* fun = (AST*) malloc(sizeof(AST));
@@ -333,6 +355,8 @@ Expr:	ID  {
 									$$ = New_Tree($2, id_1, fun);
 								}
 | ID OSB MathExpr CSB EQ ID OPAR ArgList CPAR 	{	// array assignment equals function
+													/* ---- SEMANTIC ACTIONS by PARSER ---- */
+
 													// check ids
 													// check function
 													// check arguments are the same
@@ -340,7 +364,7 @@ Expr:	ID  {
 														// clear after check
 														// make sure parameter and parameter number is correct
 
-													/* ---- SEMANTIC ACTIONS by PARSER ---- */
+													/* ---- Syntatic ACTIONS by PARSER ---- */
 
 													AST* id_1 = New_Tree($1, NULL, NULL);
 													AST* arr = New_Tree("ARRAY", id_1, $3);
@@ -348,11 +372,13 @@ Expr:	ID  {
 													$$ = New_Tree($5, arr, fun);
 												}
 | ID EQ ID OSB NUMBER CSB 	{
+								/* ---- SEMANTIC ACTIONS by PARSER ---- */
+
 								// check ids
 								// check to make sure array id exists
 								// make sure number is not null
 
-								/* ---- SEMANTIC ACTIONS by PARSER ---- */
+								/* ---- Syntatic ACTIONS by PARSER ---- */
 
 								AST* id_1 = (AST*) malloc(sizeof(AST));
 								AST* id_2 = (AST*) malloc(sizeof(AST));
@@ -367,9 +393,11 @@ Expr:	ID  {
 								$$ = New_Tree($2, id_1, arr);
 							}
 | ID OSB MathExpr CSB EQ MathExpr	{
+										/* ---- SEMANTIC ACTIONS by PARSER ---- */
+
 										// check id is an array type and declared
 
-										/* ---- SEMANTIC ACTIONS by PARSER ---- */
+										/* ---- Syntatic ACTIONS by PARSER ---- */
 
 										AST* id_1 = (AST*) malloc(sizeof(AST));
 										AST* arr = (AST*) malloc(sizeof(AST));
@@ -407,18 +435,23 @@ MathExpr:	MathExpr BinaryOp MathExpr 	{
 									$$ = New_Tree(num_s, NULL, NULL);;
 								}
 | ID	{
-			// check id exists
-
 			/* ---- SEMANTIC ACTIONS by PARSER ---- */
+			
+			checkExistance($1);
 
+			/* ---- Syntatic ACTIONS by PARSER ---- */
 			printf("\nRECOGNIZED RULE: ID\n");
 			$$ = New_Tree($1, NULL, NULL);
 		}
 | ID OSB MathExpr CSB 	{
-							// check id exists
-
 							/* ---- SEMANTIC ACTIONS by PARSER ---- */
+							if( checkExistance($1) && compareIdMathExpr( $1, $3 )) {
 
+								// IR code jazz
+
+							}
+
+							/* ---- Syntatic ACTIONS by PARSER ---- */
 							AST* id = (AST*) malloc(sizeof(AST));
 							id = New_Tree($1, NULL, NULL);
 							$$ = New_Tree("ARRAY", id, $3);
@@ -498,9 +531,11 @@ ParamDeclList: ParamDecl COMMA ParamDeclList 	{
 
 ParamDecl: /* empty */ { $$ = NULL; }
 | TYPE ID  	{
+				/* ---- SEMANTIC ACTIONS by PARSER ---- */
+
 				// check to make sure variable is not already a parameter
 
-				/* ---- SEMANTIC ACTIONS by PARSER ---- */
+				/* ---- Syntatic ACTIONS by PARSER ---- */
 
 				struct AST* id = (AST*)malloc(sizeof(struct AST));
 				struct AST* type = (AST*)malloc(sizeof(struct AST));
@@ -509,9 +544,11 @@ ParamDecl: /* empty */ { $$ = NULL; }
 				$$ = New_Tree(typeName, type, id);
 			}
 | TYPE ID OSB CSB 	{
+						/* ---- SEMANTIC ACTIONS by PARSER ---- */
+
 						// check to make sure variable is not already a parameter
 
-						/* ---- SEMANTIC ACTIONS by PARSER ---- */
+						/* ---- Syntatic ACTIONS by PARSER ---- */
 
 						AST* id = New_Tree($2, NULL, NULL);
 						AST* type = New_Tree($1, NULL, NULL);
