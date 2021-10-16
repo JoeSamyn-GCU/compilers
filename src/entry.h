@@ -13,11 +13,38 @@ class Entry {
         /**
          * Constructor to initialize object properties
          */
-        Entry(std::string name, std::string dtype){
+        // Entry(std::string name, std::string dtype){
+        //     this->name = name;
+        //     this->dtype = dtype;
+        // }
+
+        Entry(std::string name = "", 
+            std::string dtype = "", 
+            std::string scope = "", 
+            int nelements = 0,
+            int nparams = 0,         
+            std::vector<std::string> ptype = {},
+            std::string returntype = "",
+            int uses = 1,
+            int nline = 0,
+            int nchar = 0,
+            std::string stype = "",
+            std::string lexeme = "",
+            std::string value = "") 
+        {
             this->name = name;
             this->dtype = dtype;
+            this->nelements = nelements;
+            this->nparams = nparams;
+            this->ptype = ptype;
+            this->returntype = returntype;
+            this->uses = uses;
+            this->nline = nline;
+            this->nchar = nchar;
+            this->stype = stype;
+            this->lexeme = lexeme;
+            this->value = value;
         }
-
         /**
          * Name of the entry
          */

@@ -16,8 +16,10 @@
 #define in "Input"
 #define out "Output"
 #define blockName "block"
+
 Table* symbolTable = new Table();
-Table* current = symbolTable;
+Table* current = symbolTable; // pointer to SymbolTable
+
 extern int yylex();
 extern int yyparse();
 extern int lines;
@@ -135,6 +137,12 @@ VarDecl: TYPE ID SEMICOLON		{
 								printf("Adding Variable Decl to tree: Type %s %s\nLINE %d CHAR %d\n", $1, $2, lines, chars);
 							}
 	| TYPE ID OSB NUMBER CSB SEMICOLON 	{
+											// ---- SYMBOL TABLE ACTIONS by PARSER ----
+											current = new Table(current);
+											// name, dtype, scope, nelements
+											Entry* e = new Entry($2, $1,"",$4);
+											current->insertEntry(e);
+											
 											/* ---- SEMANTIC ACTIONS by PARSER ---- */
 											printf("RECOGNIZED RULE: Array Declaration\nTOKENS: %s %s %s %d %s\n", $1, $2, $3, $4, $5);
 											struct AST* array = (AST*)malloc(sizeof(struct AST));
