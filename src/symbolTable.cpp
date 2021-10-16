@@ -94,7 +94,9 @@ void Table::printEntries(bool verbose) {
 
     // Else iterate through unordered_map and print all key value pairs
     for(const std::pair<std::string, Entry*>& n : entries){
-        std::cout << n.first << "\t" << n.second->dtype << std::endl; 
+        std::cout << n.first << "\t" << n.second->dtype << "\t" << n.second->scope << "\t" << n.second->nelements << "\t" << n.second->nparams << std::endl; 
     }
-
+    if (parent != nullptr) {
+        parent->printEntries();
+    }
 }

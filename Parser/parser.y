@@ -85,7 +85,8 @@ Program: DeclList   {
 						print_tree($$, 0);
 
 						// DUMP SYMBOL TABLE 
-						
+						printf("\n--- Symbol Table ---\n\n");
+						current->printEntries();
 					}
 ;
 
@@ -127,7 +128,7 @@ VarDecl: TYPE ID SEMICOLON		{
 								// ---- SYMBOL TABLE ACTIONS by PARSER ----
 								Entry* e = new Entry($2, $1);
 								current->insertEntry(e);
-
+								
 								// ---- SEMANTIC ACTIONS by PARSER ----
 								struct AST* id = (AST*)malloc(sizeof(struct AST));
 								struct AST* type = (AST*)malloc(sizeof(struct AST));
@@ -138,7 +139,6 @@ VarDecl: TYPE ID SEMICOLON		{
 							}
 	| TYPE ID OSB NUMBER CSB SEMICOLON 	{
 											// ---- SYMBOL TABLE ACTIONS by PARSER ----
-											current = new Table(current);
 											// name, dtype, scope, nelements
 											Entry* e = new Entry($2, $1,"",$4);
 											current->insertEntry(e);
@@ -497,9 +497,7 @@ int main(int argc, char**argv)
 	  }
 	}
 	yyparse();
-	printf("--- Symbol Table ---!");
-	symbolTable->printEntries();
-	current->printEntries();
+	
 }
 
 void yyerror(const char* s) {
