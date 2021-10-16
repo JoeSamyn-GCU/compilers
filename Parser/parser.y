@@ -107,7 +107,7 @@ FunDecl:	TYPE ID OPAR CPAR Block 	{
 											current = new Table(current);
 											Entry* e = new Entry($2, $1);
 											current->insertEntry(e);
-
+											
 											/* ---- SEMANTIC ACTIONS by PARSER ---- */
 											std::cout << "\nRECOGNIZE RULE: Function Decl\n";
 											AST* type = (AST*)malloc(sizeof(AST));
@@ -465,6 +465,9 @@ ParamDeclList: ParamDecl COMMA ParamDeclList 	{
 
 ParamDecl: /* empty */ { $$ = NULL; }
 | TYPE ID  	{
+				/* --- SYMBOL TABLE ACTIONS by PARSER --- */
+				Entry* e = new Entry($2, $1);
+				current->insertEntry(e);
 				/* ---- SEMANTIC ACTIONS by PARSER ---- */
 				struct AST* id = (AST*)malloc(sizeof(struct AST));
 				struct AST* type = (AST*)malloc(sizeof(struct AST));
@@ -473,6 +476,9 @@ ParamDecl: /* empty */ { $$ = NULL; }
 				$$ = New_Tree(typeName, type, id);
 			}
 | TYPE ID OSB CSB 	{
+						/* --- SYMBOL TABLE ACTIONS by PARSER --- */
+						Entry* e = new Entry($2, $1);
+						current->insertEntry(e);
 						/* ---- SEMANTIC ACTIONS by PARSER ---- */
 						AST* id = New_Tree($2, NULL, NULL);
 						AST* type = New_Tree($1, NULL, NULL);
