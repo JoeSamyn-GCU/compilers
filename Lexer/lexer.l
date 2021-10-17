@@ -10,6 +10,7 @@
 int words = 0;
 int chars = 1;
 int lines = 1;
+bool debug_print = false;
 
 %}
 
@@ -35,68 +36,78 @@ ws          {delim}+
 						
 "int"|"char"|"float"|"void"	{
 							words++; chars += strlen(yytext);
-							printf("%s : TYPE\n", yytext);
+							if(debug_print)
+								printf("%s : TYPE\n", yytext);
 							yylval.string = strdup(yytext); 
 							return TYPE;
 						}
 
 "write"	{
 			words++; chars += strlen(yytext);
-			printf("%s : KEYWORD\n", yytext);
+			if(debug_print)
+				printf("%s : KEYWORD\n", yytext);
 			yylval.string = strdup(yytext); 
 			return WRITE;
 		}
 
 "read"	{
 			words++; chars += strlen(yytext);
-			printf("%s : KEYWORD READ\n", yytext);
+			if(debug_print)
+				printf("%s : KEYWORD READ\n", yytext);
 			yylval.string = strdup(yytext); 
 			return READ;
 		}
 
 "writeln" 	{
 				words++; chars += strlen(yytext);
-				printf("%s : KEYWORD WRITELN\n", yytext);
+				if(debug_print)
+					printf("%s : KEYWORD WRITELN\n", yytext);
 				yylval.string = strdup(yytext); 
 				return WRITELN;
 			}
 "return" 	{
 				words++; chars += strlen(yytext);
-				printf("%s : KEYWORD RETURN\n", yytext);
+				if(debug_print)
+					printf("%s : KEYWORD RETURN\n", yytext);
 				yylval.string = strdup(yytext); 
 				return RETURN;
 			}
 "while" 	{
 				words++; chars += strlen(yytext);
-				printf("%s : KEYWORD WHILE\n", yytext);
+				if(debug_print)
+					printf("%s : KEYWORD WHILE\n", yytext);
 				yylval.string = strdup(yytext); 
 				return WHILE;
 			}
 "if" 		{
 				words++;
 				chars += strlen(yytext);
-				printf("%s : KEYWORD IF\n", yytext);
+				if(debug_print)
+					printf("%s : KEYWORD IF\n", yytext);
 				yylval.string = strdup(yytext);
 				return IF;
 			}
 "else" 		{
 				words++;
 				chars += strlen(yytext);
-				printf("%s : KEYWORD ELSE\n", yytext);
+				if(debug_print)
+					printf("%s : KEYWORD ELSE\n", yytext);
 				yylval.string = strdup(yytext);
 				return ELSE;
 			}
 
 {ID}	{
 			words++; chars += strlen(yytext);
-			printf("%s : IDENTIFIER\n",yytext);
+			if(debug_print)
+				printf("%s : IDENTIFIER\n",yytext);
 			yylval.string = strdup(yytext); 
 			return ID;
 		}
 			
 {NUMBER}	{
 				words++; chars += strlen(yytext);
-				printf("%s : NUMBER\n",yytext);
+				if(debug_print)
+					printf("%s : NUMBER\n",yytext);
 				yylval.number = atoi(strdup(yytext)); 
 				return NUMBER;
 			}
@@ -109,129 +120,150 @@ ws          {delim}+
 		
 "="		{
 			chars++;
-			printf("%s : EQ\n", yytext);
+			if(debug_print)
+				printf("%s : EQ\n", yytext);
 			yylval.string = strdup(yytext); 
 			return EQ;
 		}
 "+"		{
 			chars++;
-			printf("%s : PLUS\n", yytext);
+			if(debug_print)
+				printf("%s : PLUS\n", yytext);
 			yylval.string = strdup(yytext);
 			return PLUS;
 		}
 "-"		{
 			chars++;
-			printf("%s : MINUS\n", yytext);
+			if(debug_print)
+				printf("%s : MINUS\n", yytext);
 			yylval.string = strdup(yytext);
 			return MINUS;
 		}
 "*"		{
 			chars++;
-			printf("%s : MULT\n", yytext);
+			if(debug_print)
+				printf("%s : MULT\n", yytext);
 			yylval.string = strdup(yytext);
 			return MULT;
 		}
 "/"		{
 			chars++;
-			printf("%s : DIV\n", yytext);
+			if(debug_print)
+				printf("%s : DIV\n", yytext);
 			yylval.string = strdup(yytext);
 			return DIV;
 		}
 "["		{
 			chars++;
-			printf("%s : OSB\n", yytext);
+			if(debug_print)
+				printf("%s : OSB\n", yytext);
 			yylval.string = strdup(yytext);
 			return OSB;
 		}
 "]"		{
 			chars++;
-			printf("%s : CSB\n", yytext);
+			if(debug_print)
+				printf("%s : CSB\n", yytext);
 			yylval.string = strdup(yytext);
 			return CSB;
 		}
 "("		{
 			chars++;
-			printf("%s : OPAR\n", yytext);
+			if(debug_print)
+				printf("%s : OPAR\n", yytext);
 			yylval.string = strdup(yytext);
 			return OPAR;
 		}
 ")"		{
 			chars++;
-			printf("%s : CPAR\n", yytext);
+			if(debug_print)
+				printf("%s : CPAR\n", yytext);
 			yylval.string = strdup(yytext);
 			return CPAR;
 		}
 "{"		{
 			chars++;
-			printf("%s : OCB\n", yytext);
+			if(debug_print)
+				printf("%s : OCB\n", yytext);
 			yylval.string = strdup(yytext);
 			return OCB;
 		}
 "}"		{
 			chars++;
-			printf("%s : CCB\n", yytext);
+			if(debug_print)
+				printf("%s : CCB\n", yytext);
 			yylval.string = strdup(yytext);
 			return CCB;
 		}
 ","		{
 			chars++;
-			printf("%s : COMMA\n", yytext);
+			if(debug_print)
+				printf("%s : COMMA\n", yytext);
 			yylval.string = strdup(yytext);
 			return COMMA;
 		}
 "<"		{
 			chars++;
-			printf("%s : LT\n", yytext);
+			if(debug_print)
+				printf("%s : LT\n", yytext);
 			yylval.string = strdup(yytext);
 			return LT;
 		}
 ">"		{
 			chars++;
-			printf("%s : GT\n", yytext);
+			if(debug_print)
+				printf("%s : GT\n", yytext);
 			yylval.string = strdup(yytext);
 			return GT;
 		}
 ">="		{
 			chars += 2;
-			printf("%s : GTE\n", yytext);
+			if(debug_print)
+				printf("%s : GTE\n", yytext);
 			yylval.string = strdup(yytext);
 			return GTE;
 		}
 "<="		{
 			chars += 2;
-			printf("%s : LTE\n", yytext);
+			if(debug_print)
+				printf("%s : LTE\n", yytext);
 			yylval.string = strdup(yytext);
 			return LTE;
 		}
 "=="	{
 			chars += 2;
-			printf("%s : EQEQ\n", yytext);
+			if(debug_print)
+				printf("%s : EQEQ\n", yytext);
 			yylval.string = strdup(yytext);
 			return EQEQ;
 		}
 "!="	{
 			chars += 2;
-			printf("%s : NOTEQ\n", yytext);
+			if(debug_print)
+				printf("%s : NOTEQ\n", yytext);
 			yylval.string = strdup(yytext);
 			return NOTEQ;
 		}
 "&&"	{
 			chars += 2;
-			printf("%s : AND\n", yytext);
+			if(debug_print)
+				printf("%s : AND\n", yytext);
 			yylval.string = strdup(yytext);
 			return AND;
 		}
 "||"	{
 			chars += 2;
-			printf("%s : OR\n", yytext);
+			if(debug_print)
+				printf("%s : OR\n", yytext);
 			yylval.string = strdup(yytext);
 			return OR;
 		}
 		
 [\n]	{lines++; chars=0;}
 [ \t]	{chars++;}
-.		{chars++;
-         printf("%s : Unrecognized symbol at line %d char %d\n", yytext,lines,chars);
+.		{	
+			chars++;
+         	printf("%s : Unrecognized symbol at line %d char %d\n", yytext,lines,chars);
 		}
 		
 
