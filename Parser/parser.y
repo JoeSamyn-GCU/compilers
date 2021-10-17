@@ -4,13 +4,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <iostream>
+#include <stack>
 
 #include "entry.h"
 #include "symbolTable.h"
 #include "symbolTable.cpp"
 
 #include "AST.h"
-#include "irgenerator.h"
+#include "irgen.h"
 #include "quadruples.h"
 
 #define ftypeName "Function"
@@ -133,7 +134,7 @@ VarDeclList: /* empty */ { $$ = NULL; }
 VarDecl: TYPE ID SEMICOLON		{ 
 
 								/* ---- Generate IR Code ---- */
-								outfile << $2 << ": .skip 4\n";
+								IrGen::ofile << $2 << ": .skip 4\n";
 
 								// ---- SYMBOL TABLE ACTIONS by PARSER ----
 								Entry* e = new Entry($2, $1);
@@ -308,9 +309,10 @@ Expr:	ID  {
 				}
 | ID EQ MathExpr 	{
 						/* ---- IR Code Generation ---- */
-						reg++;
-						outfile << "r" << reg << "=" << std::endl;
-						print_tree($3, 0);
+						IrGen::r_counter++;
+						std::string last_reg = IrGen::printIrCode();
+						std::string reg = "r" + std::to_string(IrGen::r_counter);
+						IrGen::ofile << reg << " = " << last_reg << std::endl;
 
 						/* ---- SEMANTIC ACTIONS by PARSER ---- */
 						if(debug)
@@ -378,7 +380,7 @@ ArgList: /* empty */ { $$ = NULL; }
 
 MathExpr:	MathExpr BinaryOp MathExpr 	{
 									/* ---- IR Code Generator ---- */
-									outfile << $1->nodeType << " " << $2->nodeType << " " << $3->nodeType << std::endl;
+									IrGen::insertQe($2->nodeType, $1->nodeType, $3->nodeType);
 
 									/* ---- SEMANTIC ACTIONS by PARSER ---- */
 									if(debug)
@@ -423,7 +425,6 @@ MathExpr:	MathExpr BinaryOp MathExpr 	{
 
 BinaryOp:	PLUS 	{ 
 						/* ---- IR CODE ---- */
-						//outfile << $1;
 
 						/* ---- SEMANTIC ACTIONS by PARSER ---- */
 						if(debug)
@@ -545,7 +546,7 @@ int main(int argc, char**argv)
 	printf("\n\n##### COMPILER STARTED #####\n\n");
 
 	std::cout << "##### Opening IR Code File #####\n";
-	openIrCodeFile();
+	IrGen::openFile();
 	
 	if (argc > 1){
 	  if(!(yyin = fopen(argv[1], "r")))
@@ -557,7 +558,7 @@ int main(int argc, char**argv)
 	yyparse();
 
 	std::cout << "#### Closing IR Code File ####\n";
-	closeIrCodeFile();
+	IrGen::closeFile();
 	
 }
 
