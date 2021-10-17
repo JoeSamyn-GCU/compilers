@@ -61,6 +61,15 @@ class IrGen {
          */
         static void insertQe(std::string op, std::string arg1, std::string arg2 = "");
 
+        /**
+         * @brief Checks if value is operator or not
+         * 
+         * @param value string to compare to ops
+         * @return true value is an operator
+         * @return false
+         */
+        static bool isOp(std::string value);
+
     /* Public Static Variables */
     public:
         /**

@@ -378,18 +378,53 @@ ArgList: /* empty */ { $$ = NULL; }
 							}
 
 
-MathExpr:	MathExpr BinaryOp MathExpr 	{
+MathExpr:	MathExpr PLUS MathExpr 	{
 									/* ---- IR Code Generator ---- */
-									IrGen::insertQe($2->nodeType, $1->nodeType, $3->nodeType);
+									IrGen::insertQe($2, $1->nodeType, $3->nodeType);
 
 									/* ---- SEMANTIC ACTIONS by PARSER ---- */
 									if(debug)
 										std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " << 
-								    $2->nodeType << " " << $3->nodeType << std::endl;
-									$2->left = $1;
-									$2->right = $3;
+								   		 $2<< " " << $3->nodeType << std::endl;
 
-									$$ = $2;
+									AST* op = New_Tree($2, $1, $3);
+									$$ = op;
+								}
+| MathExpr MINUS MathExpr 	{
+									/* ---- IR Code Generator ---- */
+									IrGen::insertQe( $2, $1->nodeType, $3->nodeType);
+
+									/* ---- SEMANTIC ACTIONS by PARSER ---- */
+									if(debug)
+										std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " << 
+								   		 $2<< " " << $3->nodeType << std::endl;
+
+									AST* op = New_Tree($2, $1, $3);
+									$$ = op;
+								}
+| MathExpr DIV MathExpr 	{
+									/* ---- IR Code Generator ---- */
+									IrGen::insertQe($2, $1->nodeType, $3->nodeType);
+
+									/* ---- SEMANTIC ACTIONS by PARSER ---- */
+									if(debug)
+										std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " << 
+								   		 $2 << " " << $3->nodeType << std::endl;
+
+									AST* op = New_Tree($2, $1, $3);
+									$$ = op;
+								}
+| MathExpr MULT MathExpr 	{
+									/* ---- IR Code Generator ---- */
+									IrGen::insertQe($2, $1->nodeType, $3->nodeType);
+
+									/* ---- SEMANTIC ACTIONS by PARSER ---- */
+									if(debug)
+										std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " << 
+								   		 $2 << " " << $3->nodeType << std::endl;
+
+									AST* op = New_Tree($2, $1, $3);
+									$$ = op;
 								}
 |	OPAR MathExpr CPAR	{
 							/* ---- SEMANTIC ACTIONS by PARSER ---- */

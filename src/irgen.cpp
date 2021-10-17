@@ -64,13 +64,34 @@ void IrGen::insertQe(std::string op, std::string arg1, std::string arg2){
    */
    else {
         r_counter++;
+        
+        if(isOp(arg1)){
+            Qe* top = qe_stack.front();
+            qe_stack.pop();
+            Qe* next = qe_stack.front();
 
-        std::string reg = "r" + std::to_string(r_counter);
-        Qe* top = qe_stack.front();
-        Qe* qe = new Qe(op, arg1, top->result, reg);
-        qe_stack.push(qe);
+            std::string reg = "r" + std::to_string(r_counter);
+            Qe* qe = new Qe(op, next->result, top->result, reg);
+            qe_stack.push(top);
+            qe_stack.push(qe);
+        }
+        else{
+            std::string reg = "r" + std::to_string(r_counter);
+            Qe* top = qe_stack.front();
+            Qe* qe = new Qe(op, arg1, top->result, reg);
+            qe_stack.push(qe);
+        }
+        
    }    
 
+}
+
+bool IrGen::isOp(std::string val){
+    
+    return val == "+" 
+    || val == "-"
+    || val == "/"
+    || val == "*";
 }
 
 /* End IrGen Implementation */
