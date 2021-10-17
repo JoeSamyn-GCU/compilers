@@ -5,6 +5,10 @@
 #include <string.h>
 #include <iostream>
 
+#include "entry.h"
+#include "symbolTable.h"
+#include "symbolTable.cpp"
+
 #include "AST.h"
 #include "irgenerator.h"
 #include "quadruples.h"
@@ -15,6 +19,8 @@
 #define out "Output"
 #define blockName "block"
 
+Table* symbolTable = new Table();
+Table* current = symbolTable; // pointer to SymbolTable
 
 extern int yylex();
 extern int yyparse();
@@ -84,7 +90,8 @@ Program: DeclList   {
 						print_tree($$, 0);
 
 						// DUMP SYMBOL TABLE 
-						
+						printf("\n--- Symbol Table ---\n\n");
+						current->printEntries();
 					}
 ;
 
@@ -101,9 +108,11 @@ Decl: VarDecl { $$ = $1; }
 ;
 
 FunDecl:	TYPE ID OPAR CPAR Block 	{
-											/* ---- IR Code Generation ---- */
-											outfile << "_" << $2 << ":"<< std::endl;
-
+											// ---- SYMBOL TABLE ACTIONS by PARSER ----
+											current = new Table(current);
+											Entry* e = new Entry($2, $1);
+											current->insertEntry(e);
+											
 											/* ---- SEMANTIC ACTIONS by PARSER ---- */
 											if(debug)
 												std::cout << "\nRECOGNIZE RULE: Function Decl\n";
@@ -127,8 +136,9 @@ VarDecl: TYPE ID SEMICOLON		{
 								outfile << $2 << ": .skip 4\n";
 
 								// ---- SYMBOL TABLE ACTIONS by PARSER ----
-								// insert into symbol table 
-
+								Entry* e = new Entry($2, $1);
+								current->insertEntry(e);
+								
 								// ---- SEMANTIC ACTIONS by PARSER ----
 								struct AST* id = (AST*)malloc(sizeof(struct AST));
 								struct AST* type = (AST*)malloc(sizeof(struct AST));
@@ -139,6 +149,11 @@ VarDecl: TYPE ID SEMICOLON		{
 									printf("Adding Variable Decl to tree: Type %s %s\nLINE %d CHAR %d\n", $1, $2, lines, chars);
 							}
 	| TYPE ID OSB NUMBER CSB SEMICOLON 	{
+											// ---- SYMBOL TABLE ACTIONS by PARSER ----
+											// name, dtype, scope, nelements
+											Entry* e = new Entry($2, $1,"",$4);
+											current->insertEntry(e);
+											
 											/* ---- SEMANTIC ACTIONS by PARSER ---- */
 											if(debug)
 												printf("RECOGNIZED RULE: Array Declaration\nTOKENS: %s %s %s %d %s\n", $1, $2, $3, $4, $5);
@@ -499,6 +514,9 @@ ParamDeclList: ParamDecl COMMA ParamDeclList 	{
 
 ParamDecl: /* empty */ { $$ = NULL; }
 | TYPE ID  	{
+				/* --- SYMBOL TABLE ACTIONS by PARSER --- */
+				Entry* e = new Entry($2, $1);
+				current->insertEntry(e);
 				/* ---- SEMANTIC ACTIONS by PARSER ---- */
 				struct AST* id = (AST*)malloc(sizeof(struct AST));
 				struct AST* type = (AST*)malloc(sizeof(struct AST));
@@ -507,6 +525,9 @@ ParamDecl: /* empty */ { $$ = NULL; }
 				$$ = New_Tree(typeName, type, id);
 			}
 | TYPE ID OSB CSB 	{
+						/* --- SYMBOL TABLE ACTIONS by PARSER --- */
+						Entry* e = new Entry($2, $1);
+						current->insertEntry(e);
 						/* ---- SEMANTIC ACTIONS by PARSER ---- */
 						AST* id = New_Tree($2, NULL, NULL);
 						AST* type = New_Tree($1, NULL, NULL);
@@ -537,6 +558,7 @@ int main(int argc, char**argv)
 
 	std::cout << "#### Closing IR Code File ####\n";
 	closeIrCodeFile();
+	
 }
 
 void yyerror(const char* s) {

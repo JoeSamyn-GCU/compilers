@@ -1,0 +1,4 @@
+int i;
+int j;
+int h[8];
+int main(int i) {}
