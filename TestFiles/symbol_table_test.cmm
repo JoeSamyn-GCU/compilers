@@ -1,4 +1,11 @@
 int i;
 int j;
 int h[8];
-int main(int i) {}
+int main(int k) {
+    char x;
+    char y;
+}
+int a;
+void addOne(int able, int character) {
+    
+}
