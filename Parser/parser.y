@@ -118,9 +118,7 @@ FunDecl:	TYPE ID OPAR CPAR Block 	{
 											// ---- SYMBOL TABLE ACTIONS by PARSER ----
 											std::cout<<"FunDecl"<<std::endl;
 											Entry* e = new Entry($2, $1);
-											current = new Table(current);
 											current->insertEntry(e);
-											tempCounter++;
 											// if (current->parent != nullptr) {
 											// 	current = current->parent;
 											// 	std::cout << "MOVING UP A LEVEL" << std::endl;
@@ -207,6 +205,9 @@ VarDecl: TYPE ID SEMICOLON		{
 											printf("\033[0m");
 										}
 	| TYPE ID Tail						{
+											/* --- SYMBOL TABLE ACTIONS --- */
+											Entry* e = new Entry($2, $1);
+											current->insertEntry(e);
 											/* ---- SEMANTIC ACTION by PARSER ---- */
 											if(debug)
 												printf("\nRECOGNIZED RULE: Function Tail\n");
@@ -502,14 +503,7 @@ RelExpr: MathExpr RelOp MathExpr	{
 
 Tail: OPAR ParamDeclList CPAR Block 	{
 											// /* --- SYMBOL TABLE ACTIONS by PARSER --- */
-											// std::cout<<"MAKING NEW TABLE (tail)"<<std::endl;
-											// current = new Table(current);
-											// tempCounter++;
 											
-											// if (current->parent != nullptr) {
-											// 	current = current->parent;
-											// 	std::cout << "MOVING UP A LEVEL" << std::endl;
-											// }
 											/* ---- SEMANTIC ACTIONS by PARSER ---- */
 											if(debug)
 												printf("\nRECOGNIZE RULE: Function Decl\n");
@@ -518,7 +512,7 @@ Tail: OPAR ParamDeclList CPAR Block 	{
 ;
 
 Block: OCB {
-			std::cout<<"MAKING NEW TABLE"<<std::endl;
+			//std::cout<<"MAKING NEW TABLE"<<std::endl;
 			current = new Table(current);
 			while(!tempStack.empty()) {
 				current->insertEntry(tempStack.top());
@@ -529,27 +523,9 @@ Block: OCB {
 				if (current->parent != nullptr) {
 					//current->printEntries();
 					current = current->parent;
-					std::cout << "MOVING UP A LEVEL" << std::endl;
+					//std::cout << "MOVING UP A LEVEL" << std::endl;
 				}
-
 			} CCB 	{
-										/* --- SYMBOL TABLE ACTIONS by PARSER --- */
-										
-										
-										
-										//tempCounter++;
-										
-										/* --- SYMBOL TABLE ACTIONS by PARSER --- */
-										//std::cout << "EXITING TO PARENT" <<std::endl;
-										// if (current->parent != nullptr) {
-										// 	current = current->parent;
-										// 	std::cout << "Going to Parent (block)" << std::endl;
-										// }
-										// std::cout<<"BLOCK!!!"<<std::endl;
-										// if (current->parent != nullptr) {
-										// 	current = current->parent;
-										// 	std::cout << "Going to Parent (block entry)" << std::endl;
-										// }
 										/* ---- SEMANTIC ACTIONS by PARSER ---- */
 										if(debug)
 											printf("\nRECOGNIZED RULE: Block\n");
@@ -570,7 +546,6 @@ ParamDeclList: ParamDecl COMMA ParamDeclList 	{
 ParamDecl: /* empty */ { $$ = NULL; }
 | TYPE ID  	{
 				/* --- SYMBOL TABLE ACTIONS by PARSER --- */
-				std::cout << "Parameter detected!!!" << std::endl;
 				Entry* e = new Entry($2, $1);
 				tempStack.push(e);
 				//current->insertEntry(e);
@@ -584,7 +559,6 @@ ParamDecl: /* empty */ { $$ = NULL; }
 | TYPE ID OSB CSB 	{
 						/* --- SYMBOL TABLE ACTIONS by PARSER --- */
 						Entry* e = new Entry($2, $1);
-						//current->insertEntry(e);
 						tempStack.push(e);
 						/* ---- SEMANTIC ACTIONS by PARSER ---- */
 						AST* id = New_Tree($2, NULL, NULL);

@@ -8,6 +8,6 @@ int main(int k) {
 int a;
 void addOne(int able, int character) {
     if (test == 1) {
-        
+        write(1);
     }
 }
