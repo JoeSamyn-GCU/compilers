@@ -8,6 +8,9 @@ typedef struct AST{
 	// Name of node or node type to be displayed when printing AST
 	std::string nodeType;
 
+	// Register the expression result is stored in
+	std::string reg;
+
 	// Left child node
 	struct AST * left;
 

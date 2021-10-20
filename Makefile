@@ -5,6 +5,8 @@
 CC = g++
 # Which flags to pass to the compilation command
 CFLAGS = -G
+# C++ Standard
+STD = -std=c++11
 # Define Include Directories
 INCLUDES = -I src
 # C source files
@@ -36,7 +38,7 @@ run:
 		( cd $$i ; make) ; \
 	done
 	@echo Building executable...
-	$(CC) $(INCLUDES) -o $(BIN) $(SRC)
+	$(CC) $(STD) $(INCLUDES) -o $(BIN) $(SRC)
 	@echo
 	@echo
 	@echo Executing parser using testProg.cmm...

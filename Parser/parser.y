@@ -108,7 +108,11 @@ Decl: VarDecl { $$ = $1; }
 	| FunDecl { $$ = $1;}
 ;
 
-FunDecl:	TYPE ID OPAR CPAR Block 	{
+FunDecl:	TYPE ID OPAR {} CPAR Block 	{
+											// ---- IR CODE GENERATION ----
+											IrGen::ofile << $2 << ": " << std::endl;
+											IrGen::printIrCode();
+
 											// ---- SYMBOL TABLE ACTIONS by PARSER ----
 											current = new Table(current);
 											Entry* e = new Entry($2, $1);
@@ -120,7 +124,7 @@ FunDecl:	TYPE ID OPAR CPAR Block 	{
 											AST* type = (AST*)malloc(sizeof(AST));
 											AST* id = (AST*)malloc(sizeof(AST));
 											type = New_Tree($1, NULL, NULL);
-											id = New_Tree($2, NULL, $5);
+											id = New_Tree($2, NULL, $6);
 											$$ = New_Tree(ftypeName, type, id);
 										}
 
@@ -309,10 +313,6 @@ Expr:	ID  {
 				}
 | ID EQ MathExpr 	{
 						/* ---- IR Code Generation ---- */
-						IrGen::r_counter++;
-						std::string last_reg = IrGen::printIrCode();
-						std::string reg = "r" + std::to_string(IrGen::r_counter);
-						IrGen::ofile << reg << " = " << last_reg << std::endl;
 
 						/* ---- SEMANTIC ACTIONS by PARSER ---- */
 						if(debug)
@@ -381,6 +381,7 @@ ArgList: /* empty */ { $$ = NULL; }
 MathExpr:	MathExpr PLUS MathExpr 	{
 									/* ---- IR Code Generator ---- */
 									IrGen::insertQe($2, $1->nodeType, $3->nodeType);
+									std::cout << $1->nodeType << " " << $2 << " " << $3->nodeType << std::endl;
 
 									/* ---- SEMANTIC ACTIONS by PARSER ---- */
 									if(debug)
@@ -393,6 +394,7 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 | MathExpr MINUS MathExpr 	{
 									/* ---- IR Code Generator ---- */
 									IrGen::insertQe( $2, $1->nodeType, $3->nodeType);
+									std::cout << $1->nodeType << " " << $2 << " " << $3->nodeType << std::endl;
 
 									/* ---- SEMANTIC ACTIONS by PARSER ---- */
 									if(debug)
@@ -405,6 +407,7 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 | MathExpr DIV MathExpr 	{
 									/* ---- IR Code Generator ---- */
 									IrGen::insertQe($2, $1->nodeType, $3->nodeType);
+									std::cout << $1->nodeType << " " << $2 << " " << $3->nodeType << std::endl;
 
 									/* ---- SEMANTIC ACTIONS by PARSER ---- */
 									if(debug)
@@ -417,6 +420,7 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 | MathExpr MULT MathExpr 	{
 									/* ---- IR Code Generator ---- */
 									IrGen::insertQe($2, $1->nodeType, $3->nodeType);
+									std::cout << $1->nodeType << " " << $2 << " " << $3->nodeType << std::endl;
 
 									/* ---- SEMANTIC ACTIONS by PARSER ---- */
 									if(debug)
@@ -464,6 +468,7 @@ BinaryOp:	PLUS 	{
 						/* ---- SEMANTIC ACTIONS by PARSER ---- */
 						if(debug)
 							printf("\n RECOGNIZED RULE: Operator\nTOKEN: %s\n", $1);
+
 						struct AST* op = (AST*)malloc(sizeof(struct AST));
 						op = New_Tree($1, NULL, NULL);
 						$$ =  op;

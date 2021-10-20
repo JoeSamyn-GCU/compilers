@@ -2,8 +2,7 @@
 
 /* Begin IrGen Implementation */
 std::ofstream IrGen::ofile;
-
-std::queue<Qe*> IrGen::qe_stack;
+std::deque<Qe*> IrGen::qe_deque;
 
 int IrGen::r_counter;
 
@@ -18,16 +17,16 @@ void IrGen::closeFile(){
 
 std::string IrGen::printIrCode(){
 
-    if(!qe_stack.empty()){
+    if(!qe_deque.empty()){
 
         std::string lreg = "";
 
         
         // Loop through stack and print all IR code in reverse order
-        while(!qe_stack.empty()){
+        while(!qe_deque.empty()){
             
-            Qe* qe = qe_stack.front();
-            qe_stack.pop();
+            Qe* qe = qe_deque.front();
+            qe_deque.pop_front();
 
             ofile << qe->result << " = " << qe->arg1 << " " << qe->op << " " << qe->arg2 << std::endl;
 
@@ -45,18 +44,20 @@ std::string IrGen::printIrCode(){
 
 }
 
+
 void IrGen::insertQe(std::string op, std::string arg1, std::string arg2){
 
+    std::string reg = "";
     /*
     * If this is the first operation, the stack is empty and therefor a result register 
     * does not currently exist
     */
-   if(qe_stack.empty()){
+   if(qe_deque.empty()){
        r_counter++;
 
-       std::string reg = "r" + std::to_string(r_counter);
+       reg = "r" + std::to_string(r_counter);
        Qe* qe = new Qe(op, arg1, arg2, reg);
-       qe_stack.push(qe);
+       qe_deque.push_back(qe);
    }
    /*
    * Else the stack is not empty, we need to use the result register of the top 
@@ -66,20 +67,20 @@ void IrGen::insertQe(std::string op, std::string arg1, std::string arg2){
         r_counter++;
         
         if(isOp(arg1)){
-            Qe* top = qe_stack.front();
-            qe_stack.pop();
-            Qe* next = qe_stack.front();
+            Qe* top = qe_deque.front();
+            qe_deque.pop_front();
+            Qe* next = qe_deque.front();
 
-            std::string reg = "r" + std::to_string(r_counter);
+            reg = "r" + std::to_string(r_counter);
             Qe* qe = new Qe(op, next->result, top->result, reg);
-            qe_stack.push(top);
-            qe_stack.push(qe);
+            qe_deque.push_front(top);
+            qe_deque.push_back(qe);
         }
         else{
             std::string reg = "r" + std::to_string(r_counter);
-            Qe* top = qe_stack.front();
+            Qe* top = qe_deque.front();
             Qe* qe = new Qe(op, arg1, top->result, reg);
-            qe_stack.push(qe);
+            qe_deque.push_back(qe);
         }
         
    }    

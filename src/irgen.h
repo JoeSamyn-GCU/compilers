@@ -2,7 +2,7 @@
 #define IRGEN_H
 
 #include <stack>
-#include <queue>
+#include <deque>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -51,6 +51,13 @@ class IrGen {
          * @return last register used in 3-address code
          */
         static std::string printIrCode();
+
+        /**
+         * @brief Print the current Quadruples table entry as IR code
+         * 
+         * @param qe pointer to the Quadruple Entry to print
+         */
+        static void printIrCode(Qe* qe);
         
         /**
          * @brief Insert a quadruples entry into the quadruples stack
@@ -82,14 +89,19 @@ class IrGen {
          * @brief stack used to hold Quadruples entries when printing IR code
          * 
          */
-        static std::queue<Qe*> qe_stack;
+        static std::deque<Qe*> qe_deque;
+
+        /**
+         * Table used to maintain all IR code needed in a function. 
+         * table is cleared when a scope is 
+         */
+        static std::vector<Qe*> ir_table;
 
         /**
          * @brief temp integer used to keep track of general register number
          * 
          */
         static int r_counter;
-
 
 };
 
