@@ -517,15 +517,25 @@ Tail: OPAR ParamDeclList CPAR Block 	{
 										}
 ;
 
-Block: OCB VarDeclList StmtList CCB 	{
+Block: OCB {
+			std::cout<<"MAKING NEW TABLE"<<std::endl;
+			current = new Table(current);
+			tempCounter++;
+			} VarDeclList StmtList {
+				if (current->parent != nullptr) {
+					current = current->parent;
+					std::cout << "MOVING UP A LEVEL" << std::endl;
+				}
+
+			} CCB 	{
 										/* --- SYMBOL TABLE ACTIONS by PARSER --- */
-										std::cout<<"MAKING NEW TABLE"<<std::endl;
-										current = new Table(current);
-										while(!tempStack.empty()) {
-											current->insertEntry(tempStack.top());
-											tempStack.pop();
-										}
-										tempCounter++;
+										
+										
+										//while(!tempStack.empty()) {
+										//	current->insertEntry(tempStack.top());
+										//	tempStack.pop();
+										//}
+										//tempCounter++;
 										
 										/* --- SYMBOL TABLE ACTIONS by PARSER --- */
 										//std::cout << "EXITING TO PARENT" <<std::endl;
@@ -542,7 +552,7 @@ Block: OCB VarDeclList StmtList CCB 	{
 										if(debug)
 											printf("\nRECOGNIZED RULE: Block\n");
 										AST* block = (AST*)malloc(sizeof(AST));
-										block = New_Tree("block", $2, $3);
+										block = New_Tree("block", $3, $4);
 										$$ = block;
 									}
 ;
