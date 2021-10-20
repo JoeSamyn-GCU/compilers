@@ -86,6 +86,15 @@ class Table {
          * @return
          */
         void printEntries(bool versbose = false);
+
+        /**
+         * Print all entries of the current Scope table and children of current scope
+         * 
+        * @param verbose if set to true, all properties in Entry object will be printed to console. 
+         * If false then just entry name and datatype is printed to console
+         * @return
+         */
+        void printTables(bool verbose = false);
 };
 
 #endif

@@ -97,7 +97,7 @@ Program: DeclList   {
 
 						// DUMP SYMBOL TABLE 
 						printf("\n--- Symbol Table ---\n\n");
-						current->printEntries();
+						current->printTables();
 						printf("Total tables created: %i\n", tempCounter);
 					}
 ;
@@ -520,9 +520,14 @@ Tail: OPAR ParamDeclList CPAR Block 	{
 Block: OCB {
 			std::cout<<"MAKING NEW TABLE"<<std::endl;
 			current = new Table(current);
+			while(!tempStack.empty()) {
+				current->insertEntry(tempStack.top());
+				tempStack.pop();
+			}
 			tempCounter++;
 			} VarDeclList StmtList {
 				if (current->parent != nullptr) {
+					//current->printEntries();
 					current = current->parent;
 					std::cout << "MOVING UP A LEVEL" << std::endl;
 				}
@@ -531,10 +536,7 @@ Block: OCB {
 										/* --- SYMBOL TABLE ACTIONS by PARSER --- */
 										
 										
-										//while(!tempStack.empty()) {
-										//	current->insertEntry(tempStack.top());
-										//	tempStack.pop();
-										//}
+										
 										//tempCounter++;
 										
 										/* --- SYMBOL TABLE ACTIONS by PARSER --- */
