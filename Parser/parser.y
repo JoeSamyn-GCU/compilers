@@ -4,17 +4,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <iostream>
+#include <stack>
 
 #include "entry.h"
 #include "symbolTable.h"
 #include "symbolTable.cpp"
+#include "semanticUtilities.h"
 
 #include "AST.h"
 #include "irgenerator.h"
 #include "quadruples.h"
-
-#include <stack>
-
 
 #define ftypeName "Function"
 #define typeName "Type"
@@ -162,6 +161,12 @@ VarDecl: TYPE ID SEMICOLON		{
 							}
 	| TYPE ID OSB NUMBER CSB SEMICOLON 	{
 											// ---- SYMBOL TABLE ACTIONS by PARSER ----
+											
+											if ($4 < 1) {
+												printf(FRED("SEMANTIC ERROR::Cannot declare array with size less than one\n"));
+
+												/* --------------------- Todo: break code here --------------------- */
+											}
 											// name, dtype, scope, nelements
 											Entry* e = new Entry($2, $1,"",$4);
 											current->insertEntry(e);
