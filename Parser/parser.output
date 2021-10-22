@@ -1,23 +1,10 @@
-Useless nonterminals
-
-   BinaryOp
-
-
-Useless rules
-
-   67 BinaryOp: PLUS
-   68         | MINUS
-   69         | MULT
-   70         | DIV
-
-
 State 12 conflicts: 1 reduce/reduce
 State 34 conflicts: 8 shift/reduce
 State 45 conflicts: 8 shift/reduce, 1 reduce/reduce
 State 55 conflicts: 1 shift/reduce
-State 107 conflicts: 1 shift/reduce
-State 114 conflicts: 2 shift/reduce
-State 115 conflicts: 2 shift/reduce
+State 106 conflicts: 1 shift/reduce
+State 118 conflicts: 2 shift/reduce
+State 119 conflicts: 2 shift/reduce
 
 
 Grammar
@@ -87,36 +74,34 @@ Grammar
    48         | ID
    49         | ID OSB MathExpr CSB
 
-   50 RelOp: GTE
-   51      | LTE
-   52      | GT
-   53      | LT
-   54      | EQEQ
-   55      | NOTEQ
+   50 RelExpr: MathExpr GTE MathExpr
+   51        | MathExpr LTE MathExpr
+   52        | MathExpr GT MathExpr
+   53        | MathExpr LT MathExpr
+   54        | MathExpr EQEQ MathExpr
+   55        | MathExpr NOTEQ MathExpr
+   56        | RelExpr AND RelExpr
+   57        | RelExpr OR RelExpr
+   58        | MathExpr
 
-   56 RelExpr: MathExpr RelOp MathExpr
-   57        | RelExpr AND RelExpr
-   58        | RelExpr OR RelExpr
-   59        | MathExpr
+   59 Tail: OPAR ParamDeclList CPAR Block
 
-   60 Tail: OPAR ParamDeclList CPAR Block
+   60 Block: OCB VarDeclList StmtList CCB
 
-   61 Block: OCB VarDeclList StmtList CCB
+   61 ParamDeclList: ParamDecl COMMA ParamDeclList
+   62              | ParamDecl
 
-   62 ParamDeclList: ParamDecl COMMA ParamDeclList
-   63              | ParamDecl
-
-   64 ParamDecl: /* empty */
-   65          | TYPE ID
-   66          | TYPE ID OSB CSB
+   63 ParamDecl: /* empty */
+   64          | TYPE ID
+   65          | TYPE ID OSB CSB
 
 
 Terminals, with rules where they appear
 
 $end (0) 0
 error (256)
-TYPE (258) 7 10 11 12 13 14 15 65 66
-ID (259) 7 10 11 12 13 14 15 19 20 31 33 34 35 36 37 38 48 49 65 66
+TYPE (258) 7 10 11 12 13 14 15 64 65
+ID (259) 7 10 11 12 13 14 15 19 20 31 33 34 35 36 37 38 48 49 64 65
 SEMICOLON (260) 10 11 14 19 20 21 22 23
 EQ (261) 33 35 36 37 38
 NUMBER (262) 11 13 37 47
@@ -126,15 +111,15 @@ WRITELN (265) 21
 MINUS (266) 43
 MULT (267) 45
 DIV (268) 44
-OSB (269) 11 13 14 36 37 38 49 66
-CSB (270) 11 13 14 36 37 38 49 66
-OCB (271) 61
-CCB (272) 61
-OPAR (273) 7 24 27 29 30 34 35 36 46 60
-CPAR (274) 7 24 27 29 30 34 35 36 46 60
+OSB (269) 11 13 14 36 37 38 49 65
+CSB (270) 11 13 14 36 37 38 49 65
+OCB (271) 60
+CCB (272) 60
+OPAR (273) 7 24 27 29 30 34 35 36 46 59
+CPAR (274) 7 24 27 29 30 34 35 36 46 59
 READ (275) 19
 RETURN (276) 23
-COMMA (277) 41 62
+COMMA (277) 41 61
 GTE (278) 50
 LTE (279) 51
 GT (280) 52
@@ -144,8 +129,8 @@ NOTEQ (283) 55
 WHILE (284) 24
 IF (285) 27 29 30
 ELSE (286) 27 30
-OR (287) 58
-AND (288) 57
+OR (287) 57
+AND (288) 56
 
 
 Nonterminals, with rules where they appear
@@ -163,11 +148,11 @@ FunDecl (38)
 @1 (39)
     on left: 6, on right: 7
 VarDeclList (40)
-    on left: 8 9, on right: 9 61
+    on left: 8 9, on right: 9 60
 VarDecl (41)
     on left: 10 11 12 13 14 15, on right: 4 9
 StmtList (42)
-    on left: 16 17, on right: 17 61
+    on left: 16 17, on right: 17 60
 Stmt (43)
     on left: 18 19 20 21 22 23 24 25 26, on right: 16 17
 Matched (44)
@@ -180,19 +165,17 @@ ArgList (47)
     on left: 39 40 41, on right: 34 35 36 41
 MathExpr (48)
     on left: 42 43 44 45 46 47 48 49, on right: 23 32 33 36 38 40 41
-    42 43 44 45 46 49 56 59
-RelOp (49)
-    on left: 50 51 52 53 54 55, on right: 56
-RelExpr (50)
-    on left: 56 57 58 59, on right: 24 27 29 30 57 58
-Tail (51)
-    on left: 60, on right: 15
-Block (52)
-    on left: 61, on right: 7 24 28 29 60
-ParamDeclList (53)
-    on left: 62 63, on right: 60 62
-ParamDecl (54)
-    on left: 64 65 66, on right: 62 63
+    42 43 44 45 46 49 50 51 52 53 54 55 58
+RelExpr (49)
+    on left: 50 51 52 53 54 55 56 57 58, on right: 24 27 29 30 56 57
+Tail (50)
+    on left: 59, on right: 15
+Block (51)
+    on left: 60, on right: 7 24 28 29 59
+ParamDeclList (52)
+    on left: 61 62, on right: 59 61
+ParamDecl (53)
+    on left: 63 64 65, on right: 61 62
 
 
 state 0
@@ -317,13 +300,13 @@ state 11
 state 12
 
     7 FunDecl: TYPE ID OPAR . @1 CPAR Block
-   60 Tail: OPAR . ParamDeclList CPAR Block
+   59 Tail: OPAR . ParamDeclList CPAR Block
 
     TYPE  shift, and go to state 16
 
     CPAR      reduce using rule 6 (@1)
-    CPAR      [reduce using rule 64 (ParamDecl)]
-    COMMA     reduce using rule 64 (ParamDecl)
+    CPAR      [reduce using rule 63 (ParamDecl)]
+    COMMA     reduce using rule 63 (ParamDecl)
     $default  reduce using rule 6 (@1)
 
     @1             go to state 17
@@ -355,8 +338,8 @@ state 15
 
 state 16
 
-   65 ParamDecl: TYPE . ID
-   66          | TYPE . ID OSB CSB
+   64 ParamDecl: TYPE . ID
+   65          | TYPE . ID OSB CSB
 
     ID  shift, and go to state 22
 
@@ -370,19 +353,19 @@ state 17
 
 state 18
 
-   60 Tail: OPAR ParamDeclList . CPAR Block
+   59 Tail: OPAR ParamDeclList . CPAR Block
 
     CPAR  shift, and go to state 24
 
 
 state 19
 
-   62 ParamDeclList: ParamDecl . COMMA ParamDeclList
-   63              | ParamDecl .
+   61 ParamDeclList: ParamDecl . COMMA ParamDeclList
+   62              | ParamDecl .
 
     COMMA  shift, and go to state 25
 
-    $default  reduce using rule 63 (ParamDeclList)
+    $default  reduce using rule 62 (ParamDeclList)
 
 
 state 20
@@ -404,12 +387,12 @@ state 21
 
 state 22
 
-   65 ParamDecl: TYPE ID .
-   66          | TYPE ID . OSB CSB
+   64 ParamDecl: TYPE ID .
+   65          | TYPE ID . OSB CSB
 
     OSB  shift, and go to state 27
 
-    $default  reduce using rule 65 (ParamDecl)
+    $default  reduce using rule 64 (ParamDecl)
 
 
 state 23
@@ -423,7 +406,7 @@ state 23
 
 state 24
 
-   60 Tail: OPAR ParamDeclList CPAR . Block
+   59 Tail: OPAR ParamDeclList CPAR . Block
 
     OCB  shift, and go to state 28
 
@@ -432,11 +415,11 @@ state 24
 
 state 25
 
-   62 ParamDeclList: ParamDecl COMMA . ParamDeclList
+   61 ParamDeclList: ParamDecl COMMA . ParamDeclList
 
     TYPE  shift, and go to state 16
 
-    $default  reduce using rule 64 (ParamDecl)
+    $default  reduce using rule 63 (ParamDecl)
 
     ParamDeclList  go to state 31
     ParamDecl      go to state 19
@@ -451,14 +434,14 @@ state 26
 
 state 27
 
-   66 ParamDecl: TYPE ID OSB . CSB
+   65 ParamDecl: TYPE ID OSB . CSB
 
     CSB  shift, and go to state 32
 
 
 state 28
 
-   61 Block: OCB . VarDeclList StmtList CCB
+   60 Block: OCB . VarDeclList StmtList CCB
 
     TYPE  shift, and go to state 33
 
@@ -477,23 +460,23 @@ state 29
 
 state 30
 
-   60 Tail: OPAR ParamDeclList CPAR Block .
+   59 Tail: OPAR ParamDeclList CPAR Block .
 
-    $default  reduce using rule 60 (Tail)
+    $default  reduce using rule 59 (Tail)
 
 
 state 31
 
-   62 ParamDeclList: ParamDecl COMMA ParamDeclList .
+   61 ParamDeclList: ParamDecl COMMA ParamDeclList .
 
-    $default  reduce using rule 62 (ParamDeclList)
+    $default  reduce using rule 61 (ParamDeclList)
 
 
 state 32
 
-   66 ParamDecl: TYPE ID OSB CSB .
+   65 ParamDecl: TYPE ID OSB CSB .
 
-    $default  reduce using rule 66 (ParamDecl)
+    $default  reduce using rule 65 (ParamDecl)
 
 
 state 33
@@ -510,7 +493,7 @@ state 33
 
 state 34
 
-   61 Block: OCB VarDeclList . StmtList CCB
+   60 Block: OCB VarDeclList . StmtList CCB
 
     ID       shift, and go to state 37
     WRITE    shift, and go to state 38
@@ -641,7 +624,7 @@ state 43
 
 state 44
 
-   61 Block: OCB VarDeclList StmtList . CCB
+   60 Block: OCB VarDeclList StmtList . CCB
 
     CCB  shift, and go to state 65
 
@@ -717,11 +700,11 @@ state 50
 
 state 51
 
-   60 Tail: OPAR . ParamDeclList CPAR Block
+   59 Tail: OPAR . ParamDeclList CPAR Block
 
     TYPE  shift, and go to state 16
 
-    $default  reduce using rule 64 (ParamDecl)
+    $default  reduce using rule 63 (ParamDecl)
 
     ParamDeclList  go to state 18
     ParamDecl      go to state 19
@@ -880,9 +863,9 @@ state 64
 
 state 65
 
-   61 Block: OCB VarDeclList StmtList CCB .
+   60 Block: OCB VarDeclList StmtList CCB .
 
-    $default  reduce using rule 61 (Block)
+    $default  reduce using rule 60 (Block)
 
 
 state 66
@@ -1066,8 +1049,13 @@ state 82
    43         | MathExpr . MINUS MathExpr
    44         | MathExpr . DIV MathExpr
    45         | MathExpr . MULT MathExpr
-   56 RelExpr: MathExpr . RelOp MathExpr
-   59        | MathExpr .
+   50 RelExpr: MathExpr . GTE MathExpr
+   51        | MathExpr . LTE MathExpr
+   52        | MathExpr . GT MathExpr
+   53        | MathExpr . LT MathExpr
+   54        | MathExpr . EQEQ MathExpr
+   55        | MathExpr . NOTEQ MathExpr
+   58        | MathExpr .
 
     PLUS   shift, and go to state 76
     MINUS  shift, and go to state 77
@@ -1080,20 +1068,18 @@ state 82
     EQEQ   shift, and go to state 100
     NOTEQ  shift, and go to state 101
 
-    $default  reduce using rule 59 (RelExpr)
-
-    RelOp  go to state 102
+    $default  reduce using rule 58 (RelExpr)
 
 
 state 83
 
    24 Stmt: WHILE OPAR RelExpr . CPAR Block
-   57 RelExpr: RelExpr . AND RelExpr
-   58        | RelExpr . OR RelExpr
+   56 RelExpr: RelExpr . AND RelExpr
+   57        | RelExpr . OR RelExpr
 
-    CPAR  shift, and go to state 103
-    OR    shift, and go to state 104
-    AND   shift, and go to state 105
+    CPAR  shift, and go to state 102
+    OR    shift, and go to state 103
+    AND   shift, and go to state 104
 
 
 state 84
@@ -1101,12 +1087,12 @@ state 84
    27 Matched: IF OPAR RelExpr . CPAR Matched ELSE Matched
    29 Unmatched: IF OPAR RelExpr . CPAR Block
    30          | IF OPAR RelExpr . CPAR Matched ELSE Unmatched
-   57 RelExpr: RelExpr . AND RelExpr
-   58        | RelExpr . OR RelExpr
+   56 RelExpr: RelExpr . AND RelExpr
+   57        | RelExpr . OR RelExpr
 
-    CPAR  shift, and go to state 106
-    OR    shift, and go to state 104
-    AND   shift, and go to state 105
+    CPAR  shift, and go to state 105
+    OR    shift, and go to state 103
+    AND   shift, and go to state 104
 
 
 state 85
@@ -1115,7 +1101,7 @@ state 85
    49 MathExpr: ID OSB . MathExpr CSB
 
     ID      shift, and go to state 61
-    NUMBER  shift, and go to state 107
+    NUMBER  shift, and go to state 106
     OPAR    shift, and go to state 57
 
     MathExpr  go to state 90
@@ -1131,7 +1117,7 @@ state 86
 
     $default  reduce using rule 39 (ArgList)
 
-    ArgList   go to state 108
+    ArgList   go to state 107
     MathExpr  go to state 72
 
 
@@ -1140,7 +1126,7 @@ state 87
    36 Expr: ID OSB MathExpr CSB . EQ ID OPAR ArgList CPAR
    38     | ID OSB MathExpr CSB . EQ MathExpr
 
-    EQ  shift, and go to state 109
+    EQ  shift, and go to state 108
 
 
 state 88
@@ -1160,7 +1146,7 @@ state 89
 
     $default  reduce using rule 39 (ArgList)
 
-    ArgList   go to state 110
+    ArgList   go to state 109
     MathExpr  go to state 72
 
 
@@ -1176,7 +1162,7 @@ state 90
     MINUS  shift, and go to state 77
     MULT   shift, and go to state 78
     DIV    shift, and go to state 79
-    CSB    shift, and go to state 111
+    CSB    shift, and go to state 110
 
 
 state 91
@@ -1238,49 +1224,18 @@ state 95
 
 state 96
 
-   50 RelOp: GTE .
+   50 RelExpr: MathExpr GTE . MathExpr
 
-    $default  reduce using rule 50 (RelOp)
+    ID      shift, and go to state 61
+    NUMBER  shift, and go to state 56
+    OPAR    shift, and go to state 57
+
+    MathExpr  go to state 111
 
 
 state 97
 
-   51 RelOp: LTE .
-
-    $default  reduce using rule 51 (RelOp)
-
-
-state 98
-
-   52 RelOp: GT .
-
-    $default  reduce using rule 52 (RelOp)
-
-
-state 99
-
-   53 RelOp: LT .
-
-    $default  reduce using rule 53 (RelOp)
-
-
-state 100
-
-   54 RelOp: EQEQ .
-
-    $default  reduce using rule 54 (RelOp)
-
-
-state 101
-
-   55 RelOp: NOTEQ .
-
-    $default  reduce using rule 55 (RelOp)
-
-
-state 102
-
-   56 RelExpr: MathExpr RelOp . MathExpr
+   51 RelExpr: MathExpr LTE . MathExpr
 
     ID      shift, and go to state 61
     NUMBER  shift, and go to state 56
@@ -1289,94 +1244,154 @@ state 102
     MathExpr  go to state 112
 
 
-state 103
+state 98
+
+   52 RelExpr: MathExpr GT . MathExpr
+
+    ID      shift, and go to state 61
+    NUMBER  shift, and go to state 56
+    OPAR    shift, and go to state 57
+
+    MathExpr  go to state 113
+
+
+state 99
+
+   53 RelExpr: MathExpr LT . MathExpr
+
+    ID      shift, and go to state 61
+    NUMBER  shift, and go to state 56
+    OPAR    shift, and go to state 57
+
+    MathExpr  go to state 114
+
+
+state 100
+
+   54 RelExpr: MathExpr EQEQ . MathExpr
+
+    ID      shift, and go to state 61
+    NUMBER  shift, and go to state 56
+    OPAR    shift, and go to state 57
+
+    MathExpr  go to state 115
+
+
+state 101
+
+   55 RelExpr: MathExpr NOTEQ . MathExpr
+
+    ID      shift, and go to state 61
+    NUMBER  shift, and go to state 56
+    OPAR    shift, and go to state 57
+
+    MathExpr  go to state 116
+
+
+state 102
 
    24 Stmt: WHILE OPAR RelExpr CPAR . Block
 
     OCB  shift, and go to state 28
 
-    Block  go to state 113
+    Block  go to state 117
+
+
+state 103
+
+   57 RelExpr: RelExpr OR . RelExpr
+
+    ID      shift, and go to state 61
+    NUMBER  shift, and go to state 56
+    OPAR    shift, and go to state 57
+
+    MathExpr  go to state 82
+    RelExpr   go to state 118
 
 
 state 104
 
-   58 RelExpr: RelExpr OR . RelExpr
+   56 RelExpr: RelExpr AND . RelExpr
 
     ID      shift, and go to state 61
     NUMBER  shift, and go to state 56
     OPAR    shift, and go to state 57
 
     MathExpr  go to state 82
-    RelExpr   go to state 114
+    RelExpr   go to state 119
 
 
 state 105
-
-   57 RelExpr: RelExpr AND . RelExpr
-
-    ID      shift, and go to state 61
-    NUMBER  shift, and go to state 56
-    OPAR    shift, and go to state 57
-
-    MathExpr  go to state 82
-    RelExpr   go to state 115
-
-
-state 106
 
    27 Matched: IF OPAR RelExpr CPAR . Matched ELSE Matched
    29 Unmatched: IF OPAR RelExpr CPAR . Block
    30          | IF OPAR RelExpr CPAR . Matched ELSE Unmatched
 
     OCB  shift, and go to state 28
-    IF   shift, and go to state 116
+    IF   shift, and go to state 120
 
-    Matched  go to state 117
-    Block    go to state 118
+    Matched  go to state 121
+    Block    go to state 122
 
 
-state 107
+state 106
 
    37 Expr: ID EQ ID OSB NUMBER . CSB
    47 MathExpr: NUMBER .
 
-    CSB  shift, and go to state 119
+    CSB  shift, and go to state 123
 
     CSB       [reduce using rule 47 (MathExpr)]
     $default  reduce using rule 47 (MathExpr)
 
 
-state 108
+state 107
 
    35 Expr: ID EQ ID OPAR ArgList . CPAR
 
-    CPAR  shift, and go to state 120
+    CPAR  shift, and go to state 124
 
 
-state 109
+state 108
 
    36 Expr: ID OSB MathExpr CSB EQ . ID OPAR ArgList CPAR
    38     | ID OSB MathExpr CSB EQ . MathExpr
 
-    ID      shift, and go to state 121
+    ID      shift, and go to state 125
     NUMBER  shift, and go to state 56
     OPAR    shift, and go to state 57
 
-    MathExpr  go to state 122
+    MathExpr  go to state 126
 
 
-state 110
+state 109
 
    41 ArgList: MathExpr COMMA ArgList .
 
     $default  reduce using rule 41 (ArgList)
 
 
-state 111
+state 110
 
    49 MathExpr: ID OSB MathExpr CSB .
 
     $default  reduce using rule 49 (MathExpr)
+
+
+state 111
+
+   42 MathExpr: MathExpr . PLUS MathExpr
+   43         | MathExpr . MINUS MathExpr
+   44         | MathExpr . DIV MathExpr
+   45         | MathExpr . MULT MathExpr
+   50 RelExpr: MathExpr GTE MathExpr .
+
+    PLUS   shift, and go to state 76
+    MINUS  shift, and go to state 77
+    MULT   shift, and go to state 78
+    DIV    shift, and go to state 79
+
+    $default  reduce using rule 50 (RelExpr)
 
 
 state 112
@@ -1385,67 +1400,131 @@ state 112
    43         | MathExpr . MINUS MathExpr
    44         | MathExpr . DIV MathExpr
    45         | MathExpr . MULT MathExpr
-   56 RelExpr: MathExpr RelOp MathExpr .
+   51 RelExpr: MathExpr LTE MathExpr .
 
     PLUS   shift, and go to state 76
     MINUS  shift, and go to state 77
     MULT   shift, and go to state 78
     DIV    shift, and go to state 79
 
-    $default  reduce using rule 56 (RelExpr)
+    $default  reduce using rule 51 (RelExpr)
 
 
 state 113
+
+   42 MathExpr: MathExpr . PLUS MathExpr
+   43         | MathExpr . MINUS MathExpr
+   44         | MathExpr . DIV MathExpr
+   45         | MathExpr . MULT MathExpr
+   52 RelExpr: MathExpr GT MathExpr .
+
+    PLUS   shift, and go to state 76
+    MINUS  shift, and go to state 77
+    MULT   shift, and go to state 78
+    DIV    shift, and go to state 79
+
+    $default  reduce using rule 52 (RelExpr)
+
+
+state 114
+
+   42 MathExpr: MathExpr . PLUS MathExpr
+   43         | MathExpr . MINUS MathExpr
+   44         | MathExpr . DIV MathExpr
+   45         | MathExpr . MULT MathExpr
+   53 RelExpr: MathExpr LT MathExpr .
+
+    PLUS   shift, and go to state 76
+    MINUS  shift, and go to state 77
+    MULT   shift, and go to state 78
+    DIV    shift, and go to state 79
+
+    $default  reduce using rule 53 (RelExpr)
+
+
+state 115
+
+   42 MathExpr: MathExpr . PLUS MathExpr
+   43         | MathExpr . MINUS MathExpr
+   44         | MathExpr . DIV MathExpr
+   45         | MathExpr . MULT MathExpr
+   54 RelExpr: MathExpr EQEQ MathExpr .
+
+    PLUS   shift, and go to state 76
+    MINUS  shift, and go to state 77
+    MULT   shift, and go to state 78
+    DIV    shift, and go to state 79
+
+    $default  reduce using rule 54 (RelExpr)
+
+
+state 116
+
+   42 MathExpr: MathExpr . PLUS MathExpr
+   43         | MathExpr . MINUS MathExpr
+   44         | MathExpr . DIV MathExpr
+   45         | MathExpr . MULT MathExpr
+   55 RelExpr: MathExpr NOTEQ MathExpr .
+
+    PLUS   shift, and go to state 76
+    MINUS  shift, and go to state 77
+    MULT   shift, and go to state 78
+    DIV    shift, and go to state 79
+
+    $default  reduce using rule 55 (RelExpr)
+
+
+state 117
 
    24 Stmt: WHILE OPAR RelExpr CPAR Block .
 
     $default  reduce using rule 24 (Stmt)
 
 
-state 114
+state 118
 
-   57 RelExpr: RelExpr . AND RelExpr
-   58        | RelExpr . OR RelExpr
-   58        | RelExpr OR RelExpr .
+   56 RelExpr: RelExpr . AND RelExpr
+   57        | RelExpr . OR RelExpr
+   57        | RelExpr OR RelExpr .
 
-    OR   shift, and go to state 104
-    AND  shift, and go to state 105
-
-    OR        [reduce using rule 58 (RelExpr)]
-    AND       [reduce using rule 58 (RelExpr)]
-    $default  reduce using rule 58 (RelExpr)
-
-
-state 115
-
-   57 RelExpr: RelExpr . AND RelExpr
-   57        | RelExpr AND RelExpr .
-   58        | RelExpr . OR RelExpr
-
-    OR   shift, and go to state 104
-    AND  shift, and go to state 105
+    OR   shift, and go to state 103
+    AND  shift, and go to state 104
 
     OR        [reduce using rule 57 (RelExpr)]
     AND       [reduce using rule 57 (RelExpr)]
     $default  reduce using rule 57 (RelExpr)
 
 
-state 116
+state 119
+
+   56 RelExpr: RelExpr . AND RelExpr
+   56        | RelExpr AND RelExpr .
+   57        | RelExpr . OR RelExpr
+
+    OR   shift, and go to state 103
+    AND  shift, and go to state 104
+
+    OR        [reduce using rule 56 (RelExpr)]
+    AND       [reduce using rule 56 (RelExpr)]
+    $default  reduce using rule 56 (RelExpr)
+
+
+state 120
 
    27 Matched: IF . OPAR RelExpr CPAR Matched ELSE Matched
 
-    OPAR  shift, and go to state 123
+    OPAR  shift, and go to state 127
 
 
-state 117
+state 121
 
    27 Matched: IF OPAR RelExpr CPAR Matched . ELSE Matched
    30 Unmatched: IF OPAR RelExpr CPAR Matched . ELSE Unmatched
 
-    ELSE  shift, and go to state 124
+    ELSE  shift, and go to state 128
 
 
-state 118
+state 122
 
    28 Matched: Block .
    29 Unmatched: IF OPAR RelExpr CPAR Block .
@@ -1454,33 +1533,33 @@ state 118
     $default  reduce using rule 29 (Unmatched)
 
 
-state 119
+state 123
 
    37 Expr: ID EQ ID OSB NUMBER CSB .
 
     $default  reduce using rule 37 (Expr)
 
 
-state 120
+state 124
 
    35 Expr: ID EQ ID OPAR ArgList CPAR .
 
     $default  reduce using rule 35 (Expr)
 
 
-state 121
+state 125
 
    36 Expr: ID OSB MathExpr CSB EQ ID . OPAR ArgList CPAR
    48 MathExpr: ID .
    49         | ID . OSB MathExpr CSB
 
     OSB   shift, and go to state 74
-    OPAR  shift, and go to state 125
+    OPAR  shift, and go to state 129
 
     $default  reduce using rule 48 (MathExpr)
 
 
-state 122
+state 126
 
    38 Expr: ID OSB MathExpr CSB EQ MathExpr .
    42 MathExpr: MathExpr . PLUS MathExpr
@@ -1496,7 +1575,7 @@ state 122
     $default  reduce using rule 38 (Expr)
 
 
-state 123
+state 127
 
    27 Matched: IF OPAR . RelExpr CPAR Matched ELSE Matched
 
@@ -1505,10 +1584,10 @@ state 123
     OPAR    shift, and go to state 57
 
     MathExpr  go to state 82
-    RelExpr   go to state 126
+    RelExpr   go to state 130
 
 
-state 124
+state 128
 
    27 Matched: IF OPAR RelExpr CPAR Matched ELSE . Matched
    30 Unmatched: IF OPAR RelExpr CPAR Matched ELSE . Unmatched
@@ -1516,12 +1595,12 @@ state 124
     OCB  shift, and go to state 28
     IF   shift, and go to state 43
 
-    Matched    go to state 127
-    Unmatched  go to state 128
+    Matched    go to state 131
+    Unmatched  go to state 132
     Block      go to state 49
 
 
-state 125
+state 129
 
    36 Expr: ID OSB MathExpr CSB EQ ID OPAR . ArgList CPAR
 
@@ -1531,73 +1610,73 @@ state 125
 
     $default  reduce using rule 39 (ArgList)
 
-    ArgList   go to state 129
+    ArgList   go to state 133
     MathExpr  go to state 72
 
 
-state 126
+state 130
 
    27 Matched: IF OPAR RelExpr . CPAR Matched ELSE Matched
-   57 RelExpr: RelExpr . AND RelExpr
-   58        | RelExpr . OR RelExpr
+   56 RelExpr: RelExpr . AND RelExpr
+   57        | RelExpr . OR RelExpr
 
-    CPAR  shift, and go to state 130
-    OR    shift, and go to state 104
-    AND   shift, and go to state 105
+    CPAR  shift, and go to state 134
+    OR    shift, and go to state 103
+    AND   shift, and go to state 104
 
 
-state 127
+state 131
 
    27 Matched: IF OPAR RelExpr CPAR Matched ELSE Matched .
 
     $default  reduce using rule 27 (Matched)
 
 
-state 128
+state 132
 
    30 Unmatched: IF OPAR RelExpr CPAR Matched ELSE Unmatched .
 
     $default  reduce using rule 30 (Unmatched)
 
 
-state 129
+state 133
 
    36 Expr: ID OSB MathExpr CSB EQ ID OPAR ArgList . CPAR
 
-    CPAR  shift, and go to state 131
+    CPAR  shift, and go to state 135
 
 
-state 130
+state 134
 
    27 Matched: IF OPAR RelExpr CPAR . Matched ELSE Matched
 
     OCB  shift, and go to state 28
-    IF   shift, and go to state 116
+    IF   shift, and go to state 120
 
-    Matched  go to state 132
+    Matched  go to state 136
     Block    go to state 49
 
 
-state 131
+state 135
 
    36 Expr: ID OSB MathExpr CSB EQ ID OPAR ArgList CPAR .
 
     $default  reduce using rule 36 (Expr)
 
 
-state 132
+state 136
 
    27 Matched: IF OPAR RelExpr CPAR Matched . ELSE Matched
 
-    ELSE  shift, and go to state 133
+    ELSE  shift, and go to state 137
 
 
-state 133
+state 137
 
    27 Matched: IF OPAR RelExpr CPAR Matched ELSE . Matched
 
     OCB  shift, and go to state 28
-    IF   shift, and go to state 116
+    IF   shift, and go to state 120
 
-    Matched  go to state 127
+    Matched  go to state 131
     Block    go to state 49

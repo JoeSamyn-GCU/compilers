@@ -1,8 +1,13 @@
 #include "irgen.h"
 
+/* 
+In ARM we can use registers R0 - R10 for general purpose, except R7 which is reserved for System Calls
+*/
+
 /* Begin IrGen Implementation */
 std::ofstream IrGen::ofile;
 std::deque<Qe*> IrGen::qe_deque;
+bool IrGen::registers[10];
 
 int IrGen::r_counter;
 
@@ -25,10 +30,13 @@ std::string IrGen::printIrCode(){
         // Loop through stack and print all IR code in reverse order
         while(!qe_deque.empty()){
             
-            Qe* qe = qe_deque.front();
-            qe_deque.pop_front();
+            Qe* qe = qe_deque.back();
+            qe_deque.pop_back();
 
-            ofile << qe->result << " = " << qe->arg1 << " " << qe->op << " " << qe->arg2 << std::endl;
+            if(!isRelOp(qe->op))
+                ofile << qe->result << " = " << qe->arg1 << " " << qe->op << " " << qe->arg2 << std::endl;
+            else
+                ofile << qe->arg1 << " " << qe->op << " " << qe->arg2 << std::endl;
 
             // save last register
             lreg = qe->result;
@@ -45,7 +53,7 @@ std::string IrGen::printIrCode(){
 }
 
 
-void IrGen::insertQe(std::string op, std::string arg1, std::string arg2){
+std::string IrGen::insertQe(std::string op, std::string arg1, std::string arg2){
 
     std::string reg = "";
     /*
@@ -82,9 +90,52 @@ void IrGen::insertQe(std::string op, std::string arg1, std::string arg2){
             Qe* qe = new Qe(op, arg1, top->result, reg);
             qe_deque.push_back(qe);
         }
-        
-   }    
+   }   
 
+   return reg; 
+
+}
+
+std::string IrGen::printIrCode(std::string op, std::string arg1, std::string arg2){
+    std::string result_register = "";
+
+    // find result register 
+    result_register = getRegister("");
+
+    ofile << result_register << " = " << arg1 << " " << op << " " << arg2 << std::endl;
+
+    return result_register;
+}
+
+void IrGen::printIrCodeCommand(std::string command, std::string arg1, std::string arg2, std::string label){
+
+     ofile << command << " " << arg1 << " " << arg2 << " " << label << std::endl;
+}
+
+void IrGen::printLabel(std::string label){
+    ofile << std::endl << label << std::endl;
+}
+
+std::string IrGen::getRegister(std::string var){
+
+    // If var is not empty, we are looking for matching variable
+    if(var != ""){
+        for(int i = 0; i < 10; i++){
+            
+            if(!registers[i]){
+                registers[i] = true;
+                return "R" + std::to_string(i);
+            }
+        }
+    }
+
+    // We are not looking for a matching variable or did not find one
+    for(int i = 0; i < 10; i++){
+        if(!registers[i]&& i != 7){
+            registers[i] = true;
+            return "R" + std::to_string(i);
+        }
+    }
 }
 
 bool IrGen::isOp(std::string val){
@@ -93,6 +144,15 @@ bool IrGen::isOp(std::string val){
     || val == "-"
     || val == "/"
     || val == "*";
+}
+
+bool IrGen::isRelOp(std::string val){
+    return val == ">"
+    || val == "<"
+    || val == "="
+    || val == "<="
+    || val == ">="
+    || val == "IF";
 }
 
 /* End IrGen Implementation */

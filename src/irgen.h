@@ -53,12 +53,32 @@ class IrGen {
         static std::string printIrCode();
 
         /**
-         * @brief Print the current Quadruples table entry as IR code
+         * @brief Insert a quadruples entry into the quadruples stack
          * 
-         * @param qe pointer to the Quadruple Entry to print
+         * @param op operator for the 3-address code
+         * @param arg2 first argument in 3-address code
+         * @param arg3 second argument in 3-address code. Can be empty and uses empty string as default value
+         * @return register the result was assigned to
          */
-        static void printIrCode(Qe* qe);
+        static std::string printIrCode(std::string op, std::string arg2, std::string arg3 = "");
         
+            /**
+         * @brief Insert a quadruples entry into the quadruples stack
+         * 
+         * @param command ARM command to execute
+         * @param arg1 first argument in 3-address code
+         * @param arg2 second argument in 3-address code. Can be empty and uses empty string as default value
+         * @param label label to jump to depending on command result
+         */
+        static void printIrCodeCommand(std::string command, std::string arg1, std::string arg2, std::string label);
+
+        /**
+         * @brief print the label for a new section in IR code
+         * 
+         * @param label the lable string to print 
+         */
+        static void printLabel(std::string label);
+
         /**
          * @brief Insert a quadruples entry into the quadruples stack
          * 
@@ -66,7 +86,7 @@ class IrGen {
          * @param arg1 first argument in 3-address code
          * @param arg2 second argument in 3-address code. Can be empty and uses empty string as default value
          */
-        static void insertQe(std::string op, std::string arg1, std::string arg2 = "");
+        static std::string insertQe(std::string op, std::string arg1, std::string arg2 = "");
 
         /**
          * @brief Checks if value is operator or not
@@ -76,6 +96,23 @@ class IrGen {
          * @return false
          */
         static bool isOp(std::string value);
+
+        /**
+         * @brief Checks if value is operator or not
+         * 
+         * @param value string to compare to ops
+         * @return true value is an operator
+         * @return false
+         */
+        static bool isRelOp(std::string value);
+        
+        /**
+         * @brief get the next available register
+         * 
+         * @param var the variable being searched for
+         * @return open register string
+         */
+        static std::string getRegister(std::string var = "");
 
     /* Public Static Variables */
     public:
@@ -96,6 +133,11 @@ class IrGen {
          * table is cleared when a scope is 
          */
         static std::vector<Qe*> ir_table;
+
+        /**
+         * @brief string array used to hold values at various registers
+         */
+        static bool registers[10];
 
         /**
          * @brief temp integer used to keep track of general register number

@@ -20,6 +20,23 @@ AST * New_Tree(std::string nt, struct AST* l, struct AST* r){
 
 }
 
+AST * New_Tree(std::string nt, struct AST* l, struct AST* r, std::string reg){
+
+	// Allocate memory for struct
+	struct AST* ast = (AST*)malloc(sizeof(struct AST));
+	
+	// Copy char arra into nodetype property
+	ast->nodeType = nt;
+
+	// Assign left and right children
+	ast->left = l;
+	ast->right = r;
+	ast->reg = reg;
+
+	return ast;
+
+}
+
 void insert_node_right(AST* parent, AST* node){
 	if(parent == NULL){
 		printf("ERROR::Parent cannot be NULL");
