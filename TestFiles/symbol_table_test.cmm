@@ -1,13 +1,17 @@
 int i;
 int j;
 int h[8];
-int main(int k) {
-    char x;
-    char y;
-}
+
 int a;
 void addOne(int able, int character) {
-    if (test == 1) {
+    if (able == 1) {
         write(1);
     }
+}
+
+int main(int k) {
+    int x;
+    int y;
+    i = 1;
+    addOne(x,y);
 }

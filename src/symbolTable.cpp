@@ -91,13 +91,16 @@ void Table::printEntries(bool verbose) {
         std::cout << FYEL("**WARNING::Entries hash table is empty. There is nothing to print") << std::endl;
         return;
     }
-
     std::cout << "\nTABLE ENTRIES" << std::endl << "--------------------------------------" << std::endl;
     std::cout << "KEY\t\t" << "VALUE" << std::endl << "--------------------------------------" << std::endl;
 
     // Else iterate through unordered_map and print all key value pairs
+    // TODO: FORMAT for verbose printing and simplified
     for(const std::pair<std::string, Entry*>& n : entries){
         std::cout << n.first << "\t" << n.second->dtype << "\t" << n.second->scope << "\t" << n.second->nelements << "\t" << n.second->nparams << std::endl; 
+        if (n.second->params.size() > 0) {
+            std::cout << n.second->params.size() << std::endl;
+        }
     }
 }
 

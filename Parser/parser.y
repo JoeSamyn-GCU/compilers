@@ -5,6 +5,7 @@
 #include <string.h>
 #include <iostream>
 #include <stack>
+#include <vector>
 
 #include "entry.h"
 #include "symbolTable.h"
@@ -26,6 +27,8 @@ Table* current = symbolTable; // pointer to SymbolTable
 std::stack<Entry*> tempStack;
 int tempCounter = 1;
 
+std::vector<Entry*> argumentVector;
+int numArguments = 0;
 
 extern int yylex();
 extern int yyparse();
@@ -34,7 +37,7 @@ extern int chars;
 extern FILE* yyin;
 
 int reg = 0;
-bool debug = false;
+bool debug = true;
 
 void yyerror(const char* s);
 char currentScope[50]; // global or the name of the function
@@ -161,11 +164,8 @@ VarDecl: TYPE ID SEMICOLON		{
 							}
 	| TYPE ID OSB NUMBER CSB SEMICOLON 	{
 											// ---- SYMBOL TABLE ACTIONS by PARSER ----
-											
 											if ($4 < 1) {
 												printf(FRED("SEMANTIC ERROR::Cannot declare array with size less than one\n"));
-
-												/* --------------------- Todo: break code here --------------------- */
 											}
 											// name, dtype, scope, nelements
 											Entry* e = new Entry($2, $1,"",$4);
@@ -212,6 +212,11 @@ VarDecl: TYPE ID SEMICOLON		{
 	| TYPE ID Tail						{
 											/* --- SYMBOL TABLE ACTIONS --- */
 											Entry* e = new Entry($2, $1);
+											while(!tempStack.empty()) {
+												e->params.push_back(tempStack.top());
+												//current->insertEntry(tempStack.top());
+												tempStack.pop();
+											}
 											current->insertEntry(e);
 											/* ---- SEMANTIC ACTION by PARSER ---- */
 											if(debug)
@@ -342,6 +347,25 @@ Expr:	ID  {
 						$$ = eq;
 					}
 |  ID OPAR ArgList CPAR {
+							/* --- SEMANTIC CHECKS --- */
+							Entry* e = current->searchEntry($1);
+							// check if parameters correct
+							for (int i = 0; i <e->params.size(); i++) {
+								if (e->params.at(i) != argumentVector.at(i)) {
+									std::cout<<"THEY ARE DIFFERENT"<<std::endl;
+									printf(FRED("SEMANTIC ERROR::Function called with incorrect elements\n"));
+
+								}
+								else {
+									std::cout<<"THEY ARE THE SAME"<<std::endl;
+									//TODO: Need to get it to check all parameters until empty or all the same									
+								}
+							}
+							// Once all the same checked properly:
+							argumentVector.clear();
+
+							// check if return type is void
+							
 							/* ---- SEMANTIC ACTIONS by PARSER ---- */
 							$$ = New_Tree($1, $3, NULL);
 						}
@@ -387,8 +411,8 @@ Expr:	ID  {
 
 ArgList: /* empty */ { $$ = NULL; }
 | MathExpr	{
-				/* ---- SEMANTIC ACTIONS by PARSER ---- */
-				$$ = $1;
+				/* --- SEMANTIC CHECKS (INSIDE FUNCTION CALL) --- */
+
 			}
 | MathExpr COMMA ArgList	{
 								/* ---- SEMANTIC ACTIONS by PARSER ---- */
@@ -414,8 +438,12 @@ MathExpr:	MathExpr BinaryOp MathExpr 	{
 							$$ = $2;
 						}
 | NUMBER						{
+									/* --- SYMBOL TABLE CHECKS  --- */
+									Entry* e = new Entry("Int", std::to_string($1));
+									argumentVector.push_back(e);
+
 									/* ---- IR CODE ---- */
-									//outfile << $1;
+									outfile << $1;
 
 									/* ---- SEMANTIC ACTIONS by PARSER ---- */
 									if(debug)
@@ -425,6 +453,32 @@ MathExpr:	MathExpr BinaryOp MathExpr 	{
 									$$ = New_Tree(num_s, NULL, NULL);;
 								}
 | ID	{
+			/* --- SYMBOL TABLE CHECKS --- */
+			Entry* e = nullptr;
+			if (!tempStack.empty()) {
+				e = tempStack.top();
+				std::cout << "\n test. ID: "<< $1 << " temp: " << e->name << std::endl;
+				if (e->name == $1) {
+					std::cout<<"THEY ARE THE SAME!!!";
+				}
+				else {
+					e = nullptr;
+					std::cout<<"DIFF LOL";
+				}
+			}
+			else {
+				e = current->searchEntry($1);
+			}
+
+			if (e != nullptr) { // found entry
+				argumentVector.push_back(e);
+			}
+			else { // Not declared in scope
+				printf(FRED("SEMANTIC ERROR::ID not declared in scope\n"));
+			}
+			//Entry* e = new Entry("ID", (char*)$1);
+			//argumentVector.push_back(e);
+
 			/* ---- IR CODE ---- */
 			//outfile << $1;
 
@@ -519,10 +573,12 @@ Tail: OPAR ParamDeclList CPAR Block 	{
 Block: OCB {
 			//std::cout<<"MAKING NEW TABLE"<<std::endl;
 			current = new Table(current);
+			/*
 			while(!tempStack.empty()) {
 				current->insertEntry(tempStack.top());
 				tempStack.pop();
 			}
+			*/
 			tempCounter++;
 			} VarDeclList StmtList {
 				if (current->parent != nullptr) {

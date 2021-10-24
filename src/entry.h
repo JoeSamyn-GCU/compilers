@@ -23,7 +23,7 @@ class Entry {
             std::string scope = "", 
             int nelements = 0,
             int nparams = 0,         
-            std::vector<std::string> ptype = {},
+            std::vector<Entry*> params = {},
             std::string returntype = "",
             int uses = 1,
             int nline = 0,
@@ -36,7 +36,7 @@ class Entry {
             this->dtype = dtype;
             this->nelements = nelements;
             this->nparams = nparams;
-            this->ptype = ptype;
+            this->params = params;
             this->returntype = returntype;
             this->uses = uses;
             this->nline = nline;
@@ -71,9 +71,9 @@ class Entry {
         int nparams;
 
         /**
-         * Array of parameter types. (order matters)
+         * Array of parameters. (order matters)
          */
-        std::vector<std::string> ptype;
+        std::vector<Entry*> params;
 
         /**
          * Mode of the parameter (pass by value or pass by reference)

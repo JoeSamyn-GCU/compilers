@@ -49,7 +49,7 @@ bool compareIdTypes(Table table, char* a, char* b) {
     Entry* A = table.searchEntry(a);
     Entry* B = table.searchEntry(b);
     
-    return std::strcmp((A->dtype).c_str(), (B->dtype).c_str());
+    return strcmp((A->dtype).c_str(), (B->dtype).c_str());
 }
 
 bool checkExistance(Table table, char* id) {
