@@ -3,15 +3,14 @@ int j;
 int h[8];
 
 int a;
-void addOne(int able, int character) {
+void addOne(int able, char character) {
     if (able == 1) {
         write(1);
     }
 }
 
 int main(int k) {
+    char y;
     int x;
-    int y;
-    i = 1;
     addOne(x,y);
 }

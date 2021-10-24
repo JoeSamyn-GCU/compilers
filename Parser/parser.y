@@ -24,7 +24,7 @@
 
 Table* symbolTable = new Table();
 Table* current = symbolTable; // pointer to SymbolTable
-std::stack<Entry*> tempStack;
+std::vector<Entry*> parameterVector;
 int tempCounter = 1;
 
 std::vector<Entry*> argumentVector;
@@ -37,7 +37,7 @@ extern int chars;
 extern FILE* yyin;
 
 int reg = 0;
-bool debug = true;
+bool debug = false;
 
 void yyerror(const char* s);
 char currentScope[50]; // global or the name of the function
@@ -212,10 +212,10 @@ VarDecl: TYPE ID SEMICOLON		{
 	| TYPE ID Tail						{
 											/* --- SYMBOL TABLE ACTIONS --- */
 											Entry* e = new Entry($2, $1);
-											while(!tempStack.empty()) {
-												e->params.push_back(tempStack.top());
+											while(!parameterVector.empty()) {
+												e->params.push_back(parameterVector.back());
 												//current->insertEntry(tempStack.top());
-												tempStack.pop();
+												parameterVector.pop_back();
 											}
 											current->insertEntry(e);
 											/* ---- SEMANTIC ACTION by PARSER ---- */
@@ -325,6 +325,7 @@ Expr:	ID  {
 				$$ = id;
 			}
 | WRITE MathExpr 	{
+					argumentVector.clear();
 					/* ---- SEMANTIC ACTIONS by PARSER ---- */
 					AST* write = (AST*)malloc(sizeof(AST));
 					write = New_Tree($1, NULL, NULL);
@@ -332,6 +333,8 @@ Expr:	ID  {
 					
 				}
 | ID EQ MathExpr 	{
+						/* --- SEMANTIC CHECKS --- */
+						argumentVector.clear();
 						/* ---- IR Code Generation ---- */
 						reg++;
 						outfile << "r" << reg << "=" << std::endl;
@@ -349,21 +352,26 @@ Expr:	ID  {
 |  ID OPAR ArgList CPAR {
 							/* --- SEMANTIC CHECKS --- */
 							Entry* e = current->searchEntry($1);
-							// check if parameters correct
-							for (int i = 0; i <e->params.size(); i++) {
-								if (e->params.at(i) != argumentVector.at(i)) {
-									std::cout<<"THEY ARE DIFFERENT"<<std::endl;
-									printf(FRED("SEMANTIC ERROR::Function called with incorrect elements\n"));
-
-								}
-								else {
-									std::cout<<"THEY ARE THE SAME"<<std::endl;
-									//TODO: Need to get it to check all parameters until empty or all the same									
-								}
+							// check for correct number of parameters
+							if (e->params.size() != argumentVector.size()) {
+								printf(FRED("SEMANTIC ERROR::Function called with incorrect number of elements\n"));
+								std::cout << "VECTORS WRONG SIZE. " << e->params.size() << " != " << argumentVector.size() << std::endl;
 							}
-							// Once all the same checked properly:
-							argumentVector.clear();
-
+							else {
+								// check if parameters correct
+								for (int i = 0; i < e->params.size(); i++) {
+									std::cout<<"parameter: "<<e->params.at(i)->dtype<<" argument: "<<argumentVector.at(e->params.size()-i-1)->dtype << std::endl;
+									if (e->params.at(i)->dtype != argumentVector.at(e->params.size() - i-1)->dtype) {
+										//std::cout<<"THEY ARE DIFFERENT"<<std::endl;
+										printf(FRED("SEMANTIC ERROR::Function called with incorrect elements\n"));
+									}
+									else {
+										//std::cout<<"THEY ARE THE SAME"<<std::endl;								
+									}
+								}
+								// Once all the same checked properly:
+								argumentVector.clear();
+							}
 							// check if return type is void
 							
 							/* ---- SEMANTIC ACTIONS by PARSER ---- */
@@ -454,9 +462,27 @@ MathExpr:	MathExpr BinaryOp MathExpr 	{
 								}
 | ID	{
 			/* --- SYMBOL TABLE CHECKS --- */
-			Entry* e = nullptr;
-			if (!tempStack.empty()) {
-				e = tempStack.top();
+			Entry* e = current->searchEntry($1);
+			if (e == nullptr && !parameterVector.empty()) { // TODO: check for parameters too!!!
+				for (int i = 0; i < parameterVector.size(); i++) {
+					if ($1 == parameterVector.at(i)->name) {
+						std::cout<<"FOUND IT"<<std::endl;
+						e = parameterVector.at(i);
+						//current.insertEntry(parameterVector.at(i));
+						break;
+					}
+				}
+			}
+			else if (e == nullptr) {
+				printf(FRED("SEMANTIC ERROR::ID not declared in scope\n"));
+			}
+			else {
+				std::cout<<e->name<<std::endl;
+			}
+			argumentVector.push_back(e);
+			/*
+			if (!parameterVector.empty()) {
+				e = parameterVector.back();
 				std::cout << "\n test. ID: "<< $1 << " temp: " << e->name << std::endl;
 				if (e->name == $1) {
 					std::cout<<"THEY ARE THE SAME!!!";
@@ -476,11 +502,12 @@ MathExpr:	MathExpr BinaryOp MathExpr 	{
 			else { // Not declared in scope
 				printf(FRED("SEMANTIC ERROR::ID not declared in scope\n"));
 			}
+			*/
 			//Entry* e = new Entry("ID", (char*)$1);
 			//argumentVector.push_back(e);
 
 			/* ---- IR CODE ---- */
-			//outfile << $1;
+			outfile << $1;
 
 			/* ---- SEMANTIC ACTIONS by PARSER ---- */
 			if(debug)
@@ -608,7 +635,7 @@ ParamDecl: /* empty */ { $$ = NULL; }
 | TYPE ID  	{
 				/* --- SYMBOL TABLE ACTIONS by PARSER --- */
 				Entry* e = new Entry($2, $1);
-				tempStack.push(e);
+				parameterVector.push_back(e);
 				//current->insertEntry(e);
 				/* ---- SEMANTIC ACTIONS by PARSER ---- */
 				struct AST* id = (AST*)malloc(sizeof(struct AST));
@@ -620,7 +647,7 @@ ParamDecl: /* empty */ { $$ = NULL; }
 | TYPE ID OSB CSB 	{
 						/* --- SYMBOL TABLE ACTIONS by PARSER --- */
 						Entry* e = new Entry($2, $1);
-						tempStack.push(e);
+						parameterVector.push_back(e);
 						/* ---- SEMANTIC ACTIONS by PARSER ---- */
 						AST* id = New_Tree($2, NULL, NULL);
 						AST* type = New_Tree($1, NULL, NULL);

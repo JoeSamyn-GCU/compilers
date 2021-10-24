@@ -13,7 +13,7 @@
     2.  [x] No identifier is used before it is declared (checkExistance)
         * check $n by searching the symbol table
     3.  [x] The int literal in an array declaration must be greater than 0 (If statement in parser)
-    4.  [] The number and types of arguments in a function call must be the same as the number and types in the function definition
+    4.  [x] The number and types of arguments in a function call must be the same as the number and types in the function definition
         * take stack of parameter functions of the function call and put them in a vector
         * use a semantic helper function to check the number and type of the arguments matches the number and type of the function definition
     5.  [] If a function call is used as an expression, the function must return a result
@@ -59,14 +59,3 @@ bool checkExistance(Table table, char* id) {
         std::cout << FRED("**ERROR::ENTRY DOES NOT EXISTS:: Cannot find ") << FRED(std::to_string(id)) << FRED("in symbol table") << std::endl;
         return false;
 }
-
-//  ***********************************
-//  *                                 *
-//  *  ***    ***   ***   ****  ***   *
-//  *  *  *  *   * *   *  *     *  *  *
-//  *  ***   *   * * *    ****  *   * *
-//  *  *  *  *   * *  *   *     *  *  *
-//  *  ***    ***  *   *  ****  ***   *
-//  *                                 *
-//  ***********************************
-
