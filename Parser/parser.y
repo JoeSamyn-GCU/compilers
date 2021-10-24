@@ -11,6 +11,7 @@
 #include "symbolTable.h"
 #include "symbolTable.cpp"
 #include "semanticUtilities.h"
+#include "semanticUtilities.cpp"
 
 #include "AST.h"
 #include "irgenerator.h"
@@ -118,7 +119,6 @@ Decl: VarDecl { $$ = $1; }
 
 FunDecl:	TYPE ID OPAR CPAR Block 	{
 											// ---- SYMBOL TABLE ACTIONS by PARSER ----
-											std::cout<<"FunDecl"<<std::endl;
 											Entry* e = new Entry($2, $1);
 											current->insertEntry(e);
 											// if (current->parent != nullptr) {
@@ -352,32 +352,23 @@ Expr:	ID  {
 |  ID OPAR ArgList CPAR {
 							/* --- SEMANTIC CHECKS --- */
 							Entry* e = current->searchEntry($1);
-							// check for correct number of parameters
-							if (e->params.size() != argumentVector.size()) {
-								printf(FRED("SEMANTIC ERROR::Function called with incorrect number of elements\n"));
-								std::cout << "VECTORS WRONG SIZE. " << e->params.size() << " != " << argumentVector.size() << std::endl;
-							}
-							else {
-								// check if parameters correct
-								for (int i = 0; i < e->params.size(); i++) {
-									std::cout<<"parameter: "<<e->params.at(i)->dtype<<" argument: "<<argumentVector.at(e->params.size()-i-1)->dtype << std::endl;
-									if (e->params.at(i)->dtype != argumentVector.at(e->params.size() - i-1)->dtype) {
-										//std::cout<<"THEY ARE DIFFERENT"<<std::endl;
-										printf(FRED("SEMANTIC ERROR::Function called with incorrect elements\n"));
-									}
-									else {
-										//std::cout<<"THEY ARE THE SAME"<<std::endl;								
-									}
-								}
-								// Once all the same checked properly:
-								argumentVector.clear();
-							}
-							// check if return type is void
-							
+							// check for correct parameters
+							checkParameters(e, argumentVector);
+							// Don't need to check return type since it is not assigned to anything
 							/* ---- SEMANTIC ACTIONS by PARSER ---- */
 							$$ = New_Tree($1, $3, NULL);
 						}
 | ID EQ ID OPAR ArgList CPAR 	{
+							/* --- SEMANTIC CHECKS --- */
+							Entry* e = current->searchEntry($1);
+							Entry* f = current->searchEntry($3);
+							// check for correct parameters
+							checkParameters(f, argumentVector);
+							if (e->dtype != f->dtype) {
+							//if (e->dtype != f->returntype) {
+								// fix this error wording
+								printf(FRED("SEMANTIC ERROR::Function return cannot be assigned to ID\n"));
+							}
 							/* ---- SEMANTIC ACTIONS by PARSER ---- */
 							AST* id_1 = (AST*) malloc(sizeof(AST));
 							AST* fun = (AST*) malloc(sizeof(AST));

@@ -2,7 +2,7 @@
 
 #include "semanticUtilities.h"
 #include "colors.h"
-
+#include <vector>
 /*
     from ISac:
     checkType()
@@ -16,7 +16,7 @@
     4.  [x] The number and types of arguments in a function call must be the same as the number and types in the function definition
         * take stack of parameter functions of the function call and put them in a vector
         * use a semantic helper function to check the number and type of the arguments matches the number and type of the function definition
-    5.  [] If a function call is used as an expression, the function must return a result
+    5.  [x] If a function call is used as an expression, the function must return a result
         * semantic helper function that checks for return type in table
     6.  [] A return statement must not have a return value unless it appears in the body of a function that is declared to return a value.
         * semantic helper function that checks for return type in table
@@ -45,17 +45,42 @@
 
 
 
-bool compareIdTypes(Table table, char* a, char* b) {
-    Entry* A = table.searchEntry(a);
-    Entry* B = table.searchEntry(b);
+// bool compareIdTypes(Table table, char* a, char* b) {
+//     Entry* A = table.searchEntry(a);
+//     Entry* B = table.searchEntry(b);
     
-    return strcmp((A->dtype).c_str(), (B->dtype).c_str());
-}
+//     return strcmp((A->dtype).c_str(), (B->dtype).c_str());
+// }
 
-bool checkExistance(Table table, char* id) {
-    if( table.searchEntry(id) != nullptr )
-        return true;
-    else
-        std::cout << FRED("**ERROR::ENTRY DOES NOT EXISTS:: Cannot find ") << FRED(std::to_string(id)) << FRED("in symbol table") << std::endl;
+// bool checkExistance(Table table, char* id) {
+//     if( table.searchEntry(id) != nullptr )
+//         return true;
+//     else
+//         std::cout << FRED("**ERROR::ENTRY DOES NOT EXISTS:: Cannot find ") << FRED(std::to_string(id)) << FRED("in symbol table") << std::endl;
+//         return false;
+// }
+
+bool checkParameters(Entry* function, std::vector<Entry*> &arguments) {
+    if (function == nullptr) {
         return false;
+    }
+    if (function->params.size() != arguments.size()) {
+        printf(FRED("SEMANTIC ERROR::Function called with incorrect number of elements\n"));
+        std::cout << "VECTORS WRONG SIZE. " << function->params.size() << " != " << arguments.size() << std::endl;
+        return false;
+    }
+    else {
+        // check if parameters correct
+        for (int i = 0; i < function->params.size(); i++) {
+            std::cout<<"parameter: "<< function->params.at(i)->dtype<<" argument: "<<arguments.at(function->params.size()-i-1)->dtype << std::endl;
+            if (function->params.at(i)->dtype != arguments.at(function->params.size() - i-1)->dtype) {
+                //std::cout<<"THEY ARE DIFFERENT"<<std::endl;
+                printf(FRED("SEMANTIC ERROR::Function called with incorrect elements\n"));
+                return false;
+            }
+        }
+        // Once all the same checked properly:
+        arguments.clear();
+        return true;
+    }
 }

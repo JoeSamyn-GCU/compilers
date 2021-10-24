@@ -4,9 +4,9 @@ int h[8];
 
 int a;
 void addOne(int able, char character) {
-    if (able == 1) {
-        write(1);
-    }
+    int temp;
+    temp = able + character;
+    return temp;
 }
 
 int main(int k) {
