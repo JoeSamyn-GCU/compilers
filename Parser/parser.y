@@ -272,6 +272,8 @@ Stmt: /* empty */ { $$ = NULL; }
 							$$ = $1;
 						}
 	| RETURN MathExpr SEMICOLON	{
+									// required for semantic checks
+									argumentVector.clear();
 									/* ---- SEMANTIC ACTIONS by PARSER ---- */
 									$$ = New_Tree("return", NULL, $2);
 								}
@@ -364,11 +366,17 @@ Expr:	ID  {
 							Entry* f = current->searchEntry($3);
 							// check for correct parameters
 							checkParameters(f, argumentVector);
-							if (e->dtype != f->dtype) {
-							//if (e->dtype != f->returntype) {
+							if (e != nullptr && f != nullptr) {
+								if (e->dtype != f->dtype) {
+								//if (e->dtype != f->returntype) {
 								// fix this error wording
-								printf(FRED("SEMANTIC ERROR::Function return cannot be assigned to ID\n"));
+									printf(FRED("SEMANTIC ERROR::Type mismatch\n"));
+								}
 							}
+							else {
+								printf(FRED("SEMANTIC ERROR::Variable does not exist\n"));
+							}
+							
 							/* ---- SEMANTIC ACTIONS by PARSER ---- */
 							AST* id_1 = (AST*) malloc(sizeof(AST));
 							AST* fun = (AST*) malloc(sizeof(AST));
