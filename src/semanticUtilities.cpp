@@ -79,8 +79,6 @@ bool checkParameters(Entry* function, std::vector<Entry*> &arguments) {
                 return false;
             }
         }
-        // Once all the same checked properly:
-        arguments.clear();
         return true;
     }
 }

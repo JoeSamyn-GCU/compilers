@@ -12,5 +12,5 @@ int addOne(int able, int character) {
 int main(int k) {
     int y;
     int x;
-    y = addOne(x,y);
+    k = addOne(x,y);
 }

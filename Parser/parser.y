@@ -356,6 +356,7 @@ Expr:	ID  {
 							Entry* e = current->searchEntry($1);
 							// check for correct parameters
 							checkParameters(e, argumentVector);
+							argumentVector.clear();
 							// Don't need to check return type since it is not assigned to anything
 							/* ---- SEMANTIC ACTIONS by PARSER ---- */
 							$$ = New_Tree($1, $3, NULL);
@@ -366,6 +367,7 @@ Expr:	ID  {
 							Entry* f = current->searchEntry($3);
 							// check for correct parameters
 							checkParameters(f, argumentVector);
+        					argumentVector.clear();
 							if (e != nullptr && f != nullptr) {
 								if (e->dtype != f->dtype) {
 								//if (e->dtype != f->returntype) {
