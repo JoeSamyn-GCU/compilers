@@ -119,7 +119,8 @@ Decl: VarDecl { $$ = $1; }
 
 FunDecl:	TYPE ID OPAR CPAR Block 	{
 											// ---- SYMBOL TABLE ACTIONS by PARSER ----
-											Entry* e = new Entry($2, $1);
+											std::vector<Entry*> emptyParams = {};
+											Entry* e = new Entry($2,"","",0,0,emptyParams,$1);
 											current->insertEntry(e);
 											// if (current->parent != nullptr) {
 											// 	current = current->parent;
@@ -211,7 +212,8 @@ VarDecl: TYPE ID SEMICOLON		{
 										}
 	| TYPE ID Tail						{
 											/* --- SYMBOL TABLE ACTIONS --- */
-											Entry* e = new Entry($2, $1);
+											std::vector<Entry*> emptyParams = {};
+											Entry* e = new Entry($2,"","",0,0,emptyParams,$1);
 											while(!parameterVector.empty()) {
 												e->params.push_back(parameterVector.back());
 												//current->insertEntry(tempStack.top());
@@ -374,9 +376,7 @@ Expr:	ID  {
 
 							// Compare ID type and function return type
 							if (e != nullptr && f != nullptr) {
-								if (e->dtype != f->dtype) {
-								//if (e->dtype != f->returntype) {
-								// fix this error wording
+								if (e->dtype != f->returntype) {
 									printf(FRED("SEMANTIC ERROR::Type mismatch\n"));
 								}
 							}
@@ -468,24 +468,10 @@ MathExpr:	MathExpr BinaryOp MathExpr 	{
 								}
 | ID	{
 			/* --- SYMBOL TABLE CHECKS --- */
-			Entry* e = current->searchEntry($1);
-			if (e == nullptr && !parameterVector.empty()) { // TODO: check for parameters too!!!
-				for (int i = 0; i < parameterVector.size(); i++) {
-					if ($1 == parameterVector.at(i)->name) {
-						std::cout<<"FOUND IT"<<std::endl;
-						e = parameterVector.at(i);
-						//current.insertEntry(parameterVector.at(i));
-						break;
-					}
-				}
+			Entry* e = checkExistance(current,$1,parameterVector);
+			if (e != nullptr) {
+				argumentVector.push_back(e);
 			}
-			else if (e == nullptr) {
-				printf(FRED("SEMANTIC ERROR::ID not declared in scope\n"));
-			}
-			else {
-				std::cout<<e->name<<std::endl;
-			}
-			argumentVector.push_back(e);
 			/*
 			if (!parameterVector.empty()) {
 				e = parameterVector.back();

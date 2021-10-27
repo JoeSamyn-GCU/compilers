@@ -1,3 +1,8 @@
+int tempFunction(int i) {
+    write(i);
+    return i;
+}
+
 int i;
 int j;
 int h[8];

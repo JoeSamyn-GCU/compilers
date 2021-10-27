@@ -70,7 +70,11 @@ Entry* checkExistance(Table* table, char* entryID, std::vector<Entry*> parameter
             }
         }
     }
-    return nullptr;
+    else if (e == nullptr) {
+        printf(FRED("SEMANTIC ERROR::ID not declared in scope\n"));
+        return nullptr;
+    }
+    return e;
 }
 
 bool checkParameters(Entry* function, std::vector<Entry*> &arguments) {
