@@ -1,4 +1,16 @@
 int i;
 int j;
 int h[8];
-int main(int i) {}
+
+int a;
+int addOne(int able, int character) {
+    int temp;
+    temp = able + character;
+    return temp;
+}
+
+int main(int k) {
+    int y;
+    int x;
+    k = addOne(x,y);
+}

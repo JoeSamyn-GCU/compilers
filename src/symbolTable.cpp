@@ -8,6 +8,7 @@ Table::Table() {
 
 Table::Table(Table* parent) {
     this->parent = parent;
+    parent->tables.push_back(this);
 }
 
 Table::~Table() {
@@ -82,21 +83,31 @@ Entry* Table::searchEntry(char* name) {
 
 // TODO: Enable verbose printing
 void Table::printEntries(bool verbose) {
-
+    //if (parent != nullptr) {
+    //    parent->printEntries();
+    //}
     // If entry hash table is empty just return
     if( entries.size() == 0 ) {
         std::cout << FYEL("**WARNING::Entries hash table is empty. There is nothing to print") << std::endl;
         return;
     }
-
     std::cout << "\nTABLE ENTRIES" << std::endl << "--------------------------------------" << std::endl;
     std::cout << "KEY\t\t" << "VALUE" << std::endl << "--------------------------------------" << std::endl;
 
     // Else iterate through unordered_map and print all key value pairs
+    // TODO: FORMAT for verbose printing and simplified
     for(const std::pair<std::string, Entry*>& n : entries){
         std::cout << n.first << "\t" << n.second->dtype << "\t" << n.second->scope << "\t" << n.second->nelements << "\t" << n.second->nparams << std::endl; 
+        if (n.second->params.size() > 0) {
+            std::cout << n.second->params.size() << std::endl;
+        }
     }
-    if (parent != nullptr) {
-        parent->printEntries();
+}
+
+// TODO: Enable verbose printing
+void Table::printTables(bool verbose) {
+    this->printEntries();
+    for (int i = 0; i < tables.size(); i++) {
+        tables.at(i)->printTables();
     }
 }

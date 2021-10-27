@@ -5,10 +5,13 @@
 #include <string.h>
 #include <iostream>
 #include <stack>
+#include <vector>
 
 #include "entry.h"
 #include "symbolTable.h"
 #include "symbolTable.cpp"
+#include "semanticUtilities.h"
+#include "semanticUtilities.cpp"
 
 #include "AST.h"
 #include "irgen.h"
@@ -22,6 +25,11 @@
 
 Table* symbolTable = new Table();
 Table* current = symbolTable; // pointer to SymbolTable
+std::vector<Entry*> parameterVector;
+int tempCounter = 1;
+
+std::vector<Entry*> argumentVector;
+int numArguments = 0;
 
 extern int yylex();
 extern int yyparse();
@@ -94,7 +102,8 @@ Program: DeclList   {
 
 						// DUMP SYMBOL TABLE 
 						printf("\n--- Symbol Table ---\n\n");
-						current->printEntries();
+						current->printTables();
+						printf("Total tables created: %i\n", tempCounter);
 					}
 ;
 
@@ -129,6 +138,25 @@ FunDecl:	TYPE ID OPAR {IrGen::ofile << "\n" << $2 << ": \n";} CPAR Block 	{
 																					id = New_Tree($2, NULL, $6);
 																					$$ = New_Tree(ftypeName, type, id);
 																				}
+FunDecl:	TYPE ID OPAR CPAR Block 	{
+											// ---- SYMBOL TABLE ACTIONS by PARSER ----
+											Entry* e = new Entry($2, $1);
+											current->insertEntry(e);
+											// if (current->parent != nullptr) {
+											// 	current = current->parent;
+											// 	std::cout << "MOVING UP A LEVEL" << std::endl;
+											// }
+											
+											
+											/* ---- SEMANTIC ACTIONS by PARSER ---- */
+											if(debug)
+												std::cout << "\nRECOGNIZE RULE: Function Decl\n";
+											AST* type = (AST*)malloc(sizeof(AST));
+											AST* id = (AST*)malloc(sizeof(AST));
+											type = New_Tree($1, NULL, NULL);
+											id = New_Tree($2, NULL, $5);
+											$$ = New_Tree(ftypeName, type, id);
+										}
 
 VarDeclList: /* empty */ { $$ = NULL; }
 | VarDecl VarDeclList	{
@@ -157,6 +185,9 @@ VarDecl: TYPE ID SEMICOLON		{
 							}
 	| TYPE ID OSB NUMBER CSB SEMICOLON 	{
 											// ---- SYMBOL TABLE ACTIONS by PARSER ----
+											if ($4 < 1) {
+												printf(FRED("SEMANTIC ERROR::Cannot declare array with size less than one\n"));
+											}
 											// name, dtype, scope, nelements
 											Entry* e = new Entry($2, $1,"",$4);
 											current->insertEntry(e);
@@ -200,6 +231,14 @@ VarDecl: TYPE ID SEMICOLON		{
 											printf("\033[0m");
 										}
 	| TYPE ID Tail						{
+											/* --- SYMBOL TABLE ACTIONS --- */
+											Entry* e = new Entry($2, $1);
+											while(!parameterVector.empty()) {
+												e->params.push_back(parameterVector.back());
+												//current->insertEntry(tempStack.top());
+												parameterVector.pop_back();
+											}
+											current->insertEntry(e);
 											/* ---- SEMANTIC ACTION by PARSER ---- */
 											if(debug)
 												printf("\nRECOGNIZED RULE: Function Tail\n");
@@ -254,6 +293,8 @@ Stmt: /* empty */ { $$ = NULL; }
 							$$ = $1;
 						}
 	| RETURN MathExpr SEMICOLON	{
+									// required for semantic checks
+									argumentVector.clear();
 									/* ---- SEMANTIC ACTIONS by PARSER ---- */
 									$$ = New_Tree("return", NULL, $2);
 								}
@@ -322,6 +363,7 @@ Expr:	ID  {
 				$$ = id;
 			}
 | WRITE MathExpr 	{
+					argumentVector.clear();
 					/* ---- SEMANTIC ACTIONS by PARSER ---- */
 					AST* write = (AST*)malloc(sizeof(AST));
 					write = New_Tree($1, NULL, NULL);
@@ -329,6 +371,8 @@ Expr:	ID  {
 					
 				}
 | ID EQ MathExpr 	{
+						/* --- SEMANTIC CHECKS --- */
+						argumentVector.clear();
 						/* ---- IR Code Generation ---- */
 
 						/* ---- SEMANTIC ACTIONS by PARSER ---- */
@@ -341,10 +385,33 @@ Expr:	ID  {
 						$$ = eq;
 					}
 |  ID OPAR ArgList CPAR {
+							/* --- SEMANTIC CHECKS --- */
+							Entry* e = current->searchEntry($1);
+							// check for correct parameters
+							checkParameters(e, argumentVector);
+							argumentVector.clear();
+							// Don't need to check return type since it is not assigned to anything
 							/* ---- SEMANTIC ACTIONS by PARSER ---- */
 							$$ = New_Tree($1, $3, NULL);
 						}
 | ID EQ ID OPAR ArgList CPAR 	{
+							/* --- SEMANTIC CHECKS --- */
+							Entry* e = current->searchEntry($1);
+							Entry* f = current->searchEntry($3);
+							// check for correct parameters
+							checkParameters(f, argumentVector);
+        					argumentVector.clear();
+							if (e != nullptr && f != nullptr) {
+								if (e->dtype != f->dtype) {
+								//if (e->dtype != f->returntype) {
+								// fix this error wording
+									printf(FRED("SEMANTIC ERROR::Type mismatch\n"));
+								}
+							}
+							else {
+								printf(FRED("SEMANTIC ERROR::Variable does not exist\n"));
+							}
+							
 							/* ---- SEMANTIC ACTIONS by PARSER ---- */
 							AST* id_1 = (AST*) malloc(sizeof(AST));
 							AST* fun = (AST*) malloc(sizeof(AST));
@@ -386,8 +453,8 @@ Expr:	ID  {
 
 ArgList: /* empty */ { $$ = NULL; }
 | MathExpr	{
-				/* ---- SEMANTIC ACTIONS by PARSER ---- */
-				$$ = $1;
+				/* --- SEMANTIC CHECKS (INSIDE FUNCTION CALL) --- */
+
 			}
 | MathExpr COMMA ArgList	{
 								/* ---- SEMANTIC ACTIONS by PARSER ---- */
@@ -456,8 +523,12 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 							$$ = $2;
 						}
 | NUMBER						{
+									/* --- SYMBOL TABLE CHECKS  --- */
+									Entry* e = new Entry("Int", std::to_string($1));
+									argumentVector.push_back(e);
+
 									/* ---- IR CODE ---- */
-									//outfile << $1;
+									outfile << $1;
 
 									/* ---- SEMANTIC ACTIONS by PARSER ---- */
 									if(debug)
@@ -467,8 +538,53 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 									$$ = New_Tree(num_s, NULL, NULL);;
 								}
 | ID	{
+			/* --- SYMBOL TABLE CHECKS --- */
+			Entry* e = current->searchEntry($1);
+			if (e == nullptr && !parameterVector.empty()) { // TODO: check for parameters too!!!
+				for (int i = 0; i < parameterVector.size(); i++) {
+					if ($1 == parameterVector.at(i)->name) {
+						std::cout<<"FOUND IT"<<std::endl;
+						e = parameterVector.at(i);
+						//current.insertEntry(parameterVector.at(i));
+						break;
+					}
+				}
+			}
+			else if (e == nullptr) {
+				printf(FRED("SEMANTIC ERROR::ID not declared in scope\n"));
+			}
+			else {
+				std::cout<<e->name<<std::endl;
+			}
+			argumentVector.push_back(e);
+			/*
+			if (!parameterVector.empty()) {
+				e = parameterVector.back();
+				std::cout << "\n test. ID: "<< $1 << " temp: " << e->name << std::endl;
+				if (e->name == $1) {
+					std::cout<<"THEY ARE THE SAME!!!";
+				}
+				else {
+					e = nullptr;
+					std::cout<<"DIFF LOL";
+				}
+			}
+			else {
+				e = current->searchEntry($1);
+			}
+
+			if (e != nullptr) { // found entry
+				argumentVector.push_back(e);
+			}
+			else { // Not declared in scope
+				printf(FRED("SEMANTIC ERROR::ID not declared in scope\n"));
+			}
+			*/
+			//Entry* e = new Entry("ID", (char*)$1);
+			//argumentVector.push_back(e);
+
 			/* ---- IR CODE ---- */
-			//outfile << $1;
+			outfile << $1;
 
 			/* ---- SEMANTIC ACTIONS by PARSER ---- */
 			if(debug)
@@ -565,6 +681,8 @@ RelExpr: MathExpr GTE MathExpr	{
 ;
 
 Tail: OPAR ParamDeclList CPAR Block 	{
+											// /* --- SYMBOL TABLE ACTIONS by PARSER --- */
+											
 											/* ---- SEMANTIC ACTIONS by PARSER ---- */
 											if(debug)
 												printf("\nRECOGNIZE RULE: Function Decl\n");
@@ -572,12 +690,28 @@ Tail: OPAR ParamDeclList CPAR Block 	{
 										}
 ;
 
-Block: OCB VarDeclList StmtList CCB 	{
+Block: OCB {
+			//std::cout<<"MAKING NEW TABLE"<<std::endl;
+			current = new Table(current);
+			/*
+			while(!tempStack.empty()) {
+				current->insertEntry(tempStack.top());
+				tempStack.pop();
+			}
+			*/
+			tempCounter++;
+			} VarDeclList StmtList {
+				if (current->parent != nullptr) {
+					//current->printEntries();
+					current = current->parent;
+					//std::cout << "MOVING UP A LEVEL" << std::endl;
+				}
+			} CCB 	{
 										/* ---- SEMANTIC ACTIONS by PARSER ---- */
 										if(debug)
 											printf("\nRECOGNIZED RULE: Block\n");
 										AST* block = (AST*)malloc(sizeof(AST));
-										block = New_Tree("block", $2, $3);
+										block = New_Tree("block", $3, $4);
 										$$ = block;
 									}
 ;
@@ -594,7 +728,8 @@ ParamDecl: /* empty */ { $$ = NULL; }
 | TYPE ID  	{
 				/* --- SYMBOL TABLE ACTIONS by PARSER --- */
 				Entry* e = new Entry($2, $1);
-				current->insertEntry(e);
+				parameterVector.push_back(e);
+				//current->insertEntry(e);
 				/* ---- SEMANTIC ACTIONS by PARSER ---- */
 				struct AST* id = (AST*)malloc(sizeof(struct AST));
 				struct AST* type = (AST*)malloc(sizeof(struct AST));
@@ -605,7 +740,7 @@ ParamDecl: /* empty */ { $$ = NULL; }
 | TYPE ID OSB CSB 	{
 						/* --- SYMBOL TABLE ACTIONS by PARSER --- */
 						Entry* e = new Entry($2, $1);
-						current->insertEntry(e);
+						parameterVector.push_back(e);
 						/* ---- SEMANTIC ACTIONS by PARSER ---- */
 						AST* id = New_Tree($2, NULL, NULL);
 						AST* type = New_Tree($1, NULL, NULL);
