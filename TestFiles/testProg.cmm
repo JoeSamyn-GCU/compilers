@@ -2,7 +2,7 @@ int x;
 int y;
 
 int main(){
-    x = y + 1 * 2 - z / 10;
+    x = y + 1 * 2 - 9 / 10;
     if(x > 5){
         x = 1 + 3;
     }

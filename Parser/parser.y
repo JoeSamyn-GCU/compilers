@@ -527,8 +527,6 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 									Entry* e = new Entry("Int", std::to_string($1));
 									argumentVector.push_back(e);
 
-									/* ---- IR CODE ---- */
-									outfile << $1;
 
 									/* ---- SEMANTIC ACTIONS by PARSER ---- */
 									if(debug)
@@ -583,8 +581,6 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 			//Entry* e = new Entry("ID", (char*)$1);
 			//argumentVector.push_back(e);
 
-			/* ---- IR CODE ---- */
-			outfile << $1;
 
 			/* ---- SEMANTIC ACTIONS by PARSER ---- */
 			if(debug)
