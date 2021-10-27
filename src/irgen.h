@@ -62,7 +62,7 @@ class IrGen {
          */
         static std::string printIrCode(std::string op, std::string arg2, std::string arg3 = "");
         
-            /**
+        /**
          * @brief Insert a quadruples entry into the quadruples stack
          * 
          * @param command ARM command to execute

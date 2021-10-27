@@ -110,25 +110,25 @@ Decl: VarDecl { $$ = $1; }
 	| FunDecl { $$ = $1;}
 ;
 
-FunDecl:	TYPE ID OPAR {IrGen::ofile << $2 << ": \n";} CPAR Block 	{
-																			// ---- IR CODE GENERATION ----
-																			//IrGen::ofile << $2 << ": " << std::endl;
-																			//IrGen::printIrCode();
+FunDecl:	TYPE ID OPAR {IrGen::ofile << "\n" << $2 << ": \n";} CPAR Block 	{
+																					// ---- IR CODE GENERATION ----
+																					//IrGen::ofile << $2 << ": " << std::endl;
+																					//IrGen::printIrCode();
 
-																			// ---- SYMBOL TABLE ACTIONS by PARSER ----
-																			current = new Table(current);
-																			Entry* e = new Entry($2, $1);
-																			current->insertEntry(e);
-																			
-																			/* ---- SEMANTIC ACTIONS by PARSER ---- */
-																			if(debug)
-																				std::cout << "\nRECOGNIZE RULE: Function Decl\n";
-																			AST* type = (AST*)malloc(sizeof(AST));
-																			AST* id = (AST*)malloc(sizeof(AST));
-																			type = New_Tree($1, NULL, NULL);
-																			id = New_Tree($2, NULL, $6);
-																			$$ = New_Tree(ftypeName, type, id);
-																		}
+																					// ---- SYMBOL TABLE ACTIONS by PARSER ----
+																					current = new Table(current);
+																					Entry* e = new Entry($2, $1);
+																					current->insertEntry(e);
+																					
+																					/* ---- SEMANTIC ACTIONS by PARSER ---- */
+																					if(debug)
+																						std::cout << "\nRECOGNIZE RULE: Function Decl\n";
+																					AST* type = (AST*)malloc(sizeof(AST));
+																					AST* id = (AST*)malloc(sizeof(AST));
+																					type = New_Tree($1, NULL, NULL);
+																					id = New_Tree($2, NULL, $6);
+																					$$ = New_Tree(ftypeName, type, id);
+																				}
 
 VarDeclList: /* empty */ { $$ = NULL; }
 | VarDecl VarDeclList	{
@@ -265,21 +265,28 @@ Stmt: /* empty */ { $$ = NULL; }
 	| Unmatched { $$ = $1; }
 ;
 
-Matched: IF OPAR RelExpr CPAR Matched ELSE Matched 	{
-														/* ---- GENERATE IR CODE ---- */
-														IrGen::ofile << "IF ";
+Matched: IF OPAR RelExpr CPAR Matched ELSE {IrGen::printLabel(".L" + std::to_string(lable_counter - 1)); } Matched 	{
+																														/* ---- GENERATE IR CODE ---- */
+																														IrGen::printLabel(curr_label);
+																														curr_label = "";
 
-														/* ---- SEMANTIC ACTIONS by PARSER ---- */
-														AST* cond = (AST*) malloc(sizeof(AST));
-														AST* e = (AST*) malloc(sizeof(AST));
-														AST* i = (AST*) malloc(sizeof(AST));
+																														/* ---- SEMANTIC ACTIONS by PARSER ---- */
+																														AST* cond = (AST*) malloc(sizeof(AST));
+																														AST* e = (AST*) malloc(sizeof(AST));
+																														AST* i = (AST*) malloc(sizeof(AST));
 
-														e = New_Tree($6, $7, NULL);
-														i = New_Tree($1, $3, $5);
-														cond = New_Tree("COND", i, e);
-														$$ = cond;
-													}
-  | Block	{ $$ = $1; }
+																														e = New_Tree($6, $8, NULL);
+																														i = New_Tree($1, $3, $5);
+																														cond = New_Tree("COND", i, e);
+																														$$ = cond;
+																													}
+  | Block	{ 
+	  			/* ---- GENERATE IR CODE ---- */
+				curr_label = ".L" + std::to_string(lable_counter);
+				IrGen::printIrCodeCommand("JUMP", curr_label, "\n", "");
+
+	  			$$ = $1; 
+			}
 ;
 
 Unmatched: IF OPAR RelExpr CPAR Block	{
@@ -399,50 +406,49 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 										std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " << 
 								   		 $2<< " " << $3->nodeType << std::endl;
 
-									AST* op = New_Tree($2, $1, $3);
-									op->reg = result_reg;
+									AST* op = New_Tree($2, $1, $3, result_reg);
 									$$ = op;
 								}
 | MathExpr MINUS MathExpr 	{
 									/* ---- IR Code Generator ---- */
-									std::string r = IrGen::insertQe( $2, $1->nodeType, $3->nodeType);
-									std::cout << $1->nodeType << " " << $2 << " " << $3->nodeType << std::endl;
+									std::string arg1 = $1->reg != "" ? $1->reg : $1->nodeType;
+									std::string arg2 = $3->reg != "" ? $3->reg : $3->nodeType;
+									std::string result_reg = IrGen::printIrCode($2, arg1, arg2);
 
 									/* ---- SEMANTIC ACTIONS by PARSER ---- */
 									if(debug)
 										std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " << 
 								   		 $2<< " " << $3->nodeType << std::endl;
 
-									AST* op = New_Tree($2, $1, $3);
-									op->reg = r;
+									AST* op = New_Tree($2, $1, $3, result_reg);
 									$$ = op;
 								}
 | MathExpr DIV MathExpr 	{
 									/* ---- IR Code Generator ---- */
-									std::string r = IrGen::insertQe($2, $1->nodeType, $3->nodeType);
-									std::cout << $1->nodeType << " " << $2 << " " << $3->nodeType << std::endl;
+									std::string arg1 = $1->reg != "" ? $1->reg : $1->nodeType;
+									std::string arg2 = $3->reg != "" ? $3->reg : $3->nodeType;
+									std::string result_reg = IrGen::printIrCode($2, arg1, arg2);
 
 									/* ---- SEMANTIC ACTIONS by PARSER ---- */
 									if(debug)
 										std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " << 
 								   		 $2 << " " << $3->nodeType << std::endl;
 
-									AST* op = New_Tree($2, $1, $3);
-									op->reg = r;
+									AST* op = New_Tree($2, $1, $3, result_reg);
 									$$ = op;
 								}
 | MathExpr MULT MathExpr 	{
 									/* ---- IR Code Generator ---- */
-									std::string r = IrGen::insertQe($2, $1->nodeType, $3->nodeType);
-									std::cout << $1->nodeType << " " << $2 << " " << $3->nodeType << std::endl;
+									std::string arg1 = $1->reg != "" ? $1->reg : $1->nodeType;
+									std::string arg2 = $3->reg != "" ? $3->reg : $3->nodeType;
+									std::string result_reg = IrGen::printIrCode($2, arg1, arg2);
 
 									/* ---- SEMANTIC ACTIONS by PARSER ---- */
 									if(debug)
 										std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " << 
 								   		 $2 << " " << $3->nodeType << std::endl;
 
-									AST* op = New_Tree($2, $1, $3);
-									op->reg = r;
+									AST* op = New_Tree($2, $1, $3, result_reg);
 									$$ = op;
 								}
 |	OPAR MathExpr CPAR	{
