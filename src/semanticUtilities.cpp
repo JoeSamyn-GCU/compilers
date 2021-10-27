@@ -60,6 +60,19 @@
 //         return false;
 // }
 
+Entry* checkExistance(Table* table, char* entryID, std::vector<Entry*> parameterVector) {
+    Entry* e = table->searchEntry(entryID);
+    if (e == nullptr && !parameterVector.empty()) {
+        for (int i = 0; i < parameterVector.size(); i++) {
+            if (entryID == parameterVector.at(i)->name) {
+                e = parameterVector.at(i);
+                return e;
+            }
+        }
+    }
+    return nullptr;
+}
+
 bool checkParameters(Entry* function, std::vector<Entry*> &arguments) {
     if (function == nullptr) {
         return false;

@@ -363,11 +363,16 @@ Expr:	ID  {
 						}
 | ID EQ ID OPAR ArgList CPAR 	{
 							/* --- SEMANTIC CHECKS --- */
-							Entry* e = current->searchEntry($1);
-							Entry* f = current->searchEntry($3);
-							// check for correct parameters
+							
+							// check if first ID exists in table or parameters
+							Entry* e = checkExistance(current, $1, parameterVector);
+							Entry* f = checkExistance(current, $3, parameterVector);
+							
+							// check for correct parameters to function
 							checkParameters(f, argumentVector);
         					argumentVector.clear();
+
+							// Compare ID type and function return type
 							if (e != nullptr && f != nullptr) {
 								if (e->dtype != f->dtype) {
 								//if (e->dtype != f->returntype) {
