@@ -14,6 +14,7 @@
 // main 
 int main() {
 
+    /*
     Entry* e1 = new Entry("Test Entry", "int");
     Entry* e2 = new Entry("Test Entry 2", "char");
 
@@ -43,6 +44,7 @@ int main() {
     delete e2;
     delete table;
     delete childTable;
+     */
 
     return 0;
 }

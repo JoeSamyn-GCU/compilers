@@ -92,7 +92,7 @@ void Table::printEntries(bool verbose) {
         return;
     }
     std::cout << "\nTABLE ENTRIES" << std::endl << "--------------------------------------" << std::endl;
-    std::cout << "KEY\t\t" << "VALUE" << std::endl << "--------------------------------------" << std::endl;
+    std::cout << "KEY\tTYPE\tSCOPE\tELEMS\tPARAMS" << std::endl << "--------------------------------------" << std::endl;
 
     // Else iterate through unordered_map and print all key value pairs
     // TODO: FORMAT for verbose printing and simplified

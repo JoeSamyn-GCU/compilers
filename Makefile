@@ -5,10 +5,12 @@
 CC = g++
 # Which flags to pass to the compilation command
 CFLAGS = -G
+# C++ Standard
+STD = -std=c++11
 # Define Include Directories
 INCLUDES = -I src
 # C source files
-SRC = build/lex.yy.c build/parser.tab.c src/AST.cpp
+SRC = build/lex.yy.c build/parser.tab.c src/AST.cpp # src/irgen.cpp
 # Set executable output name and directory
 BIN = bin/gmm
 # List subdirectories
@@ -36,11 +38,11 @@ run:
 		( cd $$i ; make) ; \
 	done
 	@echo Building executable...
-	$(CC) $(INCLUDES) -o $(BIN) $(SRC)
+	$(CC) $(STD) $(INCLUDES) -o $(BIN) $(SRC)
 	@echo
 	@echo
 	@echo Executing parser using testProg.cmm...
-	bin/gmm TestFiles/symbol_table_test.cmm
+	bin/gmm TestFiles/testProg.cmm
 
 # Remove all binaries, flex, and bison generated files
 clean:
