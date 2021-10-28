@@ -137,6 +137,7 @@ FunDecl:	TYPE ID OPAR CPAR Block 	{
 											id = New_Tree($2, NULL, $5);
 											$$ = New_Tree(ftypeName, type, id);
 										}
+;
 
 VarDeclList: /* empty */ { $$ = NULL; }
 | VarDecl VarDeclList	{
@@ -144,6 +145,7 @@ VarDeclList: /* empty */ { $$ = NULL; }
 							insert_node_right($1, $2);
 							$$ = $1;
 						}
+;
 
 VarDecl: TYPE ID SEMICOLON		{ 
 
@@ -181,6 +183,7 @@ VarDecl: TYPE ID SEMICOLON		{
 											struct AST* num = (AST*)malloc(sizeof(struct AST));
 											struct AST* type_parent = (AST*)malloc(sizeof(struct AST));
 											char nums[100];
+
 											sprintf(nums, "%d", $4);
 											num = New_Tree(nums, NULL, NULL);
 											id = New_Tree($2, NULL, NULL);
@@ -309,14 +312,14 @@ Unmatched: IF OPAR RelExpr CPAR Block	{
 										}
   | IF OPAR RelExpr CPAR Matched ELSE Unmatched	{
 	  												/* ---- SEMANTIC ACTIONS by PARSER ---- */
-														AST* cond = (AST*) malloc(sizeof(AST));
-														AST* e = (AST*) malloc(sizeof(AST));
-														AST* i = (AST*) malloc(sizeof(AST));
+													AST* cond = (AST*) malloc(sizeof(AST));
+													AST* e = (AST*) malloc(sizeof(AST));
+													AST* i = (AST*) malloc(sizeof(AST));
 
-														e = New_Tree($6, $7, NULL);
-														i = New_Tree($1, $3, $5);
-														cond = New_Tree("COND", i, e);
-														$$ = cond;
+													e = New_Tree($6, $7, NULL);
+													i = New_Tree($1, $3, $5);
+													cond = New_Tree("COND", i, e);
+													$$ = cond;
   												}
 ;
 
@@ -329,13 +332,14 @@ Expr:	ID  {
 				$$ = id;
 			}
 | WRITE MathExpr 	{
-					argumentVector.clear();
-					/* ---- SEMANTIC ACTIONS by PARSER ---- */
-					AST* write = (AST*)malloc(sizeof(AST));
-					write = New_Tree($1, NULL, NULL);
-					$$ = New_Tree(out, write, $2);
-					
-				}
+
+						argumentVector.clear();
+						/* ---- SEMANTIC ACTIONS by PARSER ---- */
+						AST* write = (AST*)malloc(sizeof(AST));
+						write = New_Tree($1, NULL, NULL);
+						$$ = New_Tree(out, write, $2);
+						
+					}
 | ID EQ MathExpr 	{
 						/* --- SEMANTIC CHECKS --- */
 						argumentVector.clear();
@@ -364,33 +368,33 @@ Expr:	ID  {
 							$$ = New_Tree($1, $3, NULL);
 						}
 | ID EQ ID OPAR ArgList CPAR 	{
-							/* --- SEMANTIC CHECKS --- */
-							
-							// check if first ID exists in table or parameters
-							Entry* e = checkExistance(current, $1, parameterVector);
-							Entry* f = checkExistance(current, $3, parameterVector);
-							
-							// check for correct parameters to function
-							checkParameters(f, argumentVector);
-        					argumentVector.clear();
+									/* --- SEMANTIC CHECKS --- */
+									
+									// check if first ID exists in table or parameters
+									Entry* e = checkExistance(current, $1, parameterVector);
+									Entry* f = checkExistance(current, $3, parameterVector);
+									
+									// check for correct parameters to function
+									checkParameters(f, argumentVector);
+									argumentVector.clear();
 
-							// Compare ID type and function return type
-							if (e != nullptr && f != nullptr) {
-								if (e->dtype != f->returntype) {
-									printf(FRED("SEMANTIC ERROR::Type mismatch\n"));
+									// Compare ID type and function return type
+									if (e != nullptr && f != nullptr) {
+										if (e->dtype != f->returntype) {
+											printf(FRED("SEMANTIC ERROR::Type mismatch\n"));
+										}
+									}
+									else {
+										printf(FRED("SEMANTIC ERROR::Variable does not exist\n"));
+									}
+									
+									/* ---- SEMANTIC ACTIONS by PARSER ---- */
+									AST* id_1 = (AST*) malloc(sizeof(AST));
+									AST* fun = (AST*) malloc(sizeof(AST));
+									id_1 = New_Tree($1, NULL, NULL);
+									fun = New_Tree($3, $5, NULL);
+									$$ = New_Tree($2, id_1, fun);
 								}
-							}
-							else {
-								printf(FRED("SEMANTIC ERROR::Variable does not exist\n"));
-							}
-							
-							/* ---- SEMANTIC ACTIONS by PARSER ---- */
-							AST* id_1 = (AST*) malloc(sizeof(AST));
-							AST* fun = (AST*) malloc(sizeof(AST));
-							id_1 = New_Tree($1, NULL, NULL);
-							fun = New_Tree($3, $5, NULL);
-							$$ = New_Tree($2, id_1, fun);
-						}
 | ID OSB MathExpr CSB EQ ID OPAR ArgList CPAR 	{
 													/* ---- SEMANTIC ACTIONS by PARSER ---- */
 													AST* id_1 = New_Tree($1, NULL, NULL);
@@ -432,21 +436,21 @@ ArgList: /* empty */ { $$ = NULL; }
 								/* ---- SEMANTIC ACTIONS by PARSER ---- */
 								$$ = New_Tree("ARG", $1, $3);
 							}
-
+;
 
 MathExpr:	MathExpr BinaryOp MathExpr 	{
-									/* ---- IR Code Generator ---- */
-									outfile << $1->nodeType << " " << $2->nodeType << " " << $3->nodeType << std::endl;
+											/* ---- IR Code Generator ---- */
+											outfile << $1->nodeType << " " << $2->nodeType << " " << $3->nodeType << std::endl;
 
-									/* ---- SEMANTIC ACTIONS by PARSER ---- */
-									if(debug)
-										std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " << 
-								    $2->nodeType << " " << $3->nodeType << std::endl;
-									$2->left = $1;
-									$2->right = $3;
+											/* ---- SEMANTIC ACTIONS by PARSER ---- */
+											if(debug)
+												std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " << 
+											$2->nodeType << " " << $3->nodeType << std::endl;
+											$2->left = $1;
+											$2->right = $3;
 
-									$$ = $2;
-								}
+											$$ = $2;
+										}
 |	OPAR MathExpr CPAR	{
 							/* ---- SEMANTIC ACTIONS by PARSER ---- */
 							$$ = $2;
@@ -472,29 +476,7 @@ MathExpr:	MathExpr BinaryOp MathExpr 	{
 			if (e != nullptr) {
 				argumentVector.push_back(e);
 			}
-			/*
-			if (!parameterVector.empty()) {
-				e = parameterVector.back();
-				std::cout << "\n test. ID: "<< $1 << " temp: " << e->name << std::endl;
-				if (e->name == $1) {
-					std::cout<<"THEY ARE THE SAME!!!";
-				}
-				else {
-					e = nullptr;
-					std::cout<<"DIFF LOL";
-				}
-			}
-			else {
-				e = current->searchEntry($1);
-			}
-
-			if (e != nullptr) { // found entry
-				argumentVector.push_back(e);
-			}
-			else { // Not declared in scope
-				printf(FRED("SEMANTIC ERROR::ID not declared in scope\n"));
-			}
-			*/
+			
 			//Entry* e = new Entry("ID", (char*)$1);
 			//argumentVector.push_back(e);
 
@@ -590,29 +572,31 @@ Tail: OPAR ParamDeclList CPAR Block 	{
 ;
 
 Block: OCB {
-			//std::cout<<"MAKING NEW TABLE"<<std::endl;
-			current = new Table(current);
-			/*
-			while(!tempStack.empty()) {
-				current->insertEntry(tempStack.top());
-				tempStack.pop();
-			}
-			*/
-			tempCounter++;
-			} VarDeclList StmtList {
-				if (current->parent != nullptr) {
-					//current->printEntries();
-					current = current->parent;
-					//std::cout << "MOVING UP A LEVEL" << std::endl;
+				//std::cout<<"MAKING NEW TABLE"<<std::endl;
+				current = new Table(current);
+				/*
+				while(!tempStack.empty()) {
+					current->insertEntry(tempStack.top());
+					tempStack.pop();
 				}
-			} CCB 	{
-										/* ---- SEMANTIC ACTIONS by PARSER ---- */
-										if(debug)
-											printf("\nRECOGNIZED RULE: Block\n");
-										AST* block = (AST*)malloc(sizeof(AST));
-										block = New_Tree("block", $3, $4);
-										$$ = block;
+				*/
+				tempCounter++;
+			} 
+			VarDeclList StmtList {
+									if (current->parent != nullptr) {
+										//current->printEntries();
+										current = current->parent;
+										//std::cout << "MOVING UP A LEVEL" << std::endl;
 									}
+								} 
+			CCB 	{
+						/* ---- SEMANTIC ACTIONS by PARSER ---- */
+						if(debug)
+							printf("\nRECOGNIZED RULE: Block\n");
+						AST* block = (AST*)malloc(sizeof(AST));
+						block = New_Tree("block", $3, $4);
+						$$ = block;
+					}
 ;
 
 ParamDeclList: ParamDecl COMMA ParamDeclList 	{
@@ -647,8 +631,7 @@ ParamDecl: /* empty */ { $$ = NULL; }
 					}	
 %%
 
-int main(int argc, char**argv)
-{
+int main(int argc, char**argv) {
 /*
 	#ifdef YYDEBUG
 		yydebug = 1;
