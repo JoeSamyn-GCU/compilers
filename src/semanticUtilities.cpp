@@ -45,12 +45,11 @@
 
 
 
-// bool compareIdTypes(Table table, char* a, char* b) {
-//     Entry* A = table.searchEntry(a);
-//     Entry* B = table.searchEntry(b);
-    
-//     return strcmp((A->dtype).c_str(), (B->dtype).c_str());
-// }
+bool compareTypes(Table* table, char* a, std::string b) {
+    std::string A = table->searchEntry(a)->dtype;
+
+    return A == b;
+}
 
 // bool checkExistance(Table table, char* id) {
 //     if( table.searchEntry(id) != nullptr )
@@ -75,6 +74,15 @@ Entry* checkExistance(Table* table, char* entryID, std::vector<Entry*> parameter
         return nullptr;
     }
     return e;
+}
+
+bool checkIntType(Table table, char* id) {
+    if (table.searchEntry(id)->dtype == "int")
+        return true;
+    else {
+        printf(FRED("SEMANTIC ERROR::ID not declared as int\n"));
+        return false;
+    }
 }
 
 bool checkParameters(Entry* function, std::vector<Entry*> &arguments) {

@@ -343,12 +343,15 @@ Expr:	ID  {
 	| ID EQ MathExpr 	{
 							/* --- SEMANTIC CHECKS --- */
 							argumentVector.clear();
+
+							checkIntType(current, $1);
+
 							/* ---- IR Code Generation ---- */
 							reg++;
 							outfile << "r" << reg << "=" << std::endl;
 							print_tree($3, 0);
 
-							/* ---- SEMANTIC ACTIONS by PARSER ---- */
+							/* ---- AST ACTIONS by PARSER ---- */
 							if(debug)
 								std::cout << "\n RECOGNIZED RULE: ID EQ MathExpr\nTOKENS: " << $1 << " " << $2 << " " << $3->nodeType << std::endl;
 							struct AST* id = (AST*)malloc(sizeof(struct AST));
@@ -360,35 +363,41 @@ Expr:	ID  {
 	|  ID OPAR ArgList CPAR {
 								/* --- SEMANTIC CHECKS --- */
 								Entry* e = current->searchEntry($1);
+
 								// check for correct parameters
-								checkParameters(e, argumentVector);
+								if( !checkParameters(e, argumentVector) )
+									std::cout << FRED("ERROR: Incorrect parameters in function call") << std::endl;
+								
 								argumentVector.clear();
 								// Don't need to check return type since it is not assigned to anything
-								/* ---- SEMANTIC ACTIONS by PARSER ---- */
+
+								/* ---- AST ACTIONS by PARSER ---- */
 								$$ = New_Tree($1, $3, NULL);
 							}
 	| ID EQ ID OPAR ArgList CPAR 	{
 										/* --- SEMANTIC CHECKS --- */
-										
 										// check if first ID exists in table or parameters
 										Entry* e = checkExistance(current, $1, parameterVector);
 										Entry* f = checkExistance(current, $3, parameterVector);
 										
+										if( e == nullptr ) 
+											std::cout << FRED("ERROR: ID " << $1 << " does not exist in table") << std::endl;
+
+										if( f == nullptr ) 
+											std::cout << FRED("ERROR: ID " << $3 << " does not exist in table") << std::endl;
+										
 										// check for correct parameters to function
-										checkParameters(f, argumentVector);
+										if( !checkParameters(f, argumentVector) ) 
+											std::cout << FRED("ERROR: Incorrect parameters in function call") << std::endl;
+
 										argumentVector.clear();
 
 										// Compare ID type and function return type
-										if (e != nullptr && f != nullptr) {
-											if (e->dtype != f->returntype) {
-												printf(FRED("SEMANTIC ERROR::Type mismatch\n"));
-											}
-										}
-										else {
-											printf(FRED("SEMANTIC ERROR::Variable does not exist\n"));
+										if (e->dtype != f->returntype) {
+											printf(FRED("SEMANTIC ERROR::Type mismatch\n"));
 										}
 										
-										/* ---- SEMANTIC ACTIONS by PARSER ---- */
+										/* ---- AST ACTIONS by PARSER ---- */
 										AST* id_1 = (AST*) malloc(sizeof(AST));
 										AST* fun = (AST*) malloc(sizeof(AST));
 										id_1 = New_Tree($1, NULL, NULL);
@@ -396,14 +405,40 @@ Expr:	ID  {
 										$$ = New_Tree($2, id_1, fun);
 									}
 	| ID OSB MathExpr CSB EQ ID OPAR ArgList CPAR 	{
-														/* ---- SEMANTIC ACTIONS by PARSER ---- */
+														/* --- SEMANTIC CHECKS --- */
+														// check if first ID exists in table or parameters
+														Entry* e = checkExistance(current, $1, parameterVector);
+														Entry* f = checkExistance(current, $6, parameterVector);
+														
+														if( e == nullptr || e->dtype != "int" ) 
+															std::cout << FRED("ERROR: ID " << $1 << " does not exist in table or has a type mismatch in assignment statement") << std::endl;
+
+														if( f == nullptr || f->returntype != "int" ) 
+															std::cout << FRED("ERROR: ID " << $6 << " does not exist in tablee or has a type mismatch in assignment statement") << std::endl;
+														
+														// check for correct parameters to function
+														if( !checkParameters(f, argumentVector) ) 
+															std::cout << FRED("ERROR: Incorrect parameters in function call") << std::endl;
+
+														argumentVector.clear();
+
+														// Compare ID type and function return type
+														if (e->dtype != f->returntype) {
+															printf(FRED("SEMANTIC ERROR::Type mismatch\n"));
+														}
+														
+														/* ---- AST ACTIONS by PARSER ---- */
 														AST* id_1 = New_Tree($1, NULL, NULL);
 														AST* arr = New_Tree("ARRAY", id_1, $3);
 														AST* fun = New_Tree($6, $8, NULL);
 														$$ = New_Tree($5, arr, fun);
 													}
 	| ID EQ ID OSB NUMBER CSB 	{
-									/* ---- SEMANTIC ACTIONS by PARSER ---- */
+									/* --- SEMANTIC CHECKS --- */
+									checkIntType(current, $1);
+									checkIntType(current, $3);
+									
+									/* ---- AST ACTIONS by PARSER ---- */
 									AST* id_1 = (AST*) malloc(sizeof(AST));
 									AST* id_2 = (AST*) malloc(sizeof(AST));
 									AST* arr = (AST*) malloc(sizeof(AST));
@@ -417,7 +452,10 @@ Expr:	ID  {
 									$$ = New_Tree($2, id_1, arr);
 								}
 	| ID OSB MathExpr CSB EQ MathExpr	{
-											/* ---- SEMANTIC ACTIONS by PARSER ---- */
+											/* --- SEMANTIC CHECKS --- */
+											checkIntType(current, $1);
+
+											/* ---- AST ACTIONS by PARSER ---- */
 											AST* id_1 = (AST*) malloc(sizeof(AST));
 											AST* arr = (AST*) malloc(sizeof(AST));
 											id_1 = New_Tree($1, NULL, NULL);
@@ -455,24 +493,24 @@ MathExpr:	MathExpr BinaryOp MathExpr 	{
 								/* ---- SEMANTIC ACTIONS by PARSER ---- */
 								$$ = $2;
 							}
-	| NUMBER						{
-										/* --- SYMBOL TABLE CHECKS  --- */
-										Entry* e = new Entry("Int", std::to_string($1));
-										argumentVector.push_back(e);
+	| NUMBER	{
+					/* --- SYMBOL TABLE CHECKS  --- */
+					Entry* e = new Entry("Int", std::to_string($1));
+					argumentVector.push_back(e);
 
-										/* ---- IR CODE ---- */
-										outfile << $1;
+					/* ---- IR CODE ---- */
+					outfile << $1;
 
-										/* ---- SEMANTIC ACTIONS by PARSER ---- */
-										if(debug)
-											printf("\n RECOGNIZED RULE: NUMBER\nTOKENS: %d\n", $1);
-										char num_s[100];
-										sprintf(num_s, "%d", $1);
-										$$ = New_Tree(num_s, NULL, NULL);;
-									}
+					/* ---- SEMANTIC ACTIONS by PARSER ---- */
+					if(debug)
+						printf("\n RECOGNIZED RULE: NUMBER\nTOKENS: %d\n", $1);
+					char num_s[100];
+					sprintf(num_s, "%d", $1);
+					$$ = New_Tree(num_s, NULL, NULL);;
+				}
 	| ID	{
 				/* --- SYMBOL TABLE CHECKS --- */
-				Entry* e = checkExistance(current,$1,parameterVector);
+				Entry* e = checkExistance(current, $1, parameterVector);
 				if (e != nullptr) {
 					argumentVector.push_back(e);
 				}
