@@ -9,7 +9,7 @@ AST * New_Tree(std::string nt, struct AST* l, struct AST* r){
 	// Allocate memory for struct
 	struct AST* ast = (AST*)malloc(sizeof(struct AST));
 	
-	// Copy char arra into nodetype property
+	// Copy char array into nodetype property
 	ast->nodeType = nt;
 
 	// Assign left and right children

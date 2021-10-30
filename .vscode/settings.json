@@ -59,8 +59,14 @@
         "streambuf": "cpp",
         "cinttypes": "cpp",
         "typeinfo": "cpp",
+<<<<<<< HEAD
         "queue": "cpp",
         "__bit_reference": "cpp",
+=======
+        "filesystem": "cpp",
+        "__bit_reference": "cpp",
+        "__bits": "cpp",
+>>>>>>> symbol-table
         "__config": "cpp",
         "__debug": "cpp",
         "__errc": "cpp",
@@ -76,14 +82,32 @@
         "__tuple": "cpp",
         "bitset": "cpp",
         "chrono": "cpp",
+<<<<<<< HEAD
         "complex": "cpp",
+=======
+        "codecvt": "cpp",
+        "compare": "cpp",
+        "complex": "cpp",
+        "concepts": "cpp",
+        "condition_variable": "cpp",
+>>>>>>> symbol-table
         "cstring": "cpp",
         "ctime": "cpp",
         "iomanip": "cpp",
         "ios": "cpp",
         "locale": "cpp",
         "mutex": "cpp",
+<<<<<<< HEAD
         "ratio": "cpp",
         "stack": "cpp"
+=======
+        "numbers": "cpp",
+        "queue": "cpp",
+        "ratio": "cpp",
+        "semaphore": "cpp",
+        "stack": "cpp",
+        "thread": "cpp",
+        "stop_token": "cpp"
+>>>>>>> symbol-table
     }
 }
