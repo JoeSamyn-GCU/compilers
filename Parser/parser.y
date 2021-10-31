@@ -361,7 +361,7 @@ Stmt: /* empty */ { $$ = NULL; }
 											is_while = false;
 											lable_counter++;
 
-											/* ---- SEMANTIC ACTIONS by PARSER ---- */
+											/* ---- AST ACTIONS by PARSER ---- */
 											$$ = New_Tree($1, $4, $6);
 										}
 	| Matched 	{ $$ = $1; }
@@ -373,7 +373,7 @@ Matched: IF OPAR RelExpr CPAR Matched ELSE {IrGen::printLabel(".L" + std::to_str
 																														IrGen::printLabel(curr_label);
 																														lable_counter++;
 
-																														/* ---- SEMANTIC ACTIONS by PARSER ---- */
+																														/* ---- AST ACTIONS by PARSER ---- */
 																														AST* cond = (AST*) malloc(sizeof(AST));
 																														AST* e = (AST*) malloc(sizeof(AST));
 																														AST* i = (AST*) malloc(sizeof(AST));
@@ -400,7 +400,7 @@ Unmatched: IF OPAR RelExpr CPAR Block	{
 											IrGen::printLabel(curr_label);
 											curr_label = "";
 
-											/* ---- SEMANTIC ACTIONS by PARSER ---- */
+											/* ---- AST ACTIONS by PARSER ---- */
 											if(debug)
 												printf("\nRECOGNIZED RULE: IF STATEMENT\n");
 											
@@ -435,24 +435,20 @@ Expr:	ID  {
 						IrGen::syscall();
 
 						argumentVector.clear();
-						/* ---- SEMANTIC ACTIONS by PARSER ---- */
+
+						/* ---- AST ACTIONS by PARSER ---- */
 						AST* write = (AST*)malloc(sizeof(AST));
 						write = New_Tree($1, NULL, NULL);
 						$$ = New_Tree(out, write, $2);
 						
 					}
 | ID EQ MathExpr 	{
-						/* --- SEMANTIC CHECKS --- */
 						argumentVector.clear();
 
+						/* --- SEMANTIC CHECKS --- */
 						checkIntType(current, $1);
 
-						/* ---- IR Code Generation ---- */
-
-						
-
-
-						/* ---- SEMANTIC ACTIONS by PARSER ---- */
+						/* ---- AST ACTIONS by PARSER ---- */
 						if(debug)
 							std::cout << "\n RECOGNIZED RULE: ID EQ MathExpr\nTOKENS: " << $1 << " " << $2 << " " << $3->nodeType << std::endl;
 						struct AST* id = (AST*)malloc(sizeof(struct AST));
@@ -462,7 +458,7 @@ Expr:	ID  {
 						$$ = eq;
 					}
 | ID EQ ID 	{
-				/* --- SYMBOL TABLE CHECKS --- */
+				/* --- SEMANTIC CHECKS --- */
 				Entry* e = current->searchEntry($1);
 				if (e == nullptr && !parameterVector.empty()) { // TODO: check for parameters too!!!
 					for (int i = 0; i < parameterVector.size(); i++) {
@@ -500,6 +496,7 @@ Expr:	ID  {
 				argumentVector.push_back(e_2);
 
 				std::cout << "HIT ID" << std::endl;
+
 				/* ---- IR Code Generation ---- */
 				// TODO: fix this to check both global variables exist
 				std::string reg_1 = IrGen::getMappedRegister($1);
@@ -528,7 +525,7 @@ Expr:	ID  {
 					IrGen::printIrCodeCommand("li", reg_2 + ",", reg_1, "");
 				}
 
-				/* ---- SEMANTIC ACTIONS by PARSER ---- */
+				/* ---- AST ACTIONS by PARSER ---- */
 				if(debug)
 					std::cout << "\n RECOGNIZED RULE: ID EQ ID\nTOKENS: " << $1 << " " << $2 << " " << $3 << std::endl;
 				struct AST* id_1 = (AST*)malloc(sizeof(struct AST));
@@ -540,7 +537,7 @@ Expr:	ID  {
 				$$ = eq;
 			}
 | ID EQ NUMBER 	{
-					/* --- SYMBOL TABLE CHECKS --- */
+					/* --- SEMANTIC CHECKS --- */
 					Entry* e = current->searchEntry($1);
 					if (e == nullptr && !parameterVector.empty()) { // TODO: check for parameters too!!!
 						for (int i = 0; i < parameterVector.size(); i++) {
@@ -567,11 +564,10 @@ Expr:	ID  {
 						IrGen::printIrCodeCommand("li", std::to_string($3).append(","), id_reg, "");
 						IrGen::storeGlobal(id_reg, $1);
 					}
-					
-
 
 					std::cout << "HIT NUM" << std::endl;
-					/* ---- SEMANTIC ACTIONS by PARSER ---- */
+
+					/* ---- AST ACTIONS by PARSER ---- */
 					if(debug)
 						std::cout << "\n RECOGNIZED RULE: ID EQ ID\nTOKENS: " << $1 << " " << $2 << " " << $3 << std::endl;
 					struct AST* id_1 = (AST*)malloc(sizeof(struct AST));
@@ -592,10 +588,8 @@ Expr:	ID  {
 							checkParameters(e, argumentVector);
 							argumentVector.clear();
 							// Don't need to check return type since it is not assigned to anything
-							/* ---- SEMANTIC ACTIONS by PARSER ---- */
-							argumentVector.clear();
 
-							/* ---- SEMANTIC ACTIONS by PARSER ---- */
+							/* ---- AST ACTIONS by PARSER ---- */
 							$$ = New_Tree($1, $3, NULL);
 						}
 
@@ -713,6 +707,7 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 										std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " << 
 								   		 $2<< " " << $3->nodeType << std::endl;
 
+									/* ---- AST ACTIONS by PARSER ---- */
 									AST* op = New_Tree($2, $1, $3, result_reg);
 									$$ = op;
 								}
@@ -728,6 +723,7 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 										std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " << 
 								   		 $2<< " " << $3->nodeType << std::endl;
 
+									/* ---- AST ACTIONS by PARSER ---- */
 									AST* op = New_Tree($2, $1, $3, result_reg);
 									$$ = op;
 								}
@@ -743,6 +739,7 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 										std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " << 
 								   		 $2 << " " << $3->nodeType << std::endl;
 
+									/* ---- AST ACTIONS by PARSER ---- */
 									AST* op = New_Tree($2, $1, $3, result_reg);
 									$$ = op;
 								}
@@ -758,11 +755,12 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 										std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " << 
 								   		 $2 << " " << $3->nodeType << std::endl;
 
+									/* ---- AST ACTIONS by PARSER ---- */
 									AST* op = New_Tree($2, $1, $3, result_reg);
 									$$ = op;
 								}
 |	OPAR MathExpr CPAR	{
-							/* ---- SEMANTIC ACTIONS by PARSER ---- */
+							/* ---- AST ACTIONS by PARSER ---- */
 							$$ = $2;
 						}
 | NUMBER	{
@@ -776,7 +774,7 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 				argumentVector.push_back(e);
 
 
-				/* ---- SEMANTIC ACTIONS by PARSER ---- */
+				/* ---- AST ACTIONS by PARSER ---- */
 				if(debug)
 					printf("\n RECOGNIZED RULE: NUMBER\nTOKENS: %d\n", $1);
 				char num_s[100];
@@ -784,7 +782,7 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 				$$ = New_Tree(num_s, NULL, NULL, reg);
 			}
 | ID	{
-			/* --- SYMBOL TABLE CHECKS --- */
+			/* --- SEMANTIC CHECKS --- */
 			Entry* e = current->searchEntry($1);
 			if (e == nullptr && !parameterVector.empty()) { // TODO: check for parameters too!!!
 				for (int i = 0; i < parameterVector.size(); i++) {
@@ -809,7 +807,7 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 			$$ = New_Tree($1, NULL, NULL);
 }
 | ID OSB MathExpr CSB 	{
-							/* ---- SEMANTIC ACTIONS by PARSER ---- */
+							/* ---- AST ACTIONS by PARSER ---- */
 							AST* id = (AST*) malloc(sizeof(AST));
 							id = New_Tree($1, NULL, NULL);
 							$$ = New_Tree("ARRAY", id, $3);
@@ -827,7 +825,7 @@ RelExpr: MathExpr GTE MathExpr	{
 										//lable_counter++;
 										IrGen::printIrCodeCommand("blt", arg1 + ",", arg2 + ",", curr_label);
 
-										/* ---- SEMANTIC ACTIONS by PARSER ---- */
+										/* ---- AST ACTIONS by PARSER ---- */
 										if(debug)
 											printf("\nRECOGNIZED RULE: Relational Expression\n");
 										$$ = New_Tree($2, $1, $3);
@@ -844,7 +842,7 @@ RelExpr: MathExpr GTE MathExpr	{
 							IrGen::printIrCodeCommand("bgt", arg1 + ",", arg2 + ",", curr_label);
 
 
-							/* ---- SEMANTIC ACTIONS by PARSER ---- */
+							/* ---- AST ACTIONS by PARSER ---- */
 							if(debug)
 								printf("\nRECOGNIZED RULE: Relational Expression\n");
 							$$ = New_Tree($2, $1, $3);
@@ -861,7 +859,7 @@ RelExpr: MathExpr GTE MathExpr	{
 							IrGen::printIrCodeCommand("blt", arg1 + ",", arg2 + ",", curr_label);
 							IrGen::printIrCodeCommand("beq", arg1 + ",", arg2 + ",", curr_label);
 
-							/* ---- SEMANTIC ACTIONS by PARSER ---- */
+							/* ---- AST ACTIONS by PARSER ---- */
 							if(debug)
 								printf("\nRECOGNIZED RULE: Relational Expression\n");
 
@@ -880,7 +878,7 @@ RelExpr: MathExpr GTE MathExpr	{
 							IrGen::printIrCodeCommand("beq", arg1 + ",", arg2 + ",", curr_label);
 
 
-							/* ---- SEMANTIC ACTIONS by PARSER ---- */
+							/* ---- AST ACTIONS by PARSER ---- */
 							if(debug)
 								printf("\nRECOGNIZED RULE: Relational Expression\n");
 							$$ = New_Tree($2, $1, $3);
@@ -897,7 +895,7 @@ RelExpr: MathExpr GTE MathExpr	{
 							IrGen::printIrCodeCommand("beq", arg1 + ",", arg2 + ",", curr_label);
 
 
-							/* ---- SEMANTIC ACTIONS by PARSER ---- */
+							/* ---- AST ACTIONS by PARSER ---- */
 							if(debug)
 								printf("\nRECOGNIZED RULE: Relational Expression\n");
 							$$ = New_Tree($2, $1, $3);
@@ -913,7 +911,7 @@ RelExpr: MathExpr GTE MathExpr	{
 							//lable_counter++;
 							IrGen::printIrCodeCommand("bneq", arg1 + ",", arg2 + ",", curr_label);
 
-							/* ---- SEMANTIC ACTIONS by PARSER ---- */
+							/* ---- AST ACTIONS by PARSER ---- */
 							if(debug)
 								printf("\nRECOGNIZED RULE: Relational Expression\n");
 							$$ = New_Tree($2, $1, $3);
@@ -921,7 +919,7 @@ RelExpr: MathExpr GTE MathExpr	{
 | RelExpr AND RelExpr 	{
 							/* ---- GENERATE IR CODE ---- */
 
-							/* ---- SEMANTIC ACTIONS by PARSER ---- */
+							/* ---- AST ACTIONS by PARSER ---- */
 							if(debug)
 								printf("\nRECOGNIZED RULE: Relational Expression\n");
 							$$ = New_Tree($2, $1, $3);
@@ -930,7 +928,7 @@ RelExpr: MathExpr GTE MathExpr	{
 							/* ---- GENERATE IR CODE ---- */
 
 
-							/* ---- SEMANTIC ACTIONS by PARSER ---- */
+							/* ---- AST ACTIONS by PARSER ---- */
 							if(debug)
 								printf("\nRECOGNIZED RULE: Relational Expression\n");
 							$$ = New_Tree($2, $1, $3);
