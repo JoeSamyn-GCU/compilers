@@ -150,12 +150,13 @@ FunDecl:	TYPE ID OPAR 	{
 												Entry* e = new Entry($2, $1);
 												current->insertEntry(e);
 
-												if( $1 != returnTypeVar ) 
+												// ---- SEMANTIC ACTIONS by PARSER ----
+												if( $1 != returnTypeVar && strcmp($1, "void") ) 
 													std::cout << FRED("ERROR: Function type does not match RETURN type") << std::endl;
 												
 												returnTypeVar = "";
 												
-												/* ---- SEMANTIC ACTIONS by PARSER ---- */
+												/* ---- AST ACTIONS by PARSER ---- */
 												if(debug)
 													std::cout << "\nRECOGNIZE RULE: Function Decl\n";
 												AST* type = (AST*)malloc(sizeof(AST));
