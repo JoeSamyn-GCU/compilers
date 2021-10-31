@@ -10,7 +10,7 @@ int main(){
     x = y + 1;
     if(x == 5){
         x = 1 + 3;
-        write x + 3;
+        write "x + 3";
     }
     else{
         x = 1 + 7;
@@ -21,10 +21,13 @@ int main(){
     }
 
     if(x < 5){
-        x = 0;
+        x := 0;
     }
 
+    /* Hey */
     fun();
+    procA2(x);
+    /* Comment */
 
     x = y + 1;
 

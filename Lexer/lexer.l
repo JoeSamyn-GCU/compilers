@@ -3,6 +3,9 @@
 %{
 #include <stdio.h>
 #include <string.h>
+#include <iostream>
+#include "colors.h"
+
 
 #define YY_DECL int yylex()
 #include "parser.tab.h"
@@ -263,7 +266,8 @@ ws          {delim}+
 [ \t]	{chars++;}
 .		{	
 			chars++;
-         	printf("%s : Unrecognized symbol at line %d char %d\n", yytext,lines,chars);
+			std::cout << FRED("ERROR::Unrecognized symbol: '") << yytext << FRED("' at line ") << lines << FRED(" character ") << chars << std::endl;
+         	//printf("%s : Unrecognized symbol at line %d char %d\n", yytext,lines,chars);
 		}
 		
 
