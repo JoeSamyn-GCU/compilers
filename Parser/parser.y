@@ -141,7 +141,7 @@ FunDecl:	TYPE ID OPAR 	{
 							} CPAR Block 	{
 												// ---- IR CODE GENERATION ----
 												std::cout << $2 << std::endl;
-												if(std::strcmp($2, "main") != 0)
+												if(strcmp($2, "main") != 0)
 													IrGen::printIrCodeCommand("jr", "$ra", "", "");
 												IrGen::ofile << std::endl;
 
@@ -151,7 +151,7 @@ FunDecl:	TYPE ID OPAR 	{
 												current->insertEntry(e);
 
 												// ---- SEMANTIC ACTIONS by PARSER ----
-												if( $1 != returnTypeVar && std::strcmp($1, "void") ) 
+												if( $1 != returnTypeVar && !strcmp($1, "void") ) 
 													std::cout << FRED("ERROR: Function type does not match RETURN type") << std::endl;
 												
 												returnTypeVar = "";
@@ -422,7 +422,7 @@ Unmatched: IF OPAR RelExpr CPAR Block	{
 Expr:	ID  { 
 				if(debug)
 					printf("\n RECOGNIZED RULE: Simplest expression\n"); 
-
+				argumentVector.clear();
 				/* ---- AST ACTIONS by PARSER ---- */
 				struct AST* id = (AST*)malloc(sizeof(struct AST));
 				id = New_Tree($1, NULL, NULL);
@@ -443,10 +443,13 @@ Expr:	ID  {
 						
 					}
 | ID EQ MathExpr 	{
+						
 						argumentVector.clear();
 
 						/* --- SEMANTIC CHECKS --- */
+						checkExistance(current, $1, parameterVector);
 						checkIntType(current, $1);
+						
 
 						/* ---- AST ACTIONS by PARSER ---- */
 						if(debug)
@@ -459,42 +462,8 @@ Expr:	ID  {
 					}
 | ID EQ ID 	{
 				/* --- SEMANTIC CHECKS --- */
-				Entry* e = current->searchEntry($1);
-				if (e == nullptr && !parameterVector.empty()) { // TODO: check for parameters too!!!
-					for (int i = 0; i < parameterVector.size(); i++) {
-						if ($1 == parameterVector.at(i)->name) {
-							std::cout<<"FOUND IT"<<std::endl;
-							e = parameterVector.at(i);
-							break;
-						}
-					}
-				}
-				else if (e == nullptr) {
-					printf(FRED("SEMANTIC ERROR::ID not declared in scope\n"));
-				}
-				else {
-					std::cout<<e->name<<std::endl;
-				}
-				argumentVector.push_back(e);
-
-				Entry* e_2 = current->searchEntry($3);
-				if (e_2 == nullptr && !parameterVector.empty()) { // TODO: check for parameters too!!!
-					for (int i = 0; i < parameterVector.size(); i++) {
-						if ($3 == parameterVector.at(i)->name) {
-							std::cout<<"FOUND IT"<<std::endl;
-							e_2 = parameterVector.at(i);
-							break;
-						}
-					}
-				}
-				else if (e_2 == nullptr) {
-					printf(FRED("SEMANTIC ERROR::ID not declared in scope\n"));
-				}
-				else {
-					std::cout<<e->name<<std::endl;
-				}
-				argumentVector.push_back(e_2);
-
+				checkExistance(current, $1, parameterVector);
+				checkExistance(current, $3, parameterVector);
 				std::cout << "HIT ID" << std::endl;
 
 				/* ---- IR Code Generation ---- */
@@ -538,24 +507,8 @@ Expr:	ID  {
 			}
 | ID EQ NUMBER 	{
 					/* --- SEMANTIC CHECKS --- */
-					Entry* e = current->searchEntry($1);
-					if (e == nullptr && !parameterVector.empty()) { // TODO: check for parameters too!!!
-						for (int i = 0; i < parameterVector.size(); i++) {
-							if ($1 == parameterVector.at(i)->name) {
-								std::cout<<"FOUND IT"<<std::endl;
-								e = parameterVector.at(i);
-								break;
-							}
-						}
-					}
-					else if (e == nullptr) {
-						printf(FRED("SEMANTIC ERROR::ID not declared in scope\n"));
-					}
-					else {
-						std::cout<<e->name<<std::endl;
-					}
-					argumentVector.push_back(e);
-
+					argumentVector.clear();
+					checkExistance(current,$1, parameterVector);
 					/* ---- IR Code Generation ---- */
 					std::string id_reg = IrGen::getMappedRegister($1);
 					// This is assumed to be a global variable 
@@ -583,6 +536,7 @@ Expr:	ID  {
 							IrGen::printIrCodeCommand("jal", $1, "", "");
 
 							/* --- SEMANTIC CHECKS --- */
+							std::cout<<"Got to this point: Checking parameters for function"<<std::endl;
 							Entry* e = current->searchEntry($1);
 							// check for correct parameters
 							checkParameters(e, argumentVector);

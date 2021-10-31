@@ -9,6 +9,7 @@
 #include <map>
 
 #include "colors.h"
+#include <vector>
 
 /**
  * @brief Class used to hold data for Quadruples table
