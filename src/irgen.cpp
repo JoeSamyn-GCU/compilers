@@ -198,6 +198,14 @@ void IrGen::storeGlobal(std::string reg, std::string id){
     IrGen::printIrCodeCommand("sw", reg + ",", id.append(gp), "");
 }
 
+void IrGen::syscall(){
+    ofile << "syscall\n";
+}
+
+void IrGen::printJump(std::string label){
+    ofile << "j " << label << std::endl << std::endl;
+}
+
 /* End IrGen Implementation */
 
 /* Begin Qe Implementation */

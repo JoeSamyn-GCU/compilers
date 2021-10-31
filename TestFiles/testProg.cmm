@@ -1,24 +1,30 @@
 int x;
 int y;
 
+void fun(){
+    writeln;
+}
+
 int main(){
     x = y;
     x = y + 1;
     if(x == 5){
         x = 1 + 3;
-        writeln;
+        write x + 3;
     }
     else{
         x = 1 + 7;
     }
 
-    if(x <= 4){
+    while(x < 5){
+        x = x + 1;
+    }
+
+    if(x < 5){
         x = 0;
     }
 
-    if(x >= 4){
-        x = 0;
-    }
+    fun();
 
     x = y + 1;
 }

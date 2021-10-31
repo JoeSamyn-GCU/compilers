@@ -164,6 +164,20 @@ class IrGen {
          */
         static void storeGlobal(std::string reg, std::string id);
 
+        /**
+         * @brief print MIPS syscall instruction
+         * 
+         * @return
+         */
+        static void syscall();
+
+        /**
+         * @brief print instruction to jump to label
+         * 
+         * @param label label to jump to in mips
+         */
+        static void printJump(std::string label);
+
     /* Public Static Variables */
     public:
         /**
