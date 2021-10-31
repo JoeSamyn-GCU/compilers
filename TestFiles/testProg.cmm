@@ -2,12 +2,22 @@ int x;
 int y;
 
 int main(){
-    x = y + 1 * 2 - 9 / 10;
-    if(x > 5){
+    x = y;
+    x = y + 1;
+    if(x == 5){
         x = 1 + 3;
+        writeln;
     }
     else{
         x = 1 + 7;
+    }
+
+    if(x <= 4){
+        x = 0;
+    }
+
+    if(x >= 4){
+        x = 0;
     }
 
     x = y + 1;

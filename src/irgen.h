@@ -6,6 +6,9 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <map>
+
+#include "colors.h"
 
 /**
  * @brief Class used to hold data for Quadruples table
@@ -114,6 +117,53 @@ class IrGen {
          */
         static std::string getRegister(std::string var = "");
 
+        /**
+         * @brief add variable name and register number to dictionary to keep track of mapped variables
+         * 
+         * @param var variable to add into map
+         * @param reg register to map to variable
+         * @return
+         */
+        static void mapVarToReg(std::string var, std::string reg);
+
+        /**
+         * @brief get the register that was mapped to the variabled
+         * 
+         * @param var variable to get register for
+         * @return register mapped to the variable. Empty string if none found
+         */
+        static std::string getMappedRegister(std::string var);
+
+        /**
+         * @brief clear all variables that were mapped to registers in this scope
+         * 
+         */
+        static void clearMappedVarsInScope();
+
+        /**
+         * @brief clear the registers that were used in this scope
+         * 
+         * TODO: This will need to be improved. Crude approach to register management
+         */
+        static void clearScopedRegisters();
+
+        /**
+         * @brief generate assembly code to load global variable into a register
+         * 
+         * @param var variable to load into register
+         * @return register the global variable was loaded into
+         */
+        static std::string loadGlobal(std::string var);
+
+        /**
+         * @brief store value in register into a global variable
+         * 
+         * @param reg register containing the value to store
+         * @param id id of the global variable 
+         * @return
+         */
+        static void storeGlobal(std::string reg, std::string id);
+
     /* Public Static Variables */
     public:
         /**
@@ -137,13 +187,25 @@ class IrGen {
         /**
          * @brief string array used to hold values at various registers
          */
-        static bool registers[10];
+        static bool registers[15];
 
         /**
          * @brief temp integer used to keep track of general register number
          * 
          */
         static int r_counter;
+
+        /**
+         * @brief integer used to keep track of current scope depth
+         * 
+         */
+        static int scope_counter;
+
+        /**
+         * @brief Hashmap used to keep track of mappings between registers and variables
+         *
+         */
+        static std::map<std::string, std::string> var_reg;
 
 };
 

@@ -7,8 +7,9 @@ In ARM we can use registers R0 - R10 for general purpose, except R7 which is res
 /* Begin IrGen Implementation */
 std::ofstream IrGen::ofile;
 std::deque<Qe*> IrGen::qe_deque;
-bool IrGen::registers[10];
-
+std::map<std::string, std::string> IrGen::var_reg;
+bool IrGen::registers[15];
+int IrGen::scope_counter = 0;
 int IrGen::r_counter;
 
 void IrGen::openFile(){
@@ -101,6 +102,10 @@ std::string IrGen::printIrCode(std::string op, std::string arg1, std::string arg
 
     // find result register 
     result_register = getRegister("");
+    if(result_register == "-1"){
+        std::cout << FRED("ERROR::Register overflow. Ran out of CPU registers\n");
+        return "";
+    }
 
     ofile << result_register << " = " << arg1 << " " << op << " " << arg2 << std::endl;
 
@@ -124,18 +129,20 @@ std::string IrGen::getRegister(std::string var){
             
             if(!registers[i]){
                 registers[i] = true;
-                return "R" + std::to_string(i);
+                return "$t" + std::to_string(i);
             }
         }
     }
 
     // We are not looking for a matching variable or did not find one
-    for(int i = 0; i < 10; i++){
+    for(int i = 0; i < 15; i++){
         if(!registers[i]&& i != 7){
             registers[i] = true;
-            return "R" + std::to_string(i);
+            return "$t" + std::to_string(i);
         }
     }
+
+    return "-1";
 }
 
 bool IrGen::isOp(std::string val){
@@ -153,6 +160,42 @@ bool IrGen::isRelOp(std::string val){
     || val == "<="
     || val == ">="
     || val == "IF";
+}
+
+void IrGen::mapVarToReg(std::string var, std::string reg){
+    if(var_reg.find(var) == var_reg.end()){
+        var_reg[var] = reg;
+    }
+    else{
+        var = var + std::to_string(scope_counter);
+        var_reg[var] = reg;
+    }
+}
+
+std::string IrGen::getMappedRegister(std::string var){
+    if(var_reg.find(var) == var_reg.end()){
+        return "";
+    }
+
+    return var_reg[var];
+}
+
+std::string IrGen::loadGlobal(std::string var){
+    std::string reg = IrGen::getRegister();
+    std::string gp = "($gp)";
+    IrGen::printIrCodeCommand("lw", var.append(gp) + ",", reg, "");
+    return reg;
+}
+
+void IrGen::clearScopedRegisters(){
+    for(int i = 0; i < 15; i++){
+        registers[i] = false;
+    }
+}
+
+void IrGen::storeGlobal(std::string reg, std::string id){
+    std::string gp = "($gp)";
+    IrGen::printIrCodeCommand("sw", reg + ",", id.append(gp), "");
 }
 
 /* End IrGen Implementation */
