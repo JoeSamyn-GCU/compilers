@@ -27,4 +27,6 @@ int main(){
     fun();
 
     x = y + 1;
+
+    return x;
 }
