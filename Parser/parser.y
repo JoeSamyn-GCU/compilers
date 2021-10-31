@@ -151,7 +151,7 @@ FunDecl:	TYPE ID OPAR 	{
 												current->insertEntry(e);
 
 												// ---- SEMANTIC ACTIONS by PARSER ----
-												if( $1 != returnTypeVar && strcmp($1, "void") ) 
+												if( $1 != returnTypeVar && std::strcmp($1, "void") ) 
 													std::cout << FRED("ERROR: Function type does not match RETURN type") << std::endl;
 												
 												returnTypeVar = "";
