@@ -41,8 +41,8 @@ run:
 	$(CC) $(STD) $(INCLUDES) -o $(BIN) $(SRC)
 	@echo
 	@echo
-	@echo Executing parser using testProg.cmm...
-	bin/gmm TestFiles/testProg.cmm
+	@echo Executing parser using Semantic_analyzer_testfile.cmm...
+	bin/gmm TestFiles/Semantic_analyzer_testfile.cmm
 
 # Remove all binaries, flex, and bison generated files
 clean:

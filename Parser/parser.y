@@ -116,7 +116,7 @@ DeclList   {
 				current->printTables();
 				printf("Total tables created: %i\n", tempCounter);
 					}
-											;
+;
 
 DeclList: Decl { $$ = $1; }
 | Decl DeclList	{ 	
@@ -536,7 +536,8 @@ Expr:	ID  {
 							IrGen::printIrCodeCommand("jal", $1, "", "");
 
 							/* --- SEMANTIC CHECKS --- */
-							std::cout<<"Got to this point: Checking parameters for function"<<std::endl;
+							checkExistance(current, $1, parameterVector);
+
 							Entry* e = current->searchEntry($1);
 							// check for correct parameters
 							checkParameters(e, argumentVector);
