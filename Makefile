@@ -42,7 +42,7 @@ run:
 	@echo
 	@echo
 	@echo Executing parser using Semantic_analyzer_testfile.cmm...
-	bin/gmm TestFiles/Semantic_analyzer_testfile.cmm
+	bin/gmm TestFiles/testProg.cmm
 
 # Remove all binaries, flex, and bison generated files
 clean:

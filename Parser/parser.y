@@ -153,7 +153,7 @@ FunDecl:	TYPE ID OPAR 	{
 
 												// ---- SEMANTIC ACTIONS by PARSER ----
 												if( $1 != returnTypeVar && strcmp($1, "void") ) 
-													std::cout << FRED("ERROR: Function type does not match RETURN type") << std::endl;
+													std::cout << FRED("ERROR::Function type does not match RETURN type. LINE ") << lines << FRED(" CHARACTER ") << chars << std::endl;
 												
 												returnTypeVar = "";
 												
@@ -340,8 +340,12 @@ Stmt: /* empty */ { $$ = NULL; }
 								$$ = New_Tree(out,write,ln);
 							}
 	| WRITE STRING SEMICOLON	{
-									std::cout << FRED("ERROR::Strings are unsupported in C-- 1.0. ") << FRED(" LINE ") << lines << FRED(" CHARACTER ") << chars << std::endl;
-									$$ = NULL;
+									std::cout << FRED("ERROR::Strings are unsupported for write in C-- 1.0. ") << FRED(" LINE ") << lines << FRED(" CHARACTER ") << chars << std::endl;
+									$$ = New_Tree("WRITE", NULL, NULL);
+								}
+	| WRITELN STRING SEMICOLON	{
+									std::cout << FRED("ERROR::Strings are unsupported for writeln in C-- 1.0. ") << FRED(" LINE ") << lines << FRED(" CHARACTER ") << chars << std::endl;
+									$$ = New_Tree("WRITE", NULL, NULL);
 								}
 	| Expr SEMICOLON	{
 							$$ = $1;
