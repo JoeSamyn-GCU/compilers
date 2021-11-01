@@ -90,6 +90,7 @@ char currentScope[50]; // global or the name of the function
 %token <string> ELSE
 %token <string> OR
 %token<string> AND
+%token<string> STRING
 
 
 %type <ast> Program VarDeclList VarDecl Stmt StmtList Expr MathExpr Tail FunDecl Block Decl DeclList ParamDecl ParamDeclList RelExpr Matched Unmatched ArgList
@@ -113,9 +114,9 @@ DeclList   {
 
 				// DUMP SYMBOL TABLE 
 				printf("\n--- Symbol Table ---\n\n");
-				current->printTables();
+				symbolTable->printTables();
 				printf("Total tables created: %i\n", tempCounter);
-					}
+			}
 ;
 
 DeclList: Decl { $$ = $1; }
@@ -338,6 +339,10 @@ Stmt: /* empty */ { $$ = NULL; }
 								write = New_Tree($1, NULL, NULL);
 								$$ = New_Tree(out,write,ln);
 							}
+	| WRITE STRING SEMICOLON	{
+									std::cout << FRED("ERROR::Strings are unsupported in C-- 1.0. ") << FRED(" LINE ") << lines << FRED(" CHARACTER ") << chars << std::endl;
+									$$ = NULL;
+								}
 	| Expr SEMICOLON	{
 							$$ = $1;
 						}
@@ -394,7 +399,6 @@ Matched: IF OPAR RelExpr CPAR Matched ELSE {IrGen::printLabel(".L" + std::to_str
 
 Unmatched: IF OPAR RelExpr CPAR Block	{
 											/* ---- GENERATE IR CODE ---- */
-											std::cout << "Label Counter: " << lable_counter << std::endl;
 											curr_label = ".L" + std::to_string(lable_counter);
 											IrGen::printIrCodeCommand("j", curr_label, "", "");
 											IrGen::printLabel(curr_label);
@@ -464,7 +468,6 @@ Expr:	ID  {
 				/* --- SEMANTIC CHECKS --- */
 				checkExistance(current, $1, parameterVector);
 				checkExistance(current, $3, parameterVector);
-				std::cout << "HIT ID" << std::endl;
 
 				/* ---- IR Code Generation ---- */
 				// TODO: fix this to check both global variables exist
@@ -518,9 +521,8 @@ Expr:	ID  {
 						IrGen::storeGlobal(id_reg, $1);
 					}
 
-					std::cout << "HIT NUM" << std::endl;
-
 					/* ---- AST ACTIONS by PARSER ---- */
+				
 					if(debug)
 						std::cout << "\n RECOGNIZED RULE: ID EQ ID\nTOKENS: " << $1 << " " << $2 << " " << $3 << std::endl;
 					struct AST* id_1 = (AST*)malloc(sizeof(struct AST));
@@ -555,21 +557,29 @@ Expr:	ID  {
 										Entry* f = checkExistance(current, $3, parameterVector);
 										
 										if( e == nullptr ) 
-											std::cout << FRED("ERROR: ID " << $1 << " does not exist in table") << std::endl;
+											std::cout << FRED("ERROR::LINE ") << lines << FRED(" ::CHARACTER ") << chars << " " << $1 << FRED(" not declared in scope. ") << std::endl;
 
-										if( f == nullptr ) 
-											std::cout << FRED("ERROR: ID " << $3 << " does not exist in table") << std::endl;
-										
-										// check for correct parameters to function
-										if( !checkParameters(f, argumentVector) ) 
-											std::cout << FRED("ERROR: Incorrect parameters in function call") << std::endl;
-
-										argumentVector.clear();
-
-										// Compare ID type and function return type
-										if (e->dtype != f->returntype) {
-											printf(FRED("SEMANTIC ERROR::Type mismatch\n"));
+										if( f == nullptr ) {
+											std::cout << FRED("ERROR: ID " << $3 << " does not exist in the current scope. ");
+											std::cout << FRED("LINE ") << lines << FRED(" CHARACTER ") << chars << std::endl;
 										}
+										else{
+											// check for correct parameters to function
+											if( !checkParameters(f, argumentVector) ) 
+											{
+												std::cout << FRED("ERROR: Incorrect parameters in function call") << std::endl;	
+														
+											}	
+
+										
+											argumentVector.clear();
+
+											// Compare ID type and function return type
+											if (e->dtype != f->returntype) {
+												printf(FRED("SEMANTIC ERROR::Type mismatch\n"));
+											}
+										}
+									
 										
 										/* ---- AST ACTIONS by PARSER ---- */
 										AST* id_1 = (AST*) malloc(sizeof(AST));
@@ -590,12 +600,14 @@ Expr:	ID  {
 														if( f == nullptr || f->returntype != "int" ) 
 															std::cout << FRED("ERROR: ID " << $6 << " does not exist in tablee or has a type mismatch in assignment statement") << std::endl;
 														
+														std::cout << "Here" << std::endl;
 														// check for correct parameters to function
 														if( !checkParameters(f, argumentVector) ) 
 															std::cout << FRED("ERROR: Incorrect parameters in function call") << std::endl;
 
+														
 														argumentVector.clear();
-
+														
 														// Compare ID type and function return type
 														if (e->dtype != f->returntype) {
 															printf(FRED("SEMANTIC ERROR::Type mismatch\n"));
@@ -749,10 +761,7 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 				}
 			}
 			else if (e == nullptr) {
-				printf(FRED("SEMANTIC ERROR::ID not declared in scope\n"));
-			}
-			else {
-				std::cout<<e->name<<std::endl;
+				std::cout << FRED("SEMANTIC ERROR::LINE ") << lines << FRED(" ::CHARACTER") << chars << FRED(" not declared in scope\n") << std::endl;
 			}
 			argumentVector.push_back(e);
 

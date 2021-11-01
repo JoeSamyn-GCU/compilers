@@ -23,6 +23,7 @@ ID          {letter}({letter}|{digit})*
 delim       [ \t\n]
 NUMBER      {digit}+(\.{digit}+)?(E[+\-]?(digit)+)?
 ws          {delim}+
+str 		\"([^\\\"]|\\.)*\"
 
 %%
 "/*"    				{
@@ -261,13 +262,25 @@ ws          {delim}+
 			yylval.string = strdup(yytext);
 			return OR;
 		}
+{str}	{
+				chars += strlen(yytext);
+				if(debug_print)
+					printf("%s : STRING\n", yytext);
+				yylval.string = strdup(yytext);
+				return STRING;
+			}
 		
 [\n]	{lines++; chars=0;}
-[ \t]	{chars++;}
+[\t]	{chars++;}
+[\r]	{chars++;}
+" "	 	{chars++;}
 .		{	
 			chars++;
-			std::cout << FRED("ERROR::Unrecognized symbol: '") << yytext << FRED("' at line ") << lines << FRED(" character ") << chars << std::endl;
-         	//printf("%s : Unrecognized symbol at line %d char %d\n", yytext,lines,chars);
+			char c = *yytext;
+			printf("%d\n", c);
+			printf("\033[0;31m");
+         	printf("ERROR::Unrecognized symbol at line %d char %d\n", lines,chars);
+			printf("\033[0m");
 		}
 		
 
