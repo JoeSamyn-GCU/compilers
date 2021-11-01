@@ -8,32 +8,33 @@ Table::Table() {
 
 Table::Table(Table* parent) {
     this->parent = parent;
+    parent->tables.push_back(this);
 }
 
 Table::~Table() {
 
 }
 
-void Table::insertEntry(Entry* e) {
+int Table::insertEntry(Entry* e) {
     
     // Check if entry exists, it does print error and return.
     // TODO: throw an invalid argument exception and catch it in the parser to signify DUPLICATE SYMBOL semantic error
-
-    if(entries.find(e->name) != entries.end()) {
-        std::cout << FRED("**ERROR::ENTRY ALREADY EXISTS:: Cannot enter duplicate entries into symbol table:: Entry Name: ") << e->name << std::endl;
-        return;
+    if(this->searchEntry(const_cast<char*>(e->name.data())) != nullptr) {
+        //std::cout << FRED("**ERROR::ENTRY ALREADY EXISTS:: Cannot enter duplicate entries into symbol table:: Entry Name: ") << e->name << std::endl;
+        return 1;
     }
 
     // TODO: Add logic to run search in parent scopes first before inserting
 
     // If not found insert into entries table
     entries[e->name] = e;
+    return 0;
 }
 
 Entry* Table::deleteEntry(char* name) {
     // If entry hash table is empty just return
     if( entries.size() == 0 ) {
-        std::cout << FYEL("**WARNING::Entries hash table is empty. There is nothing to delete") << std::endl;
+        //std::cout << FYEL("**WARNING::Entries hash table is empty. There is nothing to delete") << std::endl;
         return nullptr;
     }
     Entry* e;
@@ -43,7 +44,7 @@ Entry* Table::deleteEntry(char* name) {
     }
     // Expected if key not in range
     catch (const std::out_of_range){
-        std::cout << FYEL("**WARNING::Entries is not in the table. There is nothing to delete") << std::endl;
+        //std::cout << FYEL("**WARNING::Entries is not in the table. There is nothing to delete") << std::endl;
         return nullptr;
     }
     // Since it has been found, erase and return value
@@ -56,14 +57,14 @@ Entry* Table::searchEntry(char* name) {
     if (parent != nullptr) {
         Entry* parentResult = parent->searchEntry(name);
         if (parentResult != nullptr) {
-            std::cout << FYEL("**WARNING::Entry in parent table") << std::endl;
+            //std::cout << FYEL("**WARNING::Entry in parent table") << std::endl;
             return parentResult;
         }
     }
     
     // If entry hash table is empty, return nullptr
     if( entries.size() == 0 ) {
-        std::cout << FYEL("**WARNING::Entries hash table is empty. There is nothing to search") << std::endl;
+        //std::cout << FYEL("**WARNING::Entries hash table is empty. There is nothing to search") << std::endl;
         return nullptr;
     }
     
@@ -74,7 +75,7 @@ Entry* Table::searchEntry(char* name) {
     }
     // Expected if key not in range
     catch (const std::out_of_range){
-        std::cout << FYEL("**WARNING::Entry is not in the table.") << std::endl;
+        //std::cout << FYEL("**WARNING::Entry is not in the table.") << std::endl;
         return nullptr;
     }
     return e;
@@ -82,19 +83,31 @@ Entry* Table::searchEntry(char* name) {
 
 // TODO: Enable verbose printing
 void Table::printEntries(bool verbose) {
-
+    //if (parent != nullptr) {
+    //    parent->printEntries();
+    //}
     // If entry hash table is empty just return
     if( entries.size() == 0 ) {
-        std::cout << FYEL("**WARNING::Entries hash table is empty. There is nothing to print") << std::endl;
+        //std::cout << FYEL("**WARNING::Entries hash table is empty. There is nothing to print") << std::endl;
         return;
     }
-
-    std::cout << "\nTABLE ENTRIES" << std::endl << "--------------------------------------" << std::endl;
-    std::cout << "KEY\t\t" << "VALUE" << std::endl << "--------------------------------------" << std::endl;
+    std::cout << "\nTABLE ENTRIES" << std::endl << "-----------------------------------------------" << std::endl;
+    std::cout << "KEY\tTYPE\tSCOPE\tELEMS\tPARAMS\tRTYPE" << std::endl << "-----------------------------------------------" << std::endl;
 
     // Else iterate through unordered_map and print all key value pairs
+    // TODO: FORMAT for verbose printing and simplified
     for(const std::pair<std::string, Entry*>& n : entries){
-        std::cout << n.first << "\t" << n.second->dtype << std::endl; 
+        std::cout << n.first << "\t" << n.second->dtype << "\t" << n.second->scope << "\t" << n.second->nelements << "\t" << n.second->nparams << "\t" << n.second->returntype << std::endl; 
+        if (n.second->params.size() > 0) {
+            std::cout << n.second->params.size() << std::endl;
+        }
     }
+}
 
+// TODO: Enable verbose printing
+void Table::printTables(bool verbose) {
+    this->printEntries();
+    for (int i = 0; i < tables.size(); i++) {
+        tables.at(i)->printTables();
+    }
 }

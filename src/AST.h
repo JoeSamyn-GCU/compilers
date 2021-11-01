@@ -8,6 +8,9 @@ typedef struct AST{
 	// Name of node or node type to be displayed when printing AST
 	std::string nodeType;
 
+	// Register the expression result is stored in
+	std::string reg;
+
 	// Left child node
 	struct AST * left;
 
@@ -24,6 +27,8 @@ typedef struct AST{
  * @return new AST node pointer
  */
 struct AST * New_Tree(std::string nt, struct AST* l, struct AST* r);
+
+struct AST * New_Tree(std::string nt, struct AST* l, struct AST* r, std::string reg);
 
 /**
  * Insert node into the next available null right child of the parent subtree

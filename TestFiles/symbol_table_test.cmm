@@ -1,0 +1,21 @@
+int tempFunction(int i) {
+    write(i);
+    return i;
+}
+
+int i;
+int j;
+int h[8];
+
+int a;
+int addOne(int able, int character) {
+    int temp;
+    temp = able + character;
+    return temp;
+}
+
+int main(int k) {
+    int y;
+    int x;
+    k = addOne(x,y);
+}
