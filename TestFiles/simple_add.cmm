@@ -1,0 +1,9 @@
+void main() {
+    int i;
+    int l;
+    int k;
+    i = 1;
+    l = 1;
+    k = i + l;
+    write(k);
+}

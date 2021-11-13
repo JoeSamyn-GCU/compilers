@@ -185,8 +185,8 @@ VarDecl: TYPE ID SEMICOLON		{
 									IrGen::ofile << $2 << ": .word 4\n";
 								else{
 									std::string reg = IrGen::getRegister();
-									IrGen::mapVarToReg($2, reg);
-									IrGen::printIrCodeCommand("li", "0", reg, "");
+									IrGen::mapVarToReg(reg, $2);
+									IrGen::printIrCodeCommand("li", reg, "0", "");
 								}
 
 								// ---- SYMBOL TABLE ACTIONS by PARSER ----
