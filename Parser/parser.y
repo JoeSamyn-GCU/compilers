@@ -81,11 +81,11 @@ char currentScope[50]; // global or the name of the function
 %token <string> READ
 %token <string> RETURN
 %token <string> COMMA
-%token <string> GTE 
+%token <string> GTE
 %token <string> LTE
 %token <string> GT
 %token <string> LT
-%token <string> EQEQ 
+%token <string> EQEQ
 %token <string> NOTEQ
 %token <string> WHILE
 %token <string> IF
@@ -105,16 +105,16 @@ char currentScope[50]; // global or the name of the function
 %%
 
 Program: {
-			gen->ofile << ".data" << std::endl; 
-			gen->ofile << "ln: .asciiz \"\\n\"" << std::endl; 
+			gen->ofile << ".data" << std::endl;
+			gen->ofile << "ln: .asciiz \"\\n\"" << std::endl;
 
-		} 
-DeclList   { 
+		}
+DeclList   {
 				/* ---- AST ACTIONS by PARSER ---- */
 				printf("\n--- Abstract Syntax Tree ---\n\n");
 				print_tree($2, 0);
 
-				// DUMP SYMBOL TABLE 
+				// DUMP SYMBOL TABLE
 				printf("\n--- Symbol Table ---\n\n");
 				symbolTable->printTables();
 				printf("Total tables created: %i\n", tempCounter);
@@ -125,11 +125,11 @@ DeclList   {
 ;
 
 DeclList: Decl { $$ = $1; }
-| Decl DeclList	{ 	
+| Decl DeclList	{
 					/* ---- AST ACTIONS by PARSER ---- */
 					insert_node_right($1, $2);
 					$$ = $1;
-				}	
+				}
 ;
 
 Decl: VarDecl { $$ = $1; }
@@ -144,7 +144,7 @@ FunDecl:	TYPE ID OPAR 	{
 								gen->ofile << $2 << ": \n";
 								gen->scope_counter++;
 								curr_func_name = $2;
-								
+
 							} CPAR Block 	{
 												// ---- IR CODE GENERATION ----
 												std::cout << $2 << std::endl;
@@ -158,11 +158,11 @@ FunDecl:	TYPE ID OPAR 	{
 												current->insertEntry(e);
 
 												// ---- SEMANTIC ACTIONS by PARSER ----
-												if( $1 != returnTypeVar && strcmp($1, "void") ) 
+												if( $1 != returnTypeVar && strcmp($1, "void") )
 													std::cout << FRED("ERROR::Function type does not match RETURN type. LINE ") << lines << FRED(" CHARACTER ") << chars << std::endl;
-												
+
 												returnTypeVar = "";
-												
+
 												/* ---- AST ACTIONS by PARSER ---- */
 												if(debug)
 													std::cout << "\nRECOGNIZE RULE: Function Decl\n";
@@ -184,7 +184,7 @@ VarDeclList: /* empty */ { $$ = NULL; }
 						}
 ;
 
-VarDecl: TYPE ID SEMICOLON		{ 
+VarDecl: TYPE ID SEMICOLON		{
 
 								/* ---- Generate IR Code ---- */
 								if(is_global)
@@ -198,7 +198,7 @@ VarDecl: TYPE ID SEMICOLON		{
 								// ---- SYMBOL TABLE ACTIONS by PARSER ----
 								Entry* e = new Entry($2, $1);
 								current->insertEntry(e);
-								
+
 								// ---- AST ACTIONS by PARSER ----
 								struct AST* id = (AST*)malloc(sizeof(struct AST));
 								struct AST* type = (AST*)malloc(sizeof(struct AST));
@@ -216,7 +216,7 @@ VarDecl: TYPE ID SEMICOLON		{
 											// name, dtype, scope, nelements
 											Entry* e = new Entry($2, $1,"",$4);
 											current->insertEntry(e);
-											
+
 											/* ---- AST ACTIONS by PARSER ---- */
 											if(debug)
 												printf("RECOGNIZED RULE: Array Declaration\nTOKENS: %s %s %s %d %s\n", $1, $2, $3, $4, $5);
@@ -253,14 +253,14 @@ VarDecl: TYPE ID SEMICOLON		{
 											printf("\nLine %d Character %d::SYNTAX ERROR::Array size was not declared\n", lines, chars);
 											printf("\033[0m");
 										}
-	| FUN TYPE ID 	{ 
+	| FUN TYPE ID 	{
 						if(is_global){
 							is_global = false;
 							gen->ofile << "\n.text\n";
 						}
-						std::string s = $3; 
-						gen->printLabel(s + ":"); 
-						curr_func_name = $3; 
+						std::string s = $3;
+						gen->printLabel(s + ":");
+						curr_func_name = $3;
 					} Tail	{
 								std::cout << "HERE HIT";
 								/* ---- Code Generation ---- */
@@ -275,7 +275,7 @@ VarDecl: TYPE ID SEMICOLON		{
 								}
 								current->insertEntry(e);
 
-								if( e->returntype != returnTypeVar ) 
+								if( e->returntype != returnTypeVar )
 									std::cout << FRED("ERROR: Function type does not match RETURN type") << std::endl;
 
 								returnTypeVar = "";
@@ -309,19 +309,19 @@ Stmt: /* empty */ { $$ = NULL; }
 							read = New_Tree($1, NULL, NULL);
 							$$ = New_Tree(in, read, id);
 						}
-	| WRITE ID 	SEMICOLON	{ 
+	| WRITE ID 	SEMICOLON	{
 								/* ---- Code Generation ---- */
 								// Check what type the ID is
 
 								std::cout << curr_func_name << std::endl;
-								
+
 								// Get the id register or load global var into memory
 								std::string reg = gen->getMappedRegister($2);
 								std::cout << "WRITING REG: " << reg << std::endl;
-								
-								
+
+
 								if(current == NULL) std::cout << "DEBUG: HERE\n";
-								
+
 								// Print integer using MIPS, no new line
 								gen->printIrCodeCommand("li", "$v0,", "1", "");
 								gen->printIrCodeCommand("move", "$a0,", reg, "");
@@ -403,12 +403,12 @@ Matched: IF OPAR RelExpr CPAR Matched ELSE {gen->printLabel(".L" + std::to_strin
 																														cond = New_Tree("COND", i, e);
 																														$$ = cond;
 																													}
-  | Block	{ 
+  | Block	{
 	  			/* ---- GENERATE IR CODE ---- */
 				curr_label = ".L" + std::to_string(lable_counter+1);
 				gen->printIrCodeCommand("j", curr_label, "", "");
 
-	  			$$ = $1; 
+	  			$$ = $1;
 			}
 ;
 
@@ -421,7 +421,7 @@ Unmatched: IF OPAR RelExpr CPAR Block	{
 											/* ---- AST ACTIONS by PARSER ---- */
 											if(debug)
 												printf("\nRECOGNIZED RULE: IF STATEMENT\n");
-											
+
 											$$ = New_Tree($1, $3, $5);
 										}
   | IF OPAR RelExpr CPAR Matched ELSE Unmatched	{
@@ -437,9 +437,9 @@ Unmatched: IF OPAR RelExpr CPAR Block	{
   												}
 ;
 
-Expr:	ID  { 
+Expr:	ID  {
 				if(debug)
-					printf("\n RECOGNIZED RULE: Simplest expression\n"); 
+					printf("\n RECOGNIZED RULE: Simplest expression\n");
 				argumentVector.clear();
 				/* ---- AST ACTIONS by PARSER ---- */
 				struct AST* id = (AST*)malloc(sizeof(struct AST));
@@ -459,7 +459,7 @@ Expr:	ID  {
 						AST* write = (AST*)malloc(sizeof(AST));
 						write = New_Tree($1, NULL, NULL);
 						$$ = New_Tree(out, write, $2);
-						
+
 					}
 | ID EQ MathExpr 	{
 						/* ------ CODE GENERATION ------ */
@@ -530,7 +530,7 @@ Expr:	ID  {
 					/* ---- IR Code Generation ---- */
 					std::string id_reg = gen->getMappedRegister($1);
 					std::cout << "REGISTER: " << id_reg << std::endl;
-					// This is assumed to be a global variable 
+					// This is assumed to be a global variable
 					if(id_reg == ""){
 						id_reg = gen->getRegister();
 						gen->printIrCodeCommand("li", id_reg + ",", std::to_string($3), "");
@@ -541,7 +541,7 @@ Expr:	ID  {
 					}
 
 					/* ---- AST ACTIONS by PARSER ---- */
-				
+
 					if(debug)
 						std::cout << "\n RECOGNIZED RULE: ID EQ ID\nTOKENS: " << $1 << " " << $2 << " " << $3 << std::endl;
 					struct AST* id_1 = (AST*)malloc(sizeof(struct AST));
@@ -575,8 +575,8 @@ Expr:	ID  {
 										// check if first ID exists in table or parameters
 										Entry* e = checkExistance(current, $1, parameterVector);
 										Entry* f = checkExistance(current, $3, parameterVector);
-										
-										if( e == nullptr ) 
+
+										if( e == nullptr )
 											std::cout << FRED("ERROR::LINE ") << lines << FRED(" ::CHARACTER ") << chars << " " << $1 << FRED(" not declared in scope. ") << std::endl;
 
 										if( f == nullptr ) {
@@ -585,13 +585,13 @@ Expr:	ID  {
 										}
 										else{
 											// check for correct parameters to function
-											if( !checkParameters(f, argumentVector) ) 
+											if( !checkParameters(f, argumentVector) )
 											{
-												std::cout << FRED("ERROR: Incorrect parameters in function call") << std::endl;	
-														
-											}	
+												std::cout << FRED("ERROR: Incorrect parameters in function call") << std::endl;
 
-										
+											}
+
+
 											argumentVector.clear();
 
 											// Compare ID type and function return type
@@ -599,8 +599,8 @@ Expr:	ID  {
 												printf(FRED("SEMANTIC ERROR::Type mismatch\n"));
 											}
 										}
-									
-										
+
+
 										/* ---- AST ACTIONS by PARSER ---- */
 										AST* id_1 = (AST*) malloc(sizeof(AST));
 										AST* fun = (AST*) malloc(sizeof(AST));
@@ -613,26 +613,26 @@ Expr:	ID  {
 														// check if first ID exists in table or parameters
 														Entry* e = checkExistance(current, $1, parameterVector);
 														Entry* f = checkExistance(current, $6, parameterVector);
-														
-														if( e == nullptr || e->dtype != "int" ) 
+
+														if( e == nullptr || e->dtype != "int" )
 															std::cout << FRED("ERROR: ID " << $1 << " does not exist in table or has a type mismatch in assignment statement") << std::endl;
 
-														if( f == nullptr || f->returntype != "int" ) 
+														if( f == nullptr || f->returntype != "int" )
 															std::cout << FRED("ERROR: ID " << $6 << " does not exist in tablee or has a type mismatch in assignment statement") << std::endl;
-														
+
 														std::cout << "Here" << std::endl;
 														// check for correct parameters to function
-														if( !checkParameters(f, argumentVector) ) 
+														if( !checkParameters(f, argumentVector) )
 															std::cout << FRED("ERROR: Incorrect parameters in function call") << std::endl;
 
-														
+
 														argumentVector.clear();
-														
+
 														// Compare ID type and function return type
 														if (e->dtype != f->returntype) {
 															printf(FRED("SEMANTIC ERROR::Type mismatch\n"));
 														}
-														
+
 														/* ---- AST ACTIONS by PARSER ---- */
 														AST* id_1 = New_Tree($1, NULL, NULL);
 														AST* arr = New_Tree("ARRAY", id_1, $3);
@@ -643,7 +643,7 @@ Expr:	ID  {
 									/* --- SEMANTIC CHECKS --- */
 									checkIntType(current, $1);
 									checkIntType(current, $3);
-									
+
 									/* ---- AST ACTIONS by PARSER ---- */
 									AST* id_1 = (AST*) malloc(sizeof(AST));
 									AST* id_2 = (AST*) malloc(sizeof(AST));
@@ -654,7 +654,7 @@ Expr:	ID  {
 									id_2 = New_Tree($3, NULL, NULL);
 									index = New_Tree(std::to_string($5), NULL, NULL);
 									arr = New_Tree("ARRAY_AT", id_2, index);
-									
+
 									$$ = New_Tree($2, id_1, arr);
 								}
 	| ID OSB MathExpr CSB EQ MathExpr	{
@@ -698,12 +698,21 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 
 									/* ---- SEMANTIC ACTIONS by PARSER ---- */
 									if(debug)
-										std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " << 
+										std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " <<
 								   		 $2<< " " << $3->nodeType << std::endl;
 
 									/* ---- AST ACTIONS by PARSER ---- */
-									AST* op = New_Tree($2, $1, $3, result_reg);
-									$$ = op;
+									//! Here's the new stuff!!!
+									if ($1->isNumber && $3->isNumber) {
+										$1->nodeType = std::to_string(std::stoi($1->nodeType) + std::stoi($3->nodeType));
+										AST* op = New_Tree($2, $1, NULL, result_reg);
+										$$ = op;
+									}
+									else {
+										AST* op = New_Tree($2, $1, $3, result_reg);
+										$$ = op;
+									}
+
 								}
 | MathExpr MINUS MathExpr 	{
 									/* ---- IR Code Generator ---- */
@@ -714,7 +723,7 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 
 									/* ---- SEMANTIC ACTIONS by PARSER ---- */
 									if(debug)
-										std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " << 
+										std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " <<
 								   		 $2<< " " << $3->nodeType << std::endl;
 
 									/* ---- AST ACTIONS by PARSER ---- */
@@ -731,7 +740,7 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 
 									/* ---- SEMANTIC ACTIONS by PARSER ---- */
 									if(debug)
-										std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " << 
+										std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " <<
 								   		 $2 << " " << $3->nodeType << std::endl;
 
 									/* ---- AST ACTIONS by PARSER ---- */
@@ -748,7 +757,7 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 
 									/* ---- SEMANTIC ACTIONS by PARSER ---- */
 									if(debug)
-										std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " << 
+										std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " <<
 								   		 $2 << " " << $3->nodeType << std::endl;
 
 									/* ---- AST ACTIONS by PARSER ---- */
@@ -796,7 +805,7 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 			}
 			argumentVector.push_back(e);
 
-			
+
 			std::string reg = gen->getMappedRegister($1);
 			std::cout << "GETTING MAPPED REGISTER: " << reg << std::endl;
 
@@ -922,7 +931,7 @@ RelExpr: MathExpr GTE MathExpr	{
 							if(debug)
 								printf("\nRECOGNIZED RULE: Relational Expression\n");
 							$$ = New_Tree($2, $1, $3);
-						}	
+						}
 | RelExpr OR RelExpr	{
 							/* ---- GENERATE IR CODE ---- */
 
@@ -936,7 +945,7 @@ RelExpr: MathExpr GTE MathExpr	{
 ;
 
 Tail: OPAR ParamDeclList CPAR Block 	{
-											
+
 											/* ---- AST ACTIONS by PARSER ---- */
 											if(debug)
 												printf("\nRECOGNIZE RULE: Function Decl\n");
@@ -949,15 +958,15 @@ Tail: OPAR ParamDeclList CPAR Block 	{
 Block: OCB {
 				current = new Table(current);
 				tempCounter++;
-				
-			} 
+
+			}
 			VarDeclList StmtList {
 									if (current->parent != nullptr) {
 										//current->printEntries();
 										current = current->parent;
 										//std::cout << "MOVING UP A LEVEL" << std::endl;
 									}
-								} 
+								}
 			CCB 	{
 						/* ---- AST ACTIONS by PARSER ---- */
 						if(debug)
@@ -974,8 +983,8 @@ ParamDeclList: ParamDecl COMMA ParamDeclList 	{
 													insert_node_left($1, $3);
 													$$ = $1;
 												}
-	| ParamDecl	{ 
-					$$ = $1; 
+	| ParamDecl	{
+					$$ = $1;
 				}
 ;
 
@@ -1004,7 +1013,7 @@ ParamDecl: /* empty */ { $$ = NULL; }
 							AST* id = New_Tree($2, NULL, NULL);
 							AST* type = New_Tree($1, NULL, NULL);
 							$$ = New_Tree("array", type, id);
-						}	
+						}
 %%
 
 int main(int argc, char**argv) {
@@ -1017,7 +1026,7 @@ int main(int argc, char**argv) {
 
 	std::cout << "##### Opening IR Code File #####\n";
 	gen->openFile();
-	
+
 	if (argc > 1){
 	  if(!(yyin = fopen(argv[1], "r")))
           {
@@ -1029,7 +1038,7 @@ int main(int argc, char**argv) {
 
 	std::cout << "#### Closing IR Code File ####\n";
 	gen->closeFile();
-	
+
 }
 
 void yyerror(const char* s) {

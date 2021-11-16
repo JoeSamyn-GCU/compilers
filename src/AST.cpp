@@ -20,7 +20,7 @@ AST * New_Tree(std::string nt, struct AST* l, struct AST* r){
 
 }
 
-AST * New_Tree(std::string nt, struct AST* l, struct AST* r, std::string reg){
+AST * New_Tree(std::string nt, struct AST* l, struct AST* r, std::string reg, bool isNumber){
 
 	// Allocate memory for struct
 	struct AST* ast = (AST*)malloc(sizeof(struct AST));
@@ -32,7 +32,7 @@ AST * New_Tree(std::string nt, struct AST* l, struct AST* r, std::string reg){
 	ast->left = l;
 	ast->right = r;
 	ast->reg = reg;
-
+	ast->isNumber = isNumber;
 	return ast;
 
 }
