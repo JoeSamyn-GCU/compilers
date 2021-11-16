@@ -727,8 +727,16 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 								   		 $2<< " " << $3->nodeType << std::endl;
 
 									/* ---- AST ACTIONS by PARSER ---- */
-									AST* op = New_Tree($2, $1, $3, result_reg);
-									$$ = op;
+									//! Here's the new stuff!!!
+									if ($1->isNumber && $3->isNumber) {
+										$1->nodeType = std::to_string(std::stoi($1->nodeType) - std::stoi($3->nodeType));
+										AST* op = New_Tree($2, $1, NULL, result_reg);
+										$$ = op;
+									}
+									else {
+										AST* op = New_Tree($2, $1, $3, result_reg);
+										$$ = op;
+									}
 								}
 | MathExpr DIV MathExpr 	{
 									/* ---- IR Code Generator ---- */
@@ -744,8 +752,17 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 								   		 $2 << " " << $3->nodeType << std::endl;
 
 									/* ---- AST ACTIONS by PARSER ---- */
-									AST* op = New_Tree($2, $1, $3, result_reg);
-									$$ = op;
+									//! Here's the new stuff!!!
+									if ($1->isNumber && $3->isNumber) {
+										//todo: float division instead of integer division
+										$1->nodeType = std::to_string(std::stoi($1->nodeType) / std::stoi($3->nodeType));
+										AST* op = New_Tree($2, $1, NULL, result_reg);
+										$$ = op;
+									}
+									else {
+										AST* op = New_Tree($2, $1, $3, result_reg);
+										$$ = op;
+									}
 								}
 | MathExpr MULT MathExpr 	{
 									/* ---- IR Code Generator ---- */
@@ -761,8 +778,16 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 								   		 $2 << " " << $3->nodeType << std::endl;
 
 									/* ---- AST ACTIONS by PARSER ---- */
-									AST* op = New_Tree($2, $1, $3, result_reg);
-									$$ = op;
+									//! Here's the new stuff!!!
+									if ($1->isNumber && $3->isNumber) {
+										$1->nodeType = std::to_string(std::stoi($1->nodeType) * std::stoi($3->nodeType));
+										AST* op = New_Tree($2, $1, NULL, result_reg);
+										$$ = op;
+									}
+									else {
+										AST* op = New_Tree($2, $1, $3, result_reg);
+										$$ = op;
+									}
 								}
 |	OPAR MathExpr CPAR	{
 							/* ---- AST ACTIONS by PARSER ---- */
