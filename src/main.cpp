@@ -9,42 +9,18 @@
 #include "entry.h"
 #include "symbolTable.h"
 #include "colors.h"
+#include "irgen.h"
+#include <string>
 // Global 
 
 // main 
 int main() {
 
-    /*
-    Entry* e1 = new Entry("Test Entry", "int");
-    Entry* e2 = new Entry("Test Entry 2", "char");
+    IrGen* gen = new IrGen();
 
-    Table* table = new Table();
-    Table* childTable = new Table(table);
-    table->printEntries();
-    childTable->insertEntry(e1);
-    table->insertEntry(e2);
-    Entry* e3c = childTable->searchEntry("Test Entry");
-    std::cout<<"(c) Searched and found "<<e3c->name<<std::endl;
-    table->printEntries();
-    Entry *e3 = table->searchEntry("Test Entry");
-    if (e3 != nullptr) {
-        std::cout<<"Searched and found "<<e3->name<<std::endl;
-    }
-
-    table->deleteEntry("Test Entry");
-    table->deleteEntry("Test Entry");
-    
-    table->searchEntry("Test Entry");
-    
-    table->printEntries();
-    table->deleteEntry("some");
-
-
-    delete e1;
-    delete e2;
-    delete table;
-    delete childTable;
-     */
+    std::string i = gen->getMappedRegister("i");
+    gen->mapVarToReg("i", "$t0");
+    i = gen->getMappedRegister("i");
 
     return 0;
 }

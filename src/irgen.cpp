@@ -4,17 +4,9 @@
 In ARM we can use registers R0 - R10 for general purpose, except R7 which is reserved for System Calls
 */
 
-/* Begin IrGen Implementation */
-std::ofstream IrGen::ofile;
-std::deque<Qe*> IrGen::qe_deque;
-std::map<std::string, std::string> IrGen::var_reg;
-bool IrGen::registers[15];
-int IrGen::scope_counter = 0;
-int IrGen::r_counter;
-
 void IrGen::openFile(){
     r_counter = 0;
-    ofile.open("bin/ircode.txt");
+    ofile.open("bin/ircode.asm");
 }
 
 void IrGen::closeFile(){
@@ -162,12 +154,8 @@ bool IrGen::isRelOp(std::string val){
     || val == "IF";
 }
 
-void IrGen::mapVarToReg(std::string var, std::string reg){
-    if(var_reg.find(var) == var_reg.end()){
-        var_reg[var] = reg;
-    }
-    else{
-        var = var + std::to_string(scope_counter);
+void IrGen::mapVarToReg(std::string reg, std::string var, bool update){
+    if(var_reg.find(var) == var_reg.end() || update){
         var_reg[var] = reg;
     }
 }
@@ -177,13 +165,15 @@ std::string IrGen::getMappedRegister(std::string var){
         return "";
     }
 
-    return var_reg[var];
+    auto val = var_reg.find(var);
+
+    return val->second;
 }
 
 std::string IrGen::loadGlobal(std::string var){
     std::string reg = IrGen::getRegister();
     std::string gp = "($gp)";
-    IrGen::printIrCodeCommand("lw", var.append(gp) + ",", reg, "");
+    IrGen::printIrCodeCommand("lw", reg + ",", var.append(gp), "");
     return reg;
 }
 

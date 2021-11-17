@@ -2,7 +2,7 @@
 
 CC = g++
 CFLAGS = -g
-SRC = AST.cpp main.cpp symbolTable.cpp
+SRC = AST.cpp main.cpp symbolTable.cpp irgen.cpp
 BIN = bin/main.exe
 
 all: main

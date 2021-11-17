@@ -6,7 +6,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <map>
+#include <unordered_map>
 
 #include "colors.h"
 #include <vector>
@@ -41,20 +41,20 @@ class IrGen {
          * @brief Open file to write IR code to
          * 
          */
-        static void openFile();
+        void openFile();
 
         /**
          * @brief Close file that was used for outputing IR Code
          * 
          */
-        static void closeFile();
+        void closeFile();
 
         /**
          * @brief Print the IR code of the values in the stack
          * 
          * @return last register used in 3-address code
          */
-        static std::string printIrCode();
+        std::string printIrCode();
 
         /**
          * @brief Insert a quadruples entry into the quadruples stack
@@ -64,7 +64,7 @@ class IrGen {
          * @param arg3 second argument in 3-address code. Can be empty and uses empty string as default value
          * @return register the result was assigned to
          */
-        static std::string printIrCode(std::string op, std::string arg2, std::string arg3 = "");
+        std::string printIrCode(std::string op, std::string arg2, std::string arg3 = "");
         
         /**
          * @brief Insert a quadruples entry into the quadruples stack
@@ -74,14 +74,14 @@ class IrGen {
          * @param arg2 second argument in 3-address code. Can be empty and uses empty string as default value
          * @param label label to jump to depending on command result
          */
-        static void printIrCodeCommand(std::string command, std::string arg1, std::string arg2, std::string label);
+        void printIrCodeCommand(std::string command, std::string arg1, std::string arg2, std::string label);
 
         /**
          * @brief print the label for a new section in IR code
          * 
          * @param label the lable string to print 
          */
-        static void printLabel(std::string label);
+        void printLabel(std::string label);
 
         /**
          * @brief Insert a quadruples entry into the quadruples stack
@@ -90,7 +90,7 @@ class IrGen {
          * @param arg1 first argument in 3-address code
          * @param arg2 second argument in 3-address code. Can be empty and uses empty string as default value
          */
-        static std::string insertQe(std::string op, std::string arg1, std::string arg2 = "");
+        std::string insertQe(std::string op, std::string arg1, std::string arg2 = "");
 
         /**
          * @brief Checks if value is operator or not
@@ -99,7 +99,7 @@ class IrGen {
          * @return true value is an operator
          * @return false
          */
-        static bool isOp(std::string value);
+        bool isOp(std::string value);
 
         /**
          * @brief Checks if value is operator or not
@@ -108,7 +108,7 @@ class IrGen {
          * @return true value is an operator
          * @return false
          */
-        static bool isRelOp(std::string value);
+        bool isRelOp(std::string value);
         
         /**
          * @brief get the next available register
@@ -116,7 +116,7 @@ class IrGen {
          * @param var the variable being searched for
          * @return open register string
          */
-        static std::string getRegister(std::string var = "");
+        std::string getRegister(std::string var = "");
 
         /**
          * @brief add variable name and register number to dictionary to keep track of mapped variables
@@ -125,7 +125,7 @@ class IrGen {
          * @param reg register to map to variable
          * @return
          */
-        static void mapVarToReg(std::string var, std::string reg);
+        void mapVarToReg(std::string var, std::string reg, bool update = false);
 
         /**
          * @brief get the register that was mapped to the variabled
@@ -133,20 +133,20 @@ class IrGen {
          * @param var variable to get register for
          * @return register mapped to the variable. Empty string if none found
          */
-        static std::string getMappedRegister(std::string var);
+        std::string getMappedRegister(std::string var);
 
         /**
          * @brief clear all variables that were mapped to registers in this scope
          * 
          */
-        static void clearMappedVarsInScope();
+        void clearMappedVarsInScope();
 
         /**
          * @brief clear the registers that were used in this scope
          * 
          * TODO: This will need to be improved. Crude approach to register management
          */
-        static void clearScopedRegisters();
+        void clearScopedRegisters();
 
         /**
          * @brief generate assembly code to load global variable into a register
@@ -154,7 +154,7 @@ class IrGen {
          * @param var variable to load into register
          * @return register the global variable was loaded into
          */
-        static std::string loadGlobal(std::string var);
+        std::string loadGlobal(std::string var);
 
         /**
          * @brief store value in register into a global variable
@@ -163,21 +163,21 @@ class IrGen {
          * @param id id of the global variable 
          * @return
          */
-        static void storeGlobal(std::string reg, std::string id);
+        void storeGlobal(std::string reg, std::string id);
 
         /**
          * @brief print MIPS syscall instruction
          * 
          * @return
          */
-        static void syscall();
+        void syscall();
 
         /**
          * @brief print instruction to jump to label
          * 
          * @param label label to jump to in mips
          */
-        static void printJump(std::string label);
+        void printJump(std::string label);
 
     /* Public Static Variables */
     public:
@@ -185,42 +185,42 @@ class IrGen {
          * @brief output file stream object
          * 
          */
-        static std::ofstream ofile;
+        std::ofstream ofile;
 
         /**
          * @brief stack used to hold Quadruples entries when printing IR code
          * 
          */
-        static std::deque<Qe*> qe_deque;
+        std::deque<Qe*> qe_deque;
 
         /**
          * Table used to maintain all IR code needed in a function. 
          * table is cleared when a scope is 
          */
-        static std::vector<Qe*> ir_table;
+        std::vector<Qe*> ir_table;
 
         /**
          * @brief string array used to hold values at various registers
          */
-        static bool registers[15];
+        bool registers[15];
 
         /**
          * @brief temp integer used to keep track of general register number
          * 
          */
-        static int r_counter;
+        int r_counter;
 
         /**
          * @brief integer used to keep track of current scope depth
          * 
          */
-        static int scope_counter;
+        int scope_counter;
 
         /**
          * @brief Hashmap used to keep track of mappings between registers and variables
          *
          */
-        static std::map<std::string, std::string> var_reg;
+        std::unordered_map<std::string, std::string> var_reg;
 
 };
 
