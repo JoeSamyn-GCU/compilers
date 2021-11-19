@@ -371,7 +371,7 @@ Stmt: /* empty */ { $$ = NULL; }
 											lable_counter++;
 											std::cout << "Label: " << lable_counter << std::endl;
 											label = ".L" + std::to_string(lable_counter);
-											gen->printLabel(label);
+											gen->printLabel(label + ":");
 											is_while = false;
 											lable_counter++;
 
@@ -382,9 +382,9 @@ Stmt: /* empty */ { $$ = NULL; }
 	| Unmatched { $$ = $1; }
 ;
 
-Matched: IF OPAR RelExpr CPAR Matched ELSE {gen->printLabel(".L" + std::to_string(lable_counter)); } Matched 	{
+Matched: IF OPAR RelExpr CPAR Matched ELSE {gen->printLabel(".L" + std::to_string(lable_counter) + ":"); } Matched 	{
 																														/* ---- GENERATE IR CODE ---- */
-																														gen->printLabel(curr_label);
+																														gen->printLabel(curr_label + ":");
 																														lable_counter++;
 
 																														/* ---- AST ACTIONS by PARSER ---- */
@@ -410,7 +410,7 @@ Unmatched: IF OPAR RelExpr CPAR Block	{
 											/* ---- GENERATE IR CODE ---- */
 											curr_label = ".L" + std::to_string(lable_counter);
 											gen->printIrCodeCommand("j", curr_label, "", "");
-											gen->printLabel(curr_label);
+											gen->printLabel(curr_label + ":");
 											curr_label = "";
 
 											/* ---- AST ACTIONS by PARSER ---- */
@@ -458,8 +458,9 @@ Expr:	ID  {
 					}
 | ID EQ MathExpr 	{
 						/* ------ CODE GENERATION ------ */
-						gen->mapVarToReg($3->reg, $1, true);
 						std::string reg = gen->getMappedRegister($1);
+
+						gen->printIrCodeCommand("move", reg + ",", $3->reg, "");
 						std::cout << "GETTING EXPR REG: " << $3->reg << std::endl;
 
 						argumentVector.clear();
@@ -532,7 +533,7 @@ Expr:	ID  {
 					// This is assumed to be a global variable 
 					if(id_reg == ""){
 						id_reg = gen->getRegister();
-						gen->printIrCodeCommand("li", id_reg, std::to_string($3).append(","), "");
+						gen->printIrCodeCommand("li", id_reg + ",", std::to_string($3), "");
 						gen->storeGlobal(id_reg, $1);
 					}
 					else{
@@ -952,7 +953,7 @@ Block: OCB {
 						AST* block = (AST*)malloc(sizeof(AST));
 						block = New_Tree("block", $3, $4);
 						$$ = block;
-						gen->clearScopedRegisters();
+						//gen->clearScopedRegisters();
 					}
 ;
 

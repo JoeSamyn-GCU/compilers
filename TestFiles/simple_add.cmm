@@ -5,8 +5,18 @@ void main() {
     i = 1;
     l = 1;
     k = i + l;
-    i = 6 / 2;
-    write(k);
-    writeln;
+    if ( i >= 3){
+        write(i);
+        writeln;
+    } else {
+        write(k);
+        writeln;
+    }
+
+    while(i < 10){
+        i = i + 1;
+    }
+
     write(i);
+    
 }

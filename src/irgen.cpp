@@ -115,20 +115,9 @@ void IrGen::printLabel(std::string label){
 
 std::string IrGen::getRegister(std::string var){
 
-    // If var is not empty, we are looking for matching variable
-    if(var != ""){
-        for(int i = 0; i < 10; i++){
-            
-            if(!registers[i]){
-                registers[i] = true;
-                return "$t" + std::to_string(i);
-            }
-        }
-    }
-
     // We are not looking for a matching variable or did not find one
-    for(int i = 0; i < 15; i++){
-        if(!registers[i]&& i != 7){
+    for(int i = 0; i < 10; i++){
+        if(!registers[i]){
             registers[i] = true;
             return "$t" + std::to_string(i);
         }
@@ -178,7 +167,7 @@ std::string IrGen::loadGlobal(std::string var){
 }
 
 void IrGen::clearScopedRegisters(){
-    for(int i = 0; i < 15; i++){
+    for(int i = 0; i < 10; i++){
         registers[i] = false;
     }
 }
