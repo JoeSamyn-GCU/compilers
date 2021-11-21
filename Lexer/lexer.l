@@ -99,6 +99,14 @@ str 		\"([^\\\"]|\\.)*\"
 				yylval.string = strdup(yytext);
 				return ELSE;
 			}
+"fun"	{
+			words++;
+			chars += strlen(yytext);
+			if(debug_print)
+				printf("%s : KEYWORD FUN\n", yytext);
+			yylval.string = strdup(yytext);
+			return FUN;
+		}
 
 {ID}	{
 			words++; chars += strlen(yytext);

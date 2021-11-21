@@ -179,6 +179,35 @@ class IrGen {
          */
         void printJump(std::string label);
 
+        /**
+         * @brief Adds new argument to the argument register in MIPS ($a0 - $a3)
+         * @param arg argument to add to register and pass to function call
+         */
+        void addArgumentToRegister(std::string arg);
+        
+        /**
+         * @brief clears all arguments from argument registers ($a0 - $a3)
+         */
+        void clearArgumentRegister();
+
+        /**
+         * @brief load argument from argument registers
+         * @param argId id of argument to load and map to new register
+         */
+        void loadArgument(std::string argId);
+
+        /**
+         * @brief print comment in mips code
+         * @param comment string comment to print in mips
+         */
+        void printMipsComment(std::string comment);
+
+        /**
+         * @brief free register from its assigned value
+         * @param reg register to clear
+         */
+        void freeRegister(std::string reg);
+
     /* Public Static Variables */
     public:
         /**
@@ -200,9 +229,14 @@ class IrGen {
         std::vector<Qe*> ir_table;
 
         /**
-         * @brief string array used to hold values at various registers
+         * @brief bool array used to hold values at various registers
          */
         bool registers[15];
+
+        /**
+         * @brief string array used to keep track of which argument registers are in use
+         */
+        std::string argumentRegister[4];
 
         /**
          * @brief temp integer used to keep track of general register number
@@ -217,10 +251,18 @@ class IrGen {
         int scope_counter;
 
         /**
+         * @brief keeps track of which argument register is currently being read from
+         */
+        int arg_counter;
+
+        /**
          * @brief Hashmap used to keep track of mappings between registers and variables
          *
          */
         std::unordered_map<std::string, std::string> var_reg;
+
+    private:
+        int convertRegisterToIndex(std::string reg);
 
 };
 

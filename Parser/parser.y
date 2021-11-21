@@ -47,6 +47,7 @@ bool debug = false;
 bool is_global = true;
 bool is_while = false;
 int lable_counter = 0;
+std::string curr_func_name = "";
 std::string curr_label = "";
 
 void yyerror(const char* s);
@@ -92,7 +93,7 @@ char currentScope[50]; // global or the name of the function
 %token <string> OR
 %token<string> AND
 %token<string> STRING
-
+%token <string> FUN
 
 %type <ast> Program VarDeclList VarDecl Stmt StmtList Expr MathExpr Tail FunDecl Block Decl DeclList ParamDecl ParamDeclList RelExpr Matched Unmatched ArgList
 
@@ -142,6 +143,7 @@ FunDecl:	TYPE ID OPAR 	{
 								}
 								gen->ofile << $2 << ": \n";
 								gen->scope_counter++;
+								curr_func_name = $2;
 								
 							} CPAR Block 	{
 												// ---- IR CODE GENERATION ----
@@ -251,31 +253,43 @@ VarDecl: TYPE ID SEMICOLON		{
 											printf("\nLine %d Character %d::SYNTAX ERROR::Array size was not declared\n", lines, chars);
 											printf("\033[0m");
 										}
-	| TYPE ID Tail						{
-											/* --- SYMBOL TABLE ACTIONS --- */
-											Entry* e = new Entry($2, "", "", 0, 0, {}, $1);
-											while(!parameterVector.empty()) {
-												e->params.push_back(parameterVector.back());
-												//current->insertEntry(tempStack.top());
-												parameterVector.pop_back();
-											}
-											current->insertEntry(e);
+	| FUN TYPE ID 	{ 
+						if(is_global){
+							is_global = false;
+							gen->ofile << "\n.text\n";
+						}
+						std::string s = $3; 
+						gen->printLabel(s + ":"); 
+						curr_func_name = $3; 
+					} Tail	{
+								std::cout << "HERE HIT";
+								/* ---- Code Generation ---- */
+								if(strcmp($3, "main") != 0)
+									gen->printIrCodeCommand("jr", "$ra", "", "");
+								gen->ofile << std::endl;
+								/* --- SYMBOL TABLE ACTIONS --- */
+								Entry* e = new Entry($3, "", "", 0, 0, {}, $3);
+								while(!parameterVector.empty()) {
+									e->params.push_back(parameterVector.back());
+									parameterVector.pop_back();
+								}
+								current->insertEntry(e);
 
-											if( e->returntype != returnTypeVar ) 
-												std::cout << FRED("ERROR: Function type does not match RETURN type") << std::endl;
+								if( e->returntype != returnTypeVar ) 
+									std::cout << FRED("ERROR: Function type does not match RETURN type") << std::endl;
 
-											returnTypeVar = "";
+								returnTypeVar = "";
 
 
-											/* ---- AST ACTION by PARSER ---- */
-											if(debug)
-												printf("\nRECOGNIZED RULE: Function Tail\n");
-											AST* type = (AST*)malloc(sizeof(AST));
-											AST* id = (AST*)malloc(sizeof(AST));
-											type = New_Tree($1, $3->left, NULL);
-											id = New_Tree($2, NULL, $3->right);
-											$$ = New_Tree(ftypeName, type, id);
-										}
+								/* ---- AST ACTION by PARSER ---- */
+								if(debug)
+									printf("\nRECOGNIZED RULE: Function Tail\n");
+								AST* type = (AST*)malloc(sizeof(AST));
+								AST* id = (AST*)malloc(sizeof(AST));
+								type = New_Tree($2, $5->left, NULL);
+								id = New_Tree($3, NULL, $5->right);
+								$$ = New_Tree(ftypeName, type, id);
+							}
 ;
 
 StmtList: Stmt	{ $$ = $1; }
@@ -298,27 +312,20 @@ Stmt: /* empty */ { $$ = NULL; }
 	| WRITE ID 	SEMICOLON	{ 
 								/* ---- Code Generation ---- */
 								// Check what type the ID is
-								Entry* e = current->searchEntry($2);
+
+								std::cout << curr_func_name << std::endl;
 								
 								// Get the id register or load global var into memory
 								std::string reg = gen->getMappedRegister($2);
 								std::cout << "WRITING REG: " << reg << std::endl;
-								if(reg == ""){
-									reg = gen->loadGlobal($2);
-								}
-
+								
+								
+								if(current == NULL) std::cout << "DEBUG: HERE\n";
+								
 								// Print integer using MIPS, no new line
-								if(e->dtype == integer){
-									gen->printIrCodeCommand("li", "$v0,", "1", "");
-									gen->printIrCodeCommand("move", "$a0,", reg, "");
-									gen->syscall();
-								}
-								else if(e->dtype == "char"){
-									gen->printIrCodeCommand("li", "$v0,", "11", "");
-									gen->printIrCodeCommand("move", "$a0,", reg, "");
-									gen->syscall();
-								}
-
+								gen->printIrCodeCommand("li", "$v0,", "1", "");
+								gen->printIrCodeCommand("move", "$a0,", reg, "");
+								gen->syscall();
 								/* ---- DEBUGGING ---- */
 								if(debug)
 									printf("\n RECOGNIZED RULE: WRITE statement\n");
@@ -369,7 +376,6 @@ Stmt: /* empty */ { $$ = NULL; }
 											gen->printJump(label);
 
 											lable_counter++;
-											std::cout << "Label: " << lable_counter << std::endl;
 											label = ".L" + std::to_string(lable_counter);
 											gen->printLabel(label + ":");
 											is_while = false;
@@ -400,7 +406,7 @@ Matched: IF OPAR RelExpr CPAR Matched ELSE {gen->printLabel(".L" + std::to_strin
   | Block	{ 
 	  			/* ---- GENERATE IR CODE ---- */
 				curr_label = ".L" + std::to_string(lable_counter+1);
-				gen->printIrCodeCommand("j", curr_label, "\n", "");
+				gen->printIrCodeCommand("j", curr_label, "", "");
 
 	  			$$ = $1; 
 			}
@@ -411,7 +417,6 @@ Unmatched: IF OPAR RelExpr CPAR Block	{
 											curr_label = ".L" + std::to_string(lable_counter);
 											gen->printIrCodeCommand("j", curr_label, "", "");
 											gen->printLabel(curr_label + ":");
-											curr_label = "";
 
 											/* ---- AST ACTIONS by PARSER ---- */
 											if(debug)
@@ -459,17 +464,12 @@ Expr:	ID  {
 | ID EQ MathExpr 	{
 						/* ------ CODE GENERATION ------ */
 						std::string reg = gen->getMappedRegister($1);
-
 						gen->printIrCodeCommand("move", reg + ",", $3->reg, "");
-						std::cout << "GETTING EXPR REG: " << $3->reg << std::endl;
-
+						gen->freeRegister($3->reg);
 						argumentVector.clear();
-
 						/* --- SEMANTIC CHECKS --- */
-						checkExistance(current, $1, parameterVector);
-						checkIntType(current, $1);
-						
-
+						// checkExistance(current, $1, parameterVector);
+						// checkIntType(current, $1);
 						/* ---- AST ACTIONS by PARSER ---- */
 						if(debug)
 							std::cout << "\n RECOGNIZED RULE: ID EQ MathExpr\nTOKENS: " << $1 << " " << $2 << " " << $3->nodeType << std::endl;
@@ -555,6 +555,7 @@ Expr:	ID  {
 |  ID OPAR ArgList CPAR {
 							/* ---- Code Generator ---- */
 							gen->printIrCodeCommand("jal", $1, "", "");
+							gen->clearArgumentRegister();
 
 							/* --- SEMANTIC CHECKS --- */
 							checkExistance(current, $1, parameterVector);
@@ -672,10 +673,13 @@ Expr:	ID  {
 
 ArgList: /* empty */ { $$ = NULL; }
 	| MathExpr	{
-					/* --- SEMANTIC CHECKS (INSIDE FUNCTION CALL) --- */
-
+					/* ---- Code Generation ---- */
+					gen->addArgumentToRegister($1->reg);
+					$$ = New_Tree("ARG", $1, NULL);
 				}
 	| MathExpr COMMA ArgList	{
+									// std::cout << "HERE ARG\n";
+									gen->addArgumentToRegister($1->reg);
 									/* ---- AST ACTIONS by PARSER ---- */
 									$$ = New_Tree("ARG", $1, $3);
 								}
@@ -687,6 +691,10 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 									std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
 									std::string result_reg = gen->getRegister();
 									gen->printIrCodeCommand("add", result_reg + ",", arg1 + ",", arg2);
+
+									// Free any registers that were used to store a constant number
+									if($1->isNum) gen->freeRegister(arg1);
+									if($3->isNum) gen->freeRegister(arg2);
 
 									/* ---- SEMANTIC ACTIONS by PARSER ---- */
 									if(debug)
@@ -767,7 +775,9 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 					printf("\n RECOGNIZED RULE: NUMBER\nTOKENS: %d\n", $1);
 				char num_s[100];
 				sprintf(num_s, "%d", $1);
-				$$ = New_Tree(num_s, NULL, NULL, reg);
+				AST* n = New_Tree(num_s, NULL, NULL, reg);
+				n->isNum = true;
+				$$ = n;
 			}
 | ID	{
 			/* --- SEMANTIC CHECKS --- */
@@ -925,19 +935,21 @@ RelExpr: MathExpr GTE MathExpr	{
 | MathExpr { $$ = $1; }
 ;
 
-Tail: OPAR ParamDeclList CPAR {gen->scope_counter++; } Block 	{
-																	/* ---- AST ACTIONS by PARSER ---- */
-																	if(debug)
-																		printf("\nRECOGNIZE RULE: Function Decl\n");
-																	$$ = New_Tree("params_holder", $2, $5);
+Tail: OPAR ParamDeclList CPAR Block 	{
+											
+											/* ---- AST ACTIONS by PARSER ---- */
+											if(debug)
+												printf("\nRECOGNIZE RULE: Function Decl\n");
+											$$ = New_Tree("params_holder", $2, $4);
 
-																	gen->scope_counter--;
-																}
+											gen->scope_counter--;
+										}
 ;
 
 Block: OCB {
 				current = new Table(current);
 				tempCounter++;
+				
 			} 
 			VarDeclList StmtList {
 									if (current->parent != nullptr) {
@@ -962,11 +974,15 @@ ParamDeclList: ParamDecl COMMA ParamDeclList 	{
 													insert_node_left($1, $3);
 													$$ = $1;
 												}
-	| ParamDecl	{ $$ = $1; }
+	| ParamDecl	{ 
+					$$ = $1; 
+				}
 ;
 
 ParamDecl: /* empty */ { $$ = NULL; }
 	| TYPE ID  	{
+					/* ---- Code Generator ---- */
+					gen->loadArgument($2);
 					/* --- SYMBOL TABLE ACTIONS by PARSER --- */
 					Entry* e = new Entry($2, $1);
 					parameterVector.push_back(e);

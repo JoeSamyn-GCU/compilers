@@ -1,22 +1,24 @@
+fun void sum(int n, int m){
+    n = n + m;
+    write n;
+    writeln;
+}
+
 void main() {
-    int i;
-    int l;
     int k;
-    i = 1;
-    l = 1;
-    k = i + l;
-    if ( i >= 3){
-        write(i);
-        writeln;
-    } else {
-        write(k);
+    k = 1;
+    sum(k, 2);
+
+    if (k < 3){
+        k = k + 2;
+        write k;
         writeln;
     }
 
-    while(i < 10){
-        i = i + 1;
+    while (k < 5){
+        k = k + 1;
     }
-
-    write(i);
     
+    write(k);
+    writeln;
 }

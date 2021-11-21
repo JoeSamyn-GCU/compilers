@@ -185,6 +185,64 @@ void IrGen::printJump(std::string label){
     ofile << "j " << label << std::endl << std::endl;
 }
 
+void IrGen::addArgumentToRegister(std::string arg){
+    for(int i = 0; i < 4; i++){
+        if(argumentRegister[i] == ""){
+            argumentRegister[i] = arg;
+            std::string areg = "$a" + std::to_string(i);
+            printIrCodeCommand("move", areg + ",", arg, "");
+            return;
+        }
+
+        if(i >= 3) {
+            std::cout << FYEL("No more argument registers available for function call..") << std::endl;
+        }
+    }
+}
+
+void IrGen::clearArgumentRegister(){
+    for(int i = 0; i < 4; i++){
+        argumentRegister[i] = false;
+    }
+    arg_counter = 0;
+}
+
+void IrGen::loadArgument(std::string argId){
+    if(arg_counter < 4){
+        std::string reg = getRegister();
+        std::string areg = "$a" + std::to_string(arg_counter);
+        printMipsComment("moving param " + argId + " into register");
+        printIrCodeCommand("move", reg + ",", areg, "");
+        mapVarToReg(reg, argId);
+        arg_counter++;
+    }
+}
+
+void IrGen::printMipsComment(std::string comment){
+    ofile << "# " << comment << std::endl;
+}
+
+void IrGen::freeRegister(std::string reg){
+    int index = convertRegisterToIndex(reg);
+    if(index == -1) return;
+    registers[index] = false;
+}
+
+/* ----- Private Methods ----- */
+int IrGen::convertRegisterToIndex(std::string reg){
+    if(reg == "$t0") return 0;
+    else if (reg == "$t1") return 1;
+    else if (reg == "$t2") return 2;
+    else if (reg == "$t3") return 3;
+    else if (reg == "$t4") return 4;
+    else if (reg == "$t5") return 5;
+    else if (reg == "$t6") return 6;
+    else if (reg == "$t7") return 7;
+    else if (reg == "$t8") return 8;
+    else if (reg == "$t9") return 9;
+    else return -1;
+}
+
 /* End IrGen Implementation */
 
 /* Begin Qe Implementation */
