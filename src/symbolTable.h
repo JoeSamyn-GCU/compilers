@@ -76,7 +76,7 @@ class Table {
          * @param name Name of the entry to search for
          * @return the first Entry that matches the search criteria
          */
-        Entry* searchEntry(char* name);
+        Entry* searchEntry(char* name, std::string scope = "");
         
         /**
          * Print all entries in the current Scope table

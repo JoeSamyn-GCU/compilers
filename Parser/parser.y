@@ -26,6 +26,7 @@
 
 
 Table* symbolTable = new Table();
+IrGen* gen = new IrGen();
 Table* current = symbolTable; // pointer to SymbolTable
 std::vector<Entry*> parameterVector;
 int tempCounter = 1;
@@ -46,6 +47,7 @@ bool debug = false;
 bool is_global = true;
 bool is_while = false;
 int lable_counter = 0;
+std::string curr_func_name = "";
 std::string curr_label = "";
 
 void yyerror(const char* s);
@@ -91,7 +93,7 @@ char currentScope[50]; // global or the name of the function
 %token <string> OR
 %token<string> AND
 %token<string> STRING
-
+%token <string> FUN
 
 %type <ast> Program VarDeclList VarDecl Stmt StmtList Expr MathExpr Tail FunDecl Block Decl DeclList ParamDecl ParamDeclList RelExpr Matched Unmatched ArgList
 
@@ -103,8 +105,8 @@ char currentScope[50]; // global or the name of the function
 %%
 
 Program: {
-			IrGen::ofile << ".data" << std::endl; 
-			IrGen::ofile << "ln: .asciiz \"\\n\"" << std::endl; 
+			gen->ofile << ".data" << std::endl; 
+			gen->ofile << "ln: .asciiz \"\\n\"" << std::endl; 
 
 		} 
 DeclList   { 
@@ -116,6 +118,9 @@ DeclList   {
 				printf("\n--- Symbol Table ---\n\n");
 				symbolTable->printTables();
 				printf("Total tables created: %i\n", tempCounter);
+
+				gen->printIrCodeCommand("li", "$v0,", "10", "");
+				gen->syscall();
 			}
 ;
 
@@ -134,17 +139,18 @@ Decl: VarDecl { $$ = $1; }
 FunDecl:	TYPE ID OPAR 	{
 								if(is_global){
 									is_global = false;
-									IrGen::ofile << "\n.text\n";
+									gen->ofile << "\n.text\n";
 								}
-								IrGen::ofile << $2 << ": \n";
-								IrGen::scope_counter++;
+								gen->ofile << $2 << ": \n";
+								gen->scope_counter++;
+								curr_func_name = $2;
 								
 							} CPAR Block 	{
 												// ---- IR CODE GENERATION ----
 												std::cout << $2 << std::endl;
 												if(strcmp($2, "main") != 0)
-													IrGen::printIrCodeCommand("jr", "$ra", "", "");
-												IrGen::ofile << std::endl;
+													gen->printIrCodeCommand("jr", "$ra", "", "");
+												gen->ofile << std::endl;
 
 												// ---- SYMBOL TABLE ACTIONS by PARSER ----
 												current = new Table(current);
@@ -166,7 +172,7 @@ FunDecl:	TYPE ID OPAR 	{
 												id = New_Tree($2, NULL, $6);
 												$$ = New_Tree(ftypeName, type, id);
 
-												IrGen::scope_counter--;
+												gen->scope_counter--;
 											}
 ;
 
@@ -182,11 +188,11 @@ VarDecl: TYPE ID SEMICOLON		{
 
 								/* ---- Generate IR Code ---- */
 								if(is_global)
-									IrGen::ofile << $2 << ": .word 4\n";
+									gen->ofile << $2 << ": .word 4\n";
 								else{
-									std::string reg = IrGen::getRegister();
-									IrGen::mapVarToReg($2, reg);
-									IrGen::printIrCodeCommand("li", "0", reg, "");
+									std::string reg = gen->getRegister();
+									gen->mapVarToReg(reg, $2);
+									gen->printIrCodeCommand("li", reg + ",", "0", "");
 								}
 
 								// ---- SYMBOL TABLE ACTIONS by PARSER ----
@@ -247,31 +253,43 @@ VarDecl: TYPE ID SEMICOLON		{
 											printf("\nLine %d Character %d::SYNTAX ERROR::Array size was not declared\n", lines, chars);
 											printf("\033[0m");
 										}
-	| TYPE ID Tail						{
-											/* --- SYMBOL TABLE ACTIONS --- */
-											Entry* e = new Entry($2, "", "", 0, 0, {}, $1);
-											while(!parameterVector.empty()) {
-												e->params.push_back(parameterVector.back());
-												//current->insertEntry(tempStack.top());
-												parameterVector.pop_back();
-											}
-											current->insertEntry(e);
+	| FUN TYPE ID 	{ 
+						if(is_global){
+							is_global = false;
+							gen->ofile << "\n.text\n";
+						}
+						std::string s = $3; 
+						gen->printLabel(s + ":"); 
+						curr_func_name = $3; 
+					} Tail	{
+								std::cout << "HERE HIT";
+								/* ---- Code Generation ---- */
+								if(strcmp($3, "main") != 0)
+									gen->printIrCodeCommand("jr", "$ra", "", "");
+								gen->ofile << std::endl;
+								/* --- SYMBOL TABLE ACTIONS --- */
+								Entry* e = new Entry($3, "", "", 0, 0, {}, $3);
+								while(!parameterVector.empty()) {
+									e->params.push_back(parameterVector.back());
+									parameterVector.pop_back();
+								}
+								current->insertEntry(e);
 
-											if( e->returntype != returnTypeVar ) 
-												std::cout << FRED("ERROR: Function type does not match RETURN type") << std::endl;
+								if( e->returntype != returnTypeVar ) 
+									std::cout << FRED("ERROR: Function type does not match RETURN type") << std::endl;
 
-											returnTypeVar = "";
+								returnTypeVar = "";
 
 
-											/* ---- AST ACTION by PARSER ---- */
-											if(debug)
-												printf("\nRECOGNIZED RULE: Function Tail\n");
-											AST* type = (AST*)malloc(sizeof(AST));
-											AST* id = (AST*)malloc(sizeof(AST));
-											type = New_Tree($1, $3->left, NULL);
-											id = New_Tree($2, NULL, $3->right);
-											$$ = New_Tree(ftypeName, type, id);
-										}
+								/* ---- AST ACTION by PARSER ---- */
+								if(debug)
+									printf("\nRECOGNIZED RULE: Function Tail\n");
+								AST* type = (AST*)malloc(sizeof(AST));
+								AST* id = (AST*)malloc(sizeof(AST));
+								type = New_Tree($2, $5->left, NULL);
+								id = New_Tree($3, NULL, $5->right);
+								$$ = New_Tree(ftypeName, type, id);
+							}
 ;
 
 StmtList: Stmt	{ $$ = $1; }
@@ -294,26 +312,20 @@ Stmt: /* empty */ { $$ = NULL; }
 	| WRITE ID 	SEMICOLON	{ 
 								/* ---- Code Generation ---- */
 								// Check what type the ID is
-								Entry* e = current->searchEntry($2);
+
+								std::cout << curr_func_name << std::endl;
 								
 								// Get the id register or load global var into memory
-								std::string reg = IrGen::getMappedRegister($2);
-								if(reg == ""){
-									reg = IrGen::loadGlobal($2);
-								}
-
+								std::string reg = gen->getMappedRegister($2);
+								std::cout << "WRITING REG: " << reg << std::endl;
+								
+								
+								if(current == NULL) std::cout << "DEBUG: HERE\n";
+								
 								// Print integer using MIPS, no new line
-								if(e->dtype == integer){
-									IrGen::printIrCodeCommand("li", "$v0,", "1", "");
-									IrGen::printIrCodeCommand("move", "$a0", reg, "");
-									IrGen::syscall();
-								}
-								else if(e->dtype == "char"){
-									IrGen::printIrCodeCommand("li", "$v0,", "11", "");
-									IrGen::printIrCodeCommand("move", "$a0", reg, "");
-									IrGen::syscall();
-								}
-
+								gen->printIrCodeCommand("li", "$v0,", "1", "");
+								gen->printIrCodeCommand("move", "$a0,", reg, "");
+								gen->syscall();
 								/* ---- DEBUGGING ---- */
 								if(debug)
 									printf("\n RECOGNIZED RULE: WRITE statement\n");
@@ -327,7 +339,7 @@ Stmt: /* empty */ { $$ = NULL; }
 							}
 	| WRITELN SEMICOLON		{
 								/* ---- Code Generator ---- */
-								IrGen::ofile << "li $v0, 4\nla $a0, ln\nsyscall\n";
+								gen->ofile << "li $v0, 4\nla $a0, ln\nsyscall\n";
 
 								if(debug)
 									printf("\n RECOGNIZED RULE: WRITELN statement\n");
@@ -361,12 +373,11 @@ Stmt: /* empty */ { $$ = NULL; }
 	| WHILE { is_while = true; } OPAR RelExpr CPAR Block		{
 											/* ---- Code Generation ---- */
 											std::string label = ".L" + std::to_string(lable_counter);
-											IrGen::printJump(label);
+											gen->printJump(label);
 
 											lable_counter++;
-											std::cout << "Label: " << lable_counter << std::endl;
 											label = ".L" + std::to_string(lable_counter);
-											IrGen::printLabel(label);
+											gen->printLabel(label + ":");
 											is_while = false;
 											lable_counter++;
 
@@ -377,9 +388,9 @@ Stmt: /* empty */ { $$ = NULL; }
 	| Unmatched { $$ = $1; }
 ;
 
-Matched: IF OPAR RelExpr CPAR Matched ELSE {IrGen::printLabel(".L" + std::to_string(lable_counter)); } Matched 	{
+Matched: IF OPAR RelExpr CPAR Matched ELSE {gen->printLabel(".L" + std::to_string(lable_counter) + ":"); } Matched 	{
 																														/* ---- GENERATE IR CODE ---- */
-																														IrGen::printLabel(curr_label);
+																														gen->printLabel(curr_label + ":");
 																														lable_counter++;
 
 																														/* ---- AST ACTIONS by PARSER ---- */
@@ -395,7 +406,7 @@ Matched: IF OPAR RelExpr CPAR Matched ELSE {IrGen::printLabel(".L" + std::to_str
   | Block	{ 
 	  			/* ---- GENERATE IR CODE ---- */
 				curr_label = ".L" + std::to_string(lable_counter+1);
-				IrGen::printIrCodeCommand("j", curr_label, "\n", "");
+				gen->printIrCodeCommand("j", curr_label, "", "");
 
 	  			$$ = $1; 
 			}
@@ -404,9 +415,8 @@ Matched: IF OPAR RelExpr CPAR Matched ELSE {IrGen::printLabel(".L" + std::to_str
 Unmatched: IF OPAR RelExpr CPAR Block	{
 											/* ---- GENERATE IR CODE ---- */
 											curr_label = ".L" + std::to_string(lable_counter);
-											IrGen::printIrCodeCommand("j", curr_label, "", "");
-											IrGen::printLabel(curr_label);
-											curr_label = "";
+											gen->printIrCodeCommand("j", curr_label, "", "");
+											gen->printLabel(curr_label + ":");
 
 											/* ---- AST ACTIONS by PARSER ---- */
 											if(debug)
@@ -438,9 +448,10 @@ Expr:	ID  {
 			}
 | WRITE MathExpr 	{
 						/* ---- Code Generator ---- */
-						IrGen::printIrCodeCommand("li", "$v0,", "1", "");
-						IrGen::printIrCodeCommand("move", "$a0", $2->reg, "");
-						IrGen::syscall();
+						std::cout << "WRITING REG: " << $2->reg << std::endl;
+						gen->printIrCodeCommand("li", "$v0,", "1", "");
+						gen->printIrCodeCommand("move", "$a0,", $2->reg, "");
+						gen->syscall();
 
 						argumentVector.clear();
 
@@ -451,14 +462,14 @@ Expr:	ID  {
 						
 					}
 | ID EQ MathExpr 	{
-						
+						/* ------ CODE GENERATION ------ */
+						std::string reg = gen->getMappedRegister($1);
+						gen->printIrCodeCommand("move", reg + ",", $3->reg, "");
+						gen->freeRegister($3->reg);
 						argumentVector.clear();
-
 						/* --- SEMANTIC CHECKS --- */
-						checkExistance(current, $1, parameterVector);
-						checkIntType(current, $1);
-						
-
+						// checkExistance(current, $1, parameterVector);
+						// checkIntType(current, $1);
 						/* ---- AST ACTIONS by PARSER ---- */
 						if(debug)
 							std::cout << "\n RECOGNIZED RULE: ID EQ MathExpr\nTOKENS: " << $1 << " " << $2 << " " << $3->nodeType << std::endl;
@@ -475,30 +486,30 @@ Expr:	ID  {
 
 				/* ---- IR Code Generation ---- */
 				// TODO: fix this to check both global variables exist
-				std::string reg_1 = IrGen::getMappedRegister($1);
-				std::string reg_2 = IrGen::getMappedRegister($3);
+				std::string reg_1 = gen->getMappedRegister($1);
+				std::string reg_2 = gen->getMappedRegister($3);
 				// Both global vars
 				if(reg_1 == "" && reg_2 == ""){
-					reg_2 = IrGen::getRegister();
+					reg_2 = gen->getRegister();
 					std::string gp = "($gp)";
 					std::string id($1);
 					std::string id_2($3);
-					IrGen::printIrCodeCommand("lw", id_2.append(gp) + ",", reg_2, "");
-					IrGen::printIrCodeCommand("sw", reg_2 + ",", id.append(gp), "");
+					gen->printIrCodeCommand("lw", reg_2 + ",", id_2.append(gp), "");
+					gen->printIrCodeCommand("sw", reg_2 + ",", id.append(gp), "");
 					int reg_1_index = reg_2[2] - 48;
-					IrGen::registers[reg_1_index] = false;
+					gen->registers[reg_1_index] = false;
 				}
 				else if (reg_1 != "" && reg_2 == ""){
 					std::string gp = "($gp)";
 					std::string id_2($3);
-					IrGen::printIrCodeCommand("li", id_2.append(gp) + ",", reg_1, "");
+					gen->printIrCodeCommand("li", reg_1 + ",", id_2.append(gp), "");
 				}
 				else if (reg_1 == "" && reg_2 != ""){
 					std::string gp = "($gp)";
 					std::string id_1($1);
-					IrGen::printIrCodeCommand("li", id_1.append(gp) + ",", reg_2, "");
+					gen->printIrCodeCommand("li", reg_2 + ", ", id_1.append(gp), "");
 				}else{
-					IrGen::printIrCodeCommand("li", reg_2 + ",", reg_1, "");
+					gen->printIrCodeCommand("li", reg_2 + ",", reg_1, "");
 				}
 
 				/* ---- AST ACTIONS by PARSER ---- */
@@ -517,12 +528,16 @@ Expr:	ID  {
 					argumentVector.clear();
 					checkExistance(current,$1, parameterVector);
 					/* ---- IR Code Generation ---- */
-					std::string id_reg = IrGen::getMappedRegister($1);
+					std::string id_reg = gen->getMappedRegister($1);
+					std::cout << "REGISTER: " << id_reg << std::endl;
 					// This is assumed to be a global variable 
 					if(id_reg == ""){
-						id_reg = IrGen::getRegister();
-						IrGen::printIrCodeCommand("li", std::to_string($3).append(","), id_reg, "");
-						IrGen::storeGlobal(id_reg, $1);
+						id_reg = gen->getRegister();
+						gen->printIrCodeCommand("li", id_reg + ",", std::to_string($3), "");
+						gen->storeGlobal(id_reg, $1);
+					}
+					else{
+						gen->printIrCodeCommand("li", id_reg + ",", std::to_string($3), "");
 					}
 
 					/* ---- AST ACTIONS by PARSER ---- */
@@ -539,7 +554,8 @@ Expr:	ID  {
 				}
 |  ID OPAR ArgList CPAR {
 							/* ---- Code Generator ---- */
-							IrGen::printIrCodeCommand("jal", $1, "", "");
+							gen->printIrCodeCommand("jal", $1, "", "");
+							gen->clearArgumentRegister();
 
 							/* --- SEMANTIC CHECKS --- */
 							checkExistance(current, $1, parameterVector);
@@ -657,10 +673,13 @@ Expr:	ID  {
 
 ArgList: /* empty */ { $$ = NULL; }
 	| MathExpr	{
-					/* --- SEMANTIC CHECKS (INSIDE FUNCTION CALL) --- */
-
+					/* ---- Code Generation ---- */
+					gen->addArgumentToRegister($1->reg);
+					$$ = New_Tree("ARG", $1, NULL);
 				}
 	| MathExpr COMMA ArgList	{
+									// std::cout << "HERE ARG\n";
+									gen->addArgumentToRegister($1->reg);
 									/* ---- AST ACTIONS by PARSER ---- */
 									$$ = New_Tree("ARG", $1, $3);
 								}
@@ -668,10 +687,14 @@ ArgList: /* empty */ { $$ = NULL; }
 
 MathExpr:	MathExpr PLUS MathExpr 	{
 									/* ---- IR Code Generator ---- */
-									std::string arg1 = $1->reg != "" ? $1->reg : IrGen::loadGlobal($1->nodeType);
-									std::string arg2 = $3->reg != "" ? $3->reg : IrGen::loadGlobal($3->nodeType);
-									std::string result_reg = IrGen::getRegister();
-									IrGen::printIrCodeCommand("add", result_reg + ",", arg1 + ",", arg2);
+									std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType);
+									std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
+									std::string result_reg = gen->getRegister();
+									gen->printIrCodeCommand("add", result_reg + ",", arg1 + ",", arg2);
+
+									// Free any registers that were used to store a constant number
+									if($1->isNum) gen->freeRegister(arg1);
+									if($3->isNum) gen->freeRegister(arg2);
 
 									/* ---- SEMANTIC ACTIONS by PARSER ---- */
 									if(debug)
@@ -684,10 +707,10 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 								}
 | MathExpr MINUS MathExpr 	{
 									/* ---- IR Code Generator ---- */
-									std::string arg1 = $1->reg != "" ? $1->reg : IrGen::loadGlobal($1->nodeType);
-									std::string arg2 = $3->reg != "" ? $3->reg : IrGen::loadGlobal($3->nodeType);
-									std::string result_reg = IrGen::getRegister();
-									IrGen::printIrCodeCommand("sub", result_reg + ",", arg1 + ",", arg2);
+									std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType);
+									std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
+									std::string result_reg = gen->getRegister();
+									gen->printIrCodeCommand("sub", result_reg + ",", arg1 + ",", arg2);
 
 									/* ---- SEMANTIC ACTIONS by PARSER ---- */
 									if(debug)
@@ -700,10 +723,11 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 								}
 | MathExpr DIV MathExpr 	{
 									/* ---- IR Code Generator ---- */
-									std::string arg1 = $1->reg != "" ? $1->reg : IrGen::loadGlobal($1->nodeType);
-									std::string arg2 = $3->reg != "" ? $3->reg : IrGen::loadGlobal($3->nodeType);
-									std::string result_reg = IrGen::getRegister();
-									IrGen::printIrCodeCommand("div", result_reg + ",", arg1 + ",", arg2);
+									std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType);
+									std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
+									std::string result_reg = gen->getRegister();
+									gen->printIrCodeCommand("div", arg1 + ",", arg2, "");
+									gen->printIrCodeCommand("mflo", result_reg, "", "");
 
 									/* ---- SEMANTIC ACTIONS by PARSER ---- */
 									if(debug)
@@ -716,10 +740,11 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 								}
 | MathExpr MULT MathExpr 	{
 									/* ---- IR Code Generator ---- */
-									std::string arg1 = $1->reg != "" ? $1->reg : IrGen::loadGlobal($1->nodeType);
-									std::string arg2 = $3->reg != "" ? $3->reg : IrGen::loadGlobal($3->nodeType);
-									std::string result_reg = IrGen::getRegister();
-									IrGen::printIrCodeCommand("mult", result_reg + ",", arg1 + ",", arg2);
+									std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType);
+									std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
+									std::string result_reg = gen->getRegister();
+									gen->printIrCodeCommand("mult",  arg1 + ",", arg2, "");
+									gen->printIrCodeCommand("mflo", result_reg, "", "");
 
 									/* ---- SEMANTIC ACTIONS by PARSER ---- */
 									if(debug)
@@ -736,9 +761,9 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 						}
 | NUMBER	{
 				/* ---- Code Generation ---- */
-				std::string reg = IrGen::getRegister();
+				std::string reg = gen->getRegister();
 				std::string num = std::to_string($1);
-				IrGen::printIrCodeCommand("li", num, reg, "");
+				gen->printIrCodeCommand("li", reg + ",", num, "");
 
 				/* --- SYMBOL TABLE CHECKS  --- */
 				Entry* e = new Entry("Int", std::to_string($1));
@@ -750,7 +775,9 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 					printf("\n RECOGNIZED RULE: NUMBER\nTOKENS: %d\n", $1);
 				char num_s[100];
 				sprintf(num_s, "%d", $1);
-				$$ = New_Tree(num_s, NULL, NULL, reg);
+				AST* n = New_Tree(num_s, NULL, NULL, reg);
+				n->isNum = true;
+				$$ = n;
 			}
 | ID	{
 			/* --- SEMANTIC CHECKS --- */
@@ -769,10 +796,14 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 			}
 			argumentVector.push_back(e);
 
+			
+			std::string reg = gen->getMappedRegister($1);
+			std::cout << "GETTING MAPPED REGISTER: " << reg << std::endl;
+
 			/* ---- AST ACTIONS by PARSER ---- */
 			if(debug)
 				printf("\nRECOGNIZED RULE: ID\n");
-			$$ = New_Tree($1, NULL, NULL);
+			$$ = New_Tree($1, NULL, NULL, reg);
 }
 | ID OSB MathExpr CSB 	{
 							/* ---- AST ACTIONS by PARSER ---- */
@@ -784,14 +815,14 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 
 RelExpr: MathExpr GTE MathExpr	{
 										/* ---- GENERATE IR CODE ---- */
-										std::string arg1 = $1->reg != "" ? $1->reg : IrGen::loadGlobal($1->nodeType);
-										std::string arg2 = $3->reg != "" ? $3->reg : IrGen::loadGlobal($3->nodeType);
+										std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType);
+										std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
 										if(is_while)
 											curr_label = ".L" + std::to_string(lable_counter+1);
 										else
 											curr_label = ".L" + std::to_string(lable_counter);
 										//lable_counter++;
-										IrGen::printIrCodeCommand("blt", arg1 + ",", arg2 + ",", curr_label);
+										gen->printIrCodeCommand("blt", arg1 + ",", arg2 + ",", curr_label);
 
 										/* ---- AST ACTIONS by PARSER ---- */
 										if(debug)
@@ -800,14 +831,14 @@ RelExpr: MathExpr GTE MathExpr	{
 									}
 | MathExpr LTE MathExpr	{
 							/* ---- GENERATE IR CODE ---- */
-							std::string arg1 = $1->reg != "" ? $1->reg : IrGen::loadGlobal($1->nodeType);
-							std::string arg2 = $3->reg != "" ? $3->reg : IrGen::loadGlobal($3->nodeType);
+							std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType);
+							std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
 							if(is_while)
 								curr_label = ".L" + std::to_string(lable_counter+1);
 							else
 								curr_label = ".L" + std::to_string(lable_counter);
 							//lable_counter++;
-							IrGen::printIrCodeCommand("bgt", arg1 + ",", arg2 + ",", curr_label);
+							gen->printIrCodeCommand("bgt", arg1 + ",", arg2 + ",", curr_label);
 
 
 							/* ---- AST ACTIONS by PARSER ---- */
@@ -817,15 +848,15 @@ RelExpr: MathExpr GTE MathExpr	{
 						}
 | MathExpr GT MathExpr	{
 							/* ---- GENERATE IR CODE ---- */
-							std::string arg1 = $1->reg != "" ? $1->reg : IrGen::loadGlobal($1->nodeType);
-							std::string arg2 = $3->reg != "" ? $3->reg : IrGen::loadGlobal($3->nodeType);
+							std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType);
+							std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
 							if(is_while)
 								curr_label = ".L" + std::to_string(lable_counter+1);
 							else
 								curr_label = ".L" + std::to_string(lable_counter);
 							//lable_counter++;
-							IrGen::printIrCodeCommand("blt", arg1 + ",", arg2 + ",", curr_label);
-							IrGen::printIrCodeCommand("beq", arg1 + ",", arg2 + ",", curr_label);
+							gen->printIrCodeCommand("blt", arg1 + ",", arg2 + ",", curr_label);
+							gen->printIrCodeCommand("beq", arg1 + ",", arg2 + ",", curr_label);
 
 							/* ---- AST ACTIONS by PARSER ---- */
 							if(debug)
@@ -835,15 +866,15 @@ RelExpr: MathExpr GTE MathExpr	{
 						}
 | MathExpr LT MathExpr	{
 							/* ---- GENERATE IR CODE ---- */
-							std::string arg1 = $1->reg != "" ? $1->reg : IrGen::loadGlobal($1->nodeType);
-							std::string arg2 = $3->reg != "" ? $3->reg : IrGen::loadGlobal($3->nodeType);
+							std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType);
+							std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
 							if(is_while)
 								curr_label = ".L" + std::to_string(lable_counter+1);
 							else
 								curr_label = ".L" + std::to_string(lable_counter);
 							//lable_counter++;
-							IrGen::printIrCodeCommand("bgt", arg1 + ",", arg2 + ",", curr_label);
-							IrGen::printIrCodeCommand("beq", arg1 + ",", arg2 + ",", curr_label);
+							gen->printIrCodeCommand("bgt", arg1 + ",", arg2 + ",", curr_label);
+							gen->printIrCodeCommand("beq", arg1 + ",", arg2 + ",", curr_label);
 
 
 							/* ---- AST ACTIONS by PARSER ---- */
@@ -853,14 +884,14 @@ RelExpr: MathExpr GTE MathExpr	{
 						}
 | MathExpr EQEQ MathExpr	{
 							/* ---- GENERATE IR CODE ---- */
-							std::string arg1 = $1->reg != "" ? $1->reg : IrGen::loadGlobal($1->nodeType);
-							std::string arg2 = $3->reg != "" ? $3->reg : IrGen::loadGlobal($3->nodeType);
+							std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType);
+							std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
 							if(is_while)
 								curr_label = ".L" + std::to_string(lable_counter+1);
 							else
 								curr_label = ".L" + std::to_string(lable_counter);
 							//lable_counter++;
-							IrGen::printIrCodeCommand("beq", arg1 + ",", arg2 + ",", curr_label);
+							gen->printIrCodeCommand("beq", arg1 + ",", arg2 + ",", curr_label);
 
 
 							/* ---- AST ACTIONS by PARSER ---- */
@@ -870,14 +901,14 @@ RelExpr: MathExpr GTE MathExpr	{
 						}
 | MathExpr NOTEQ MathExpr	{
 							/* ---- GENERATE IR CODE ---- */
-							std::string arg1 = $1->reg != "" ? $1->reg : IrGen::loadGlobal($1->nodeType);
-							std::string arg2 = $3->reg != "" ? $3->reg : IrGen::loadGlobal($3->nodeType);
+							std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType);
+							std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
 							if(is_while)
 								curr_label = ".L" + std::to_string(lable_counter+1);
 							else
 								curr_label = ".L" + std::to_string(lable_counter);
 							//lable_counter++;
-							IrGen::printIrCodeCommand("bneq", arg1 + ",", arg2 + ",", curr_label);
+							gen->printIrCodeCommand("bneq", arg1 + ",", arg2 + ",", curr_label);
 
 							/* ---- AST ACTIONS by PARSER ---- */
 							if(debug)
@@ -904,19 +935,21 @@ RelExpr: MathExpr GTE MathExpr	{
 | MathExpr { $$ = $1; }
 ;
 
-Tail: OPAR ParamDeclList CPAR {IrGen::scope_counter++; } Block 	{
-																	/* ---- AST ACTIONS by PARSER ---- */
-																	if(debug)
-																		printf("\nRECOGNIZE RULE: Function Decl\n");
-																	$$ = New_Tree("params_holder", $2, $5);
+Tail: OPAR ParamDeclList CPAR Block 	{
+											
+											/* ---- AST ACTIONS by PARSER ---- */
+											if(debug)
+												printf("\nRECOGNIZE RULE: Function Decl\n");
+											$$ = New_Tree("params_holder", $2, $4);
 
-																	IrGen::scope_counter--;
-																}
+											gen->scope_counter--;
+										}
 ;
 
 Block: OCB {
 				current = new Table(current);
 				tempCounter++;
+				
 			} 
 			VarDeclList StmtList {
 									if (current->parent != nullptr) {
@@ -932,7 +965,7 @@ Block: OCB {
 						AST* block = (AST*)malloc(sizeof(AST));
 						block = New_Tree("block", $3, $4);
 						$$ = block;
-						IrGen::clearScopedRegisters();
+						//gen->clearScopedRegisters();
 					}
 ;
 
@@ -941,11 +974,15 @@ ParamDeclList: ParamDecl COMMA ParamDeclList 	{
 													insert_node_left($1, $3);
 													$$ = $1;
 												}
-	| ParamDecl	{ $$ = $1; }
+	| ParamDecl	{ 
+					$$ = $1; 
+				}
 ;
 
 ParamDecl: /* empty */ { $$ = NULL; }
 	| TYPE ID  	{
+					/* ---- Code Generator ---- */
+					gen->loadArgument($2);
 					/* --- SYMBOL TABLE ACTIONS by PARSER --- */
 					Entry* e = new Entry($2, $1);
 					parameterVector.push_back(e);
@@ -979,7 +1016,7 @@ int main(int argc, char**argv) {
 	printf("\n\n##### COMPILER STARTED #####\n\n");
 
 	std::cout << "##### Opening IR Code File #####\n";
-	IrGen::openFile();
+	gen->openFile();
 	
 	if (argc > 1){
 	  if(!(yyin = fopen(argv[1], "r")))
@@ -991,7 +1028,7 @@ int main(int argc, char**argv) {
 	yyparse();
 
 	std::cout << "#### Closing IR Code File ####\n";
-	IrGen::closeFile();
+	gen->closeFile();
 	
 }
 

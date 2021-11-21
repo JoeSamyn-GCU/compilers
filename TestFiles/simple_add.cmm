@@ -1,0 +1,28 @@
+fun void sum(int n, int m){
+    n = n + m;
+    write n;
+    writeln;
+}
+
+void main() {
+    int k;
+    k = 1;
+    sum(k, 2);
+
+    if (k < 3){
+        k = k + 2;
+        write k;
+        writeln;
+    }else{
+        k = 0;
+    }
+
+    while (k < 5){
+        k = k + 1;
+        write k;
+        writeln;
+    }
+
+    write(k);
+    writeln;
+}

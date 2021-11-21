@@ -52,7 +52,19 @@ Entry* Table::deleteEntry(char* name) {
     return e;
 }
 
-Entry* Table::searchEntry(char* name) {
+Entry* Table::searchEntry(char* name, std::string scope) {
+
+    // Search for matching function params
+    if(scope != ""){
+        Entry* e = entries.at(scope);
+        std::cout << "Found matching function: " << e->name << std::endl;
+        for(int i = 0; i < e->params.size(); i++){
+            if(e->params.at(i)->name == name){
+                return e->params.at(i);
+            }
+        }
+    }
+
     // Recursively call parent. If not null, return result
     if (parent != nullptr) {
         Entry* parentResult = parent->searchEntry(name);

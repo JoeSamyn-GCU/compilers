@@ -4,17 +4,9 @@
 In ARM we can use registers R0 - R10 for general purpose, except R7 which is reserved for System Calls
 */
 
-/* Begin IrGen Implementation */
-std::ofstream IrGen::ofile;
-std::deque<Qe*> IrGen::qe_deque;
-std::map<std::string, std::string> IrGen::var_reg;
-bool IrGen::registers[15];
-int IrGen::scope_counter = 0;
-int IrGen::r_counter;
-
 void IrGen::openFile(){
     r_counter = 0;
-    ofile.open("bin/ircode.txt");
+    ofile.open("bin/ircode.asm");
 }
 
 void IrGen::closeFile(){
@@ -123,20 +115,9 @@ void IrGen::printLabel(std::string label){
 
 std::string IrGen::getRegister(std::string var){
 
-    // If var is not empty, we are looking for matching variable
-    if(var != ""){
-        for(int i = 0; i < 10; i++){
-            
-            if(!registers[i]){
-                registers[i] = true;
-                return "$t" + std::to_string(i);
-            }
-        }
-    }
-
     // We are not looking for a matching variable or did not find one
-    for(int i = 0; i < 15; i++){
-        if(!registers[i]&& i != 7){
+    for(int i = 0; i < 10; i++){
+        if(!registers[i]){
             registers[i] = true;
             return "$t" + std::to_string(i);
         }
@@ -162,12 +143,8 @@ bool IrGen::isRelOp(std::string val){
     || val == "IF";
 }
 
-void IrGen::mapVarToReg(std::string var, std::string reg){
-    if(var_reg.find(var) == var_reg.end()){
-        var_reg[var] = reg;
-    }
-    else{
-        var = var + std::to_string(scope_counter);
+void IrGen::mapVarToReg(std::string reg, std::string var, bool update){
+    if(var_reg.find(var) == var_reg.end() || update){
         var_reg[var] = reg;
     }
 }
@@ -177,18 +154,20 @@ std::string IrGen::getMappedRegister(std::string var){
         return "";
     }
 
-    return var_reg[var];
+    auto val = var_reg.find(var);
+
+    return val->second;
 }
 
 std::string IrGen::loadGlobal(std::string var){
     std::string reg = IrGen::getRegister();
     std::string gp = "($gp)";
-    IrGen::printIrCodeCommand("lw", var.append(gp) + ",", reg, "");
+    IrGen::printIrCodeCommand("lw", reg + ",", var.append(gp), "");
     return reg;
 }
 
 void IrGen::clearScopedRegisters(){
-    for(int i = 0; i < 15; i++){
+    for(int i = 0; i < 10; i++){
         registers[i] = false;
     }
 }
@@ -204,6 +183,64 @@ void IrGen::syscall(){
 
 void IrGen::printJump(std::string label){
     ofile << "j " << label << std::endl << std::endl;
+}
+
+void IrGen::addArgumentToRegister(std::string arg){
+    for(int i = 0; i < 4; i++){
+        if(argumentRegister[i] == ""){
+            argumentRegister[i] = arg;
+            std::string areg = "$a" + std::to_string(i);
+            printIrCodeCommand("move", areg + ",", arg, "");
+            return;
+        }
+
+        if(i >= 3) {
+            std::cout << FYEL("No more argument registers available for function call..") << std::endl;
+        }
+    }
+}
+
+void IrGen::clearArgumentRegister(){
+    for(int i = 0; i < 4; i++){
+        argumentRegister[i] = false;
+    }
+    arg_counter = 0;
+}
+
+void IrGen::loadArgument(std::string argId){
+    if(arg_counter < 4){
+        std::string reg = getRegister();
+        std::string areg = "$a" + std::to_string(arg_counter);
+        printMipsComment("moving param " + argId + " into register");
+        printIrCodeCommand("move", reg + ",", areg, "");
+        mapVarToReg(reg, argId);
+        arg_counter++;
+    }
+}
+
+void IrGen::printMipsComment(std::string comment){
+    ofile << "# " << comment << std::endl;
+}
+
+void IrGen::freeRegister(std::string reg){
+    int index = convertRegisterToIndex(reg);
+    if(index == -1) return;
+    registers[index] = false;
+}
+
+/* ----- Private Methods ----- */
+int IrGen::convertRegisterToIndex(std::string reg){
+    if(reg == "$t0") return 0;
+    else if (reg == "$t1") return 1;
+    else if (reg == "$t2") return 2;
+    else if (reg == "$t3") return 3;
+    else if (reg == "$t4") return 4;
+    else if (reg == "$t5") return 5;
+    else if (reg == "$t6") return 6;
+    else if (reg == "$t7") return 7;
+    else if (reg == "$t8") return 8;
+    else if (reg == "$t9") return 9;
+    else return -1;
 }
 
 /* End IrGen Implementation */
