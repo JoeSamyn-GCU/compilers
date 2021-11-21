@@ -13,12 +13,16 @@ void main() {
         k = k + 2;
         write k;
         writeln;
+    }else{
+        k = 0;
     }
 
     while (k < 5){
         k = k + 1;
+        write k;
+        writeln;
     }
-    
+
     write(k);
     writeln;
 }
