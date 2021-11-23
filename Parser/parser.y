@@ -693,8 +693,8 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 									gen->printIrCodeCommand("add", result_reg + ",", arg1 + ",", arg2);
 
 									// Free any registers that were used to store a constant number
-									if($1->isNum) gen->freeRegister(arg1);
-									if($3->isNum) gen->freeRegister(arg2);
+									if($1->isNumber) gen->freeRegister(arg1);
+									if($3->isNumber) gen->freeRegister(arg2);
 
 									/* ---- SEMANTIC ACTIONS by PARSER ---- */
 									if(debug)
@@ -810,7 +810,7 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 				char num_s[100];
 				sprintf(num_s, "%d", $1);
 				AST* n = New_Tree(num_s, NULL, NULL, reg);
-				n->isNum = true;
+				n->isNumber = true;
 				$$ = n;
 			}
 | ID	{

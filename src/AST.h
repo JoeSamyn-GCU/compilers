@@ -11,7 +11,7 @@ typedef struct AST{
 	// Register the expression result is stored in
 	std::string reg;
 
-	bool isNum;
+	bool isNumber;
 
 	// Left child node
 	struct AST * left;
