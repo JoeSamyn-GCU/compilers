@@ -25,7 +25,7 @@ class Entry {
             int nparams = 0,         
             std::vector<Entry*> params = {},
             std::string returntype = "",
-            int uses = 1,
+            int uses = 0,
             int nline = 0,
             int nchar = 0,
             std::string stype = "",

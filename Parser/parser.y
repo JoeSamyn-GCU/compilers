@@ -268,7 +268,7 @@ VarDecl: TYPE ID SEMICOLON		{
 									gen->printIrCodeCommand("jr", "$ra", "", "");
 								gen->ofile << std::endl;
 								/* --- SYMBOL TABLE ACTIONS --- */
-								Entry* e = new Entry($3, "", "", 0, 0, {}, $3);
+								Entry* e = new Entry($3, "", "", 0, 0, {}, $2);
 								while(!parameterVector.empty()) {
 									e->params.push_back(parameterVector.back());
 									parameterVector.pop_back();
@@ -558,9 +558,9 @@ Expr:	ID  {
 							gen->clearArgumentRegister();
 
 							/* --- SEMANTIC CHECKS --- */
-							checkExistance(current, $1, parameterVector);
-
-							Entry* e = current->searchEntry($1);
+							Entry* e = checkExistance(current, $1, parameterVector);
+							e->uses++;
+							//Entry* e = current->searchEntry($1);
 							// check for correct parameters
 							checkParameters(e, argumentVector);
 							argumentVector.clear();

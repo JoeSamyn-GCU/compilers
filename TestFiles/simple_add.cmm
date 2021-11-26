@@ -1,4 +1,12 @@
+fun int simpleAdd(int i, int k) {
+    int b;
+    b = i + k;
+    return b;
+}
+
+
 void main() {
     int l;
     l = 1 + 2 + 3 + 4 + 5;
+    simpleAdd(l, 1);
 }

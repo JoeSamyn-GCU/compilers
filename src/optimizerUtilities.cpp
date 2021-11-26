@@ -22,3 +22,7 @@ std::string returnExpr(AST* mathExpr1, AST* mathExpr2, std::string op){
         reduced = std::to_string(std::stoi(reduced) + std::stoi(mathExpr2->nodeType));
     }
 }
+
+void expressionElimination(Table* root) {
+    root. 
+}
