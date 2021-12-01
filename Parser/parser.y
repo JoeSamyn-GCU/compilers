@@ -12,6 +12,8 @@
 #include "symbolTable.cpp"
 #include "semanticUtilities.h"
 #include "semanticUtilities.cpp"
+#include "optimizerUtilities.h"
+#include "optimizerUtilities.cpp"
 
 #include "AST.h"
 #include "irgen.h"
@@ -695,6 +697,9 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 									// Free any registers that were used to store a constant number
 									if($1->isNumber) gen->freeRegister(arg1);
 									if($3->isNumber) gen->freeRegister(arg2);
+
+									std::string test = returnExpr($1, $3, $2);
+									std::cout << "TEST: " << test << std::endl;
 
 									/* ---- SEMANTIC ACTIONS by PARSER ---- */
 									if(debug)

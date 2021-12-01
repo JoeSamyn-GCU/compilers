@@ -2,6 +2,7 @@
 #define OPTIMIZERUTILITIES_H
 
 #include "AST.h"
+#include "symbolTable.h"
 #include <string>
 
 std::string returnExpr(AST* mathExpr1, AST* mathExpr2, std::string op);
@@ -16,7 +17,7 @@ void redundantFunctionElimination(Table* root);
 /** 
  * @brief removes redundant expressions
 */
-void removeRedundant(File ircode); 
+// void removeRedundant(File ircode);  // do stuff with fstream
 // rough idea of what may be needed. Follow Artzi's method for subexpression removal
 
 #endif
