@@ -704,7 +704,7 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 											if(!$1->isNumber) {
 												/* ---- Code Generation ---- */
 												std::string reg = gen->getRegister();
-												std::string num = std::to_string($1->nodeType);
+												std::string num = $1->nodeType;
 												gen->printIrCodeCommand("li", reg + ",", num, "");
 
 												if($1->isNumber) gen->freeRegister(reg);
@@ -715,7 +715,7 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 											} else if (!$3->isNumber) {
 												/* ---- Code Generation ---- */
 												std::string reg = gen->getRegister();
-												std::string num = std::to_string($3->nodeType);
+												std::string num = $3->nodeType;
 												gen->printIrCodeCommand("li", reg + ",", num, "");
 
 												if($1->isNumber) gen->freeRegister(reg);
