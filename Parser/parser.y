@@ -688,62 +688,95 @@ ArgList: /* empty */ { $$ = NULL; }
 ;
 
 MathExpr:	MathExpr PLUS MathExpr 	{
-									/* ---- IR Code Generator ---- */
-									std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType);
-									std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
-									std::string result_reg = gen->getRegister();
-									gen->printIrCodeCommand("add", result_reg + ",", arg1 + ",", arg2);
+										/* ---- SEMANTIC ACTIONS by PARSER ---- */
+										if(debug)
+											std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " <<
+											$2<< " " << $3->nodeType << std::endl;
 
-									// Free any registers that were used to store a constant number
-									if($1->isNumber) gen->freeRegister(arg1);
-									if($3->isNumber) gen->freeRegister(arg2);
+										/* ---- AST ACTIONS by PARSER ---- */
+										//! Here's the new stuff!!!
+										if ($1->isNumber && $3->isNumber) {
+											$1->nodeType = std::to_string(std::stoi($1->nodeType) + std::stoi($3->nodeType));
+											AST* n = New_Tree($1->nodeType, NULL, NULL);
+											n->isNumber = true;
+											$$ = n;
+										} else {
+											if(!$1->isNumber) {
+												/* ---- Code Generation ---- */
+												std::string reg = gen->getRegister();
+												std::string num = std::to_string($1->nodeType);
+												gen->printIrCodeCommand("li", reg + ",", num, "");
 
-									std::string test = returnExpr($1, $3, $2);
-									std::cout << "TEST: " << test << std::endl;
+												if($1->isNumber) gen->freeRegister(reg);
 
-									/* ---- SEMANTIC ACTIONS by PARSER ---- */
-									if(debug)
-										std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " <<
-								   		 $2<< " " << $3->nodeType << std::endl;
+												AST* n = New_Tree($3->nodeType, NULL, NULL);
+												n->isNumber = true;
+												$$ = n;
+											} else if (!$3->isNumber) {
+												/* ---- Code Generation ---- */
+												std::string reg = gen->getRegister();
+												std::string num = std::to_string($3->nodeType);
+												gen->printIrCodeCommand("li", reg + ",", num, "");
 
-									/* ---- AST ACTIONS by PARSER ---- */
-									//! Here's the new stuff!!!
-									if ($1->isNumber && $3->isNumber) {
-										$1->nodeType = std::to_string(std::stoi($1->nodeType) + std::stoi($3->nodeType));
-										AST* op = New_Tree($2, $1, NULL, result_reg);
-										$$ = op;
+												if($1->isNumber) gen->freeRegister(reg);
+
+												AST* n = New_Tree($1->nodeType, NULL, NULL);
+												n->isNumber = true;
+												$$ = n;
+											} else {
+												/* ---- IR Code Generator ---- */
+												std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType); // if the register is empty, load the global variable
+												std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
+												std::string result_reg = gen->getRegister();
+												
+												gen->printIrCodeCommand("add", result_reg + ",", arg1 + ",", arg2);
+
+												// Free any registers that were used to store a constant number
+												if($1->isNumber) gen->freeRegister(arg1);
+												if($3->isNumber) gen->freeRegister(arg2);
+
+												AST* op = New_Tree($2, $1, $3, result_reg);
+												$$ = op;
+											}
+										}
 									}
-									else {
-										AST* op = New_Tree($2, $1, $3, result_reg);
-										$$ = op;
-									}
-
-								}
 | MathExpr MINUS MathExpr 	{
+								/* ---- SEMANTIC ACTIONS by PARSER ---- */
+								if(debug)
+									std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " <<
+										$2<< " " << $3->nodeType << std::endl;
+
+								/* ---- AST ACTIONS by PARSER ---- */
+								//! Here's the new stuff!!!
+								if ($1->isNumber && $3->isNumber) {
+									$1->nodeType = std::to_string(std::stoi($1->nodeType) - std::stoi($3->nodeType));
+									AST* op = New_Tree($2, $1, NULL);
+									$$ = op;
+								} else {
 									/* ---- IR Code Generator ---- */
 									std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType);
 									std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
 									std::string result_reg = gen->getRegister();
 									gen->printIrCodeCommand("sub", result_reg + ",", arg1 + ",", arg2);
 
-									/* ---- SEMANTIC ACTIONS by PARSER ---- */
-									if(debug)
-										std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " <<
-								   		 $2<< " " << $3->nodeType << std::endl;
-
-									/* ---- AST ACTIONS by PARSER ---- */
-									//! Here's the new stuff!!!
-									if ($1->isNumber && $3->isNumber) {
-										$1->nodeType = std::to_string(std::stoi($1->nodeType) - std::stoi($3->nodeType));
-										AST* op = New_Tree($2, $1, NULL, result_reg);
-										$$ = op;
-									}
-									else {
-										AST* op = New_Tree($2, $1, $3, result_reg);
-										$$ = op;
-									}
+									AST* op = New_Tree($2, $1, $3, result_reg);
+									$$ = op;
 								}
+							}
 | MathExpr DIV MathExpr 	{
+								/* ---- SEMANTIC ACTIONS by PARSER ---- */
+								if(debug)
+									std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " <<
+										$2 << " " << $3->nodeType << std::endl;
+
+								/* ---- AST ACTIONS by PARSER ---- */
+								//! Here's the new stuff!!!
+								if ($1->isNumber && $3->isNumber) {
+									//todo: float division instead of integer division
+									$1->nodeType = std::to_string(std::stoi($1->nodeType) / std::stoi($3->nodeType));
+									AST* op = New_Tree($2, $1, NULL);
+									$$ = op;
+								} else {
 									/* ---- IR Code Generator ---- */
 									std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType);
 									std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
@@ -751,25 +784,24 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 									gen->printIrCodeCommand("div", arg1 + ",", arg2, "");
 									gen->printIrCodeCommand("mflo", result_reg, "", "");
 
-									/* ---- SEMANTIC ACTIONS by PARSER ---- */
-									if(debug)
-										std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " <<
-								   		 $2 << " " << $3->nodeType << std::endl;
 
-									/* ---- AST ACTIONS by PARSER ---- */
-									//! Here's the new stuff!!!
-									if ($1->isNumber && $3->isNumber) {
-										//todo: float division instead of integer division
-										$1->nodeType = std::to_string(std::stoi($1->nodeType) / std::stoi($3->nodeType));
-										AST* op = New_Tree($2, $1, NULL, result_reg);
-										$$ = op;
-									}
-									else {
-										AST* op = New_Tree($2, $1, $3, result_reg);
-										$$ = op;
-									}
+									AST* op = New_Tree($2, $1, $3, result_reg);
+									$$ = op;
 								}
+							}
 | MathExpr MULT MathExpr 	{
+								/* ---- SEMANTIC ACTIONS by PARSER ---- */
+								if(debug)
+									std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " <<
+										$2 << " " << $3->nodeType << std::endl;
+
+								/* ---- AST ACTIONS by PARSER ---- */
+								//! Here's the new stuff!!!
+								if ($1->isNumber && $3->isNumber) {
+									$1->nodeType = std::to_string(std::stoi($1->nodeType) * std::stoi($3->nodeType));
+									AST* op = New_Tree($2, $1, NULL);
+									$$ = op;
+								} else {
 									/* ---- IR Code Generator ---- */
 									std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType);
 									std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
@@ -777,23 +809,10 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 									gen->printIrCodeCommand("mult",  arg1 + ",", arg2, "");
 									gen->printIrCodeCommand("mflo", result_reg, "", "");
 
-									/* ---- SEMANTIC ACTIONS by PARSER ---- */
-									if(debug)
-										std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " <<
-								   		 $2 << " " << $3->nodeType << std::endl;
-
-									/* ---- AST ACTIONS by PARSER ---- */
-									//! Here's the new stuff!!!
-									if ($1->isNumber && $3->isNumber) {
-										$1->nodeType = std::to_string(std::stoi($1->nodeType) * std::stoi($3->nodeType));
-										AST* op = New_Tree($2, $1, NULL, result_reg);
-										$$ = op;
-									}
-									else {
-										AST* op = New_Tree($2, $1, $3, result_reg);
-										$$ = op;
-									}
+									AST* op = New_Tree($2, $1, $3, result_reg);
+									$$ = op;
 								}
+							}
 |	OPAR MathExpr CPAR	{
 							/* ---- AST ACTIONS by PARSER ---- */
 							$$ = $2;

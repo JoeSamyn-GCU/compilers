@@ -1,3 +1,5 @@
+#ifndef AST_H
+#define AST_H
 //Abstract Syntax Tree Implementation
 #include <string>
 #include <string.h>
@@ -64,3 +66,4 @@ void print_spaces(int level);
  * @param level starting depth or level
  */
 void print_tree(struct AST* node, int level);
+#endif
