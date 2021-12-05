@@ -119,6 +119,13 @@ class IrGen {
         std::string getRegister(std::string var = "");
 
         /**
+         * @brief get the next available character register
+         * 
+         * @return open register string
+         */
+        std::string getSRegister();
+
+        /**
          * @brief add variable name and register number to dictionary to keep track of mapped variables
          * 
          * @param var variable to add into map
@@ -231,7 +238,12 @@ class IrGen {
         /**
          * @brief bool array used to hold values at various registers
          */
-        bool registers[15];
+        bool registers[10];
+
+        /**
+         * @brief bool array used to hold values at various character registers
+         */
+        bool s_registers[10];
 
         /**
          * @brief string array used to keep track of which argument registers are in use

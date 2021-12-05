@@ -190,20 +190,28 @@ VarDecl: TYPE ID SEMICOLON		{
 								if(is_global)
 									gen->ofile << $2 << ": .word 4\n";
 								else{
-
-									if ($1 == "int"){ 
+									
+									std::string i = "int";
+									std::string c = "char";
+									if (i.compare($1) == 0){ 
 										std::string reg = gen->getRegister();
 										gen->mapVarToReg(reg, $2);
 										gen->printIrCodeCommand("li", reg + ",", "0", "");
+										// ---- SYMBOL TABLE ACTIONS by PARSER ----
+										Entry* e = new Entry($2, $1);
+										e->dtype = "int";
+										current->insertEntry(e);
 									}
-									else if ($1 == "char"){
-										
+									else if (c.compare($1) == 0){
+										std::string reg = gen->getRegister();
+										gen->mapVarToReg(reg, $2);
+										gen->printIrCodeCommand("li", reg + ",", "\'~\'", "");
+										// ---- SYMBOL TABLE ACTIONS by PARSER ----
+										Entry* e = new Entry($2, $1);
+										e->dtype = "char";
+										current->insertEntry(e);
 									}
 								}
-
-								// ---- SYMBOL TABLE ACTIONS by PARSER ----
-								Entry* e = new Entry($2, $1);
-								current->insertEntry(e);
 								
 								// ---- AST ACTIONS by PARSER ----
 								struct AST* id = (AST*)malloc(sizeof(struct AST));
@@ -325,13 +333,24 @@ Stmt: /* empty */ { $$ = NULL; }
 								std::string reg = gen->getMappedRegister($2);
 								std::cout << "WRITING REG: " << reg << std::endl;
 								
+								std::string dtype = current->searchEntry($2)->dtype;
+								std::cout << dtype << std::endl;
 								
 								if(current == NULL) std::cout << "DEBUG: HERE\n";
 								
 								// Print integer using MIPS, no new line
-								gen->printIrCodeCommand("li", "$v0,", "1", "");
-								gen->printIrCodeCommand("move", "$a0,", reg, "");
-								gen->syscall();
+								if(dtype.compare("int") == 0){
+									gen->printIrCodeCommand("li", "$v0,", "1", "");
+									gen->printIrCodeCommand("move", "$a0,", reg, "");
+									gen->syscall();
+								}
+								// Else we are printing character, use different syscall code
+								else if(dtype.compare("char") == 0){
+									gen->printIrCodeCommand("li", "$v0,", "11", "");
+									gen->printIrCodeCommand("move", "$a0,", reg, "");
+									gen->syscall();
+								}
+
 								/* ---- DEBUGGING ---- */
 								if(debug)
 									printf("\n RECOGNIZED RULE: WRITE statement\n");

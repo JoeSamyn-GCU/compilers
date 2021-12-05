@@ -228,6 +228,7 @@ void IrGen::freeRegister(std::string reg){
     registers[index] = false;
 }
 
+
 /* ----- Private Methods ----- */
 int IrGen::convertRegisterToIndex(std::string reg){
     if(reg == "$t0") return 0;

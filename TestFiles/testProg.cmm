@@ -4,4 +4,8 @@ int main(){
     int x;
     char y;
     int x;
+
+    write x;
+    writeln;
+    write y;
 }
