@@ -190,9 +190,15 @@ VarDecl: TYPE ID SEMICOLON		{
 								if(is_global)
 									gen->ofile << $2 << ": .word 4\n";
 								else{
-									std::string reg = gen->getRegister();
-									gen->mapVarToReg(reg, $2);
-									gen->printIrCodeCommand("li", reg + ",", "0", "");
+
+									if ($1 == "int"){ 
+										std::string reg = gen->getRegister();
+										gen->mapVarToReg(reg, $2);
+										gen->printIrCodeCommand("li", reg + ",", "0", "");
+									}
+									else if ($1 == "char"){
+										
+									}
 								}
 
 								// ---- SYMBOL TABLE ACTIONS by PARSER ----
