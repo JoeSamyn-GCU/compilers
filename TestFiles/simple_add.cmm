@@ -8,5 +8,4 @@ fun int simpleAdd(int i, int k) {
 void main() {
     int l;
     l = 1 + 2 + 3 + 4 + 5;
-    simpleAdd(l, 1);
 }

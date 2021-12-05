@@ -1087,7 +1087,7 @@ int main(int argc, char**argv) {
 
 	std::cout << "#### Closing IR Code File ####\n";
 	gen->closeFile();
-
+	redundantFunctionElimination(symbolTable);
 }
 
 void yyerror(const char* s) {
