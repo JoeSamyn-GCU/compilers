@@ -1,7 +1,9 @@
-int main(){
+fun int deadFunc() {
+
+}
+
+int main() {
     int x;
     int y;
     x = 1 + 2 * 6 / 3 - 4;
-    
-
 }

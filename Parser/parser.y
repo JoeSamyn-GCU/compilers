@@ -466,9 +466,15 @@ Expr:	ID  {
 | ID EQ MathExpr 	{
 						/* ------ CODE GENERATION ------ */
 						std::string reg = gen->getMappedRegister($1);
-						gen->printIrCodeCommand("move", reg + ",", $3->reg, "");
-						gen->freeRegister($3->reg);
-						argumentVector.clear();
+
+						if( $3->isNumber ) {
+							std::string reg = gen->getMappedRegister($1);
+							gen->printIrCodeCommand("li", reg + ",", $3->nodeType, "");
+						} else {
+							gen->freeRegister($3->reg);
+							argumentVector.clear();
+						}
+						// gen->printIrCodeCommand("move", reg + ",", $3->reg, "");
 						/* --- SEMANTIC CHECKS --- */
 						// checkExistance(current, $1, parameterVector);
 						// checkIntType(current, $1);
