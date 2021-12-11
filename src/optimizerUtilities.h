@@ -4,7 +4,6 @@
 #include "AST.h"
 #include "symbolTable.h"
 #include <string>
-
 std::string returnExpr(AST* mathExpr1, AST* mathExpr2, std::string op);
 
 
@@ -14,7 +13,7 @@ std::string returnExpr(AST* mathExpr1, AST* mathExpr2, std::string op);
 */
 void redundantFunctionElimination(Table* root);
 
-void findUnusedEntries(Table* root, std::vector<std::string> &redundantEntries);
+void findUnusedEntries(Table* root, std::vector<std::string> &deadLabels, std::vector<std::string> &unusedVariables);
 
 
 /** 
