@@ -713,7 +713,7 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 											if(!$1->isNumber && $3->isNumber) {
 												// check if the left side is a variable then add the variable value to the number
 												if($1->isIntVar) {
-													Entry* e = current->searchEntry($1->nodeType);
+													Entry* e = current->searchEntry(const_cast<char*>($1->nodeType.data()));
 													$1->nodeType = std::to_string(std::stoi(e->value) + std::stoi($3->nodeType));
 													AST* n = New_Tree($1->nodeType, NULL, NULL);
 													n->isNumber = true;

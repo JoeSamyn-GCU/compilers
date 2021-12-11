@@ -33,7 +33,7 @@ typedef struct AST{
  */
 struct AST * New_Tree(std::string nt, struct AST* l, struct AST* r);
 
-struct AST * New_Tree(std::string nt, struct AST* l, struct AST* r, std::string reg, bool isNumber=false);
+struct AST * New_Tree(std::string nt, struct AST* l, struct AST* r, std::string reg, bool isNumber=false, bool isIntVar=false);
 
 /**
  * Insert node into the next available null right child of the parent subtree
