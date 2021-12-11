@@ -14,6 +14,7 @@ typedef struct AST{
 	std::string reg;
 
 	bool isNumber;
+	bool isIntVar;
 
 	// Left child node
 	struct AST * left;

@@ -534,7 +534,9 @@ Expr:	ID  {
 | ID EQ NUMBER 	{
 					/* --- SEMANTIC CHECKS --- */
 					argumentVector.clear();
-					checkExistance(current,$1, parameterVector);
+					Entry* e = checkExistance(current, $1, parameterVector);
+					e->value = std::to_string($3);
+
 					/* ---- IR Code Generation ---- */
 					std::string id_reg = gen->getMappedRegister($1);
 					std::cout << "REGISTER: " << id_reg << std::endl;
@@ -552,9 +554,11 @@ Expr:	ID  {
 
 					if(debug)
 						std::cout << "\n RECOGNIZED RULE: ID EQ ID\nTOKENS: " << $1 << " " << $2 << " " << $3 << std::endl;
+
 					struct AST* id_1 = (AST*)malloc(sizeof(struct AST));
 					struct AST* num = (AST*)malloc(sizeof(struct AST));
 					struct AST* eq = (AST*)malloc(sizeof(struct AST));
+
 					id_1 = New_Tree($1, NULL, NULL);
 					num = New_Tree(std::to_string($3), NULL, NULL);
 					eq = New_Tree("=", id_1, num);
@@ -707,16 +711,25 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 											$$ = n;
 										} else {
 											if(!$1->isNumber && $3->isNumber) {
-												/* ---- Code Generation ---- */
-												std::string reg = gen->getRegister();
-												std::string num = $1->nodeType;
-												gen->printIrCodeCommand("li", reg + ",", num, "");
+												// check if the left side is a variable then add the variable value to the number
+												if($1->isIntVar) {
+													Entry* e = current->searchEntry($1->nodeType);
+													$1->nodeType = std::to_string(std::stoi(e->value) + std::stoi($3->nodeType));
+													AST* n = New_Tree($1->nodeType, NULL, NULL);
+													n->isNumber = true;
+													$$ = n;
+												} else {
+													/* ---- Code Generation ---- */
+													std::string reg = gen->getRegister();
+													std::string num = $1->nodeType;
+													gen->printIrCodeCommand("li", reg + ",", num, "");
 
-												AST* n = New_Tree($3->nodeType, NULL, NULL, gen->getRegister());
-												if($1->isNumber) gen->freeRegister(reg);
+													AST* n = New_Tree($3->nodeType, NULL, NULL, gen->getRegister());
+													if($3->isNumber) gen->freeRegister(reg);
 
-												n->isNumber = true;
-												$$ = n;
+													n->isNumber = true;
+													$$ = n;
+												}
 											} else if (!$3->isNumber && $1->isNumber) {
 												/* ---- Code Generation ---- */
 												std::string reg = gen->getRegister();
@@ -765,7 +778,7 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 										gen->printIrCodeCommand("li", reg + ",", num, "");
 
 										AST* n = New_Tree($3->nodeType, NULL, NULL, gen->getRegister());
-										if($1->isNumber) gen->freeRegister(reg);
+										if($3->isNumber) gen->freeRegister(reg);
 
 										n->isNumber = true;
 										$$ = n;
@@ -817,7 +830,7 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 										gen->printIrCodeCommand("li", reg + ",", num, "");
 
 										AST* n = New_Tree($3->nodeType, NULL, NULL, gen->getRegister());
-										if($1->isNumber) gen->freeRegister(reg);
+										if($3->isNumber) gen->freeRegister(reg);
 
 										n->isNumber = true;
 										$$ = n;
@@ -862,18 +875,18 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 									n->isNumber = true;
 									$$ = n;
 								} else {
-									if(!$1->isNumber) {
+									if(!$1->isNumber && $3->isNumber) {
 										/* ---- Code Generation ---- */
 										std::string reg = gen->getRegister();
 										std::string num = $1->nodeType;
 										gen->printIrCodeCommand("li", reg + ",", num, "");
 
 										AST* n = New_Tree($3->nodeType, NULL, NULL, gen->getRegister());
-										if($1->isNumber) gen->freeRegister(reg);
+										if($3->isNumber) gen->freeRegister(reg);
 
 										n->isNumber = true;
 										$$ = n;
-									} else if (!$3->isNumber) {
+									} else if (!$3->isNumber && $1->isNumber) {
 										/* ---- Code Generation ---- */
 										std::string reg = gen->getRegister();
 										std::string num = $3->nodeType;
@@ -949,7 +962,9 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 			/* ---- AST ACTIONS by PARSER ---- */
 			if(debug)
 				printf("\nRECOGNIZED RULE: ID\n");
-			$$ = New_Tree($1, NULL, NULL, reg);
+			AST* n = New_Tree($1, NULL, NULL, reg);
+			n->isIntVar = true;
+			$$ = n;
 }
 | ID OSB MathExpr CSB 	{
 							/* ---- AST ACTIONS by PARSER ---- */

@@ -20,12 +20,12 @@ AST * New_Tree(std::string nt, struct AST* l, struct AST* r){
 
 }
 
-AST * New_Tree(std::string nt, struct AST* l, struct AST* r, std::string reg, bool isNumber){
+AST * New_Tree(std::string nt, struct AST* l, struct AST* r, std::string reg, bool isNumber, bool isIntVar){
 
 	// Allocate memory for struct
 	struct AST* ast = (AST*)malloc(sizeof(struct AST));
 	
-	// Copy char arra into nodetype property
+	// Copy char array into nodetype property
 	ast->nodeType = nt;
 
 	// Assign left and right children
@@ -33,6 +33,7 @@ AST * New_Tree(std::string nt, struct AST* l, struct AST* r, std::string reg, bo
 	ast->right = r;
 	ast->reg = reg;
 	ast->isNumber = isNumber;
+	ast->isIntVar = isIntVar;
 	return ast;
 
 }
