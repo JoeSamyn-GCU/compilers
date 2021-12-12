@@ -710,8 +710,10 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 											n->isNumber = true;
 											$$ = n;
 										} else if ($1->isIntVar && $3->isIntVar) {
-											Entry* e1 = current->searchEntry(const_cast<char*>($1->nodeType.data()));
-											Entry* e2 = current->searchEntry(const_cast<char*>($3->nodeType.data()));
+											Entry* e1 = checkExistance(current, const_cast<char*>($1->nodeType.data()), parameterVector);
+											Entry* e2 = checkExistance(current, const_cast<char*>($3->nodeType.data()), parameterVector);
+											//Entry* e1 = current->searchEntry(const_cast<char*>($1->nodeType.data()));
+											//Entry* e2 = current->searchEntry(const_cast<char*>($3->nodeType.data()));
 
 											$1->nodeType = std::to_string(std::stoi(e1->value) + std::stoi(e2->value));
 											AST* n = New_Tree($1->nodeType, NULL, NULL);
@@ -721,7 +723,8 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 											if(!$1->isNumber && $3->isNumber) {
 												// check if the left side is a variable then add the variable value to the number
 												if($1->isIntVar) {
-													Entry* e = current->searchEntry(const_cast<char*>($1->nodeType.data()));
+													Entry* e = checkExistance(current, const_cast<char*>($1->nodeType.data()), parameterVector);
+													//Entry* e = current->searchEntry(const_cast<char*>($1->nodeType.data()));
 													$1->nodeType = std::to_string(std::stoi(e->value) + std::stoi($3->nodeType));
 													AST* n = New_Tree($1->nodeType, NULL, NULL);
 													n->isNumber = true;
@@ -741,7 +744,8 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 											} else if (!$3->isNumber && $1->isNumber) {
 												// check if the left side is a variable then add the variable value to the number
 												if($3->isIntVar) {
-													Entry* e = current->searchEntry(const_cast<char*>($3->nodeType.data()));
+													Entry* e = checkExistance(current, const_cast<char*>($3->nodeType.data()), parameterVector);
+													//Entry* e = current->searchEntry(const_cast<char*>($3->nodeType.data()));
 													$1->nodeType = std::to_string(std::stoi(e->value) + std::stoi($1->nodeType));
 													AST* n = New_Tree($1->nodeType, NULL, NULL);
 													n->isNumber = true;
@@ -788,8 +792,10 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 									n->isNumber = true;
 									$$ = n;
 								} else if ($1->isIntVar && $3->isIntVar) {
-									Entry* e1 = current->searchEntry(const_cast<char*>($1->nodeType.data()));
-									Entry* e2 = current->searchEntry(const_cast<char*>($3->nodeType.data()));
+									Entry* e1 = checkExistance(current, const_cast<char*>($1->nodeType.data()), parameterVector);
+									Entry* e2 = checkExistance(current, const_cast<char*>($3->nodeType.data()), parameterVector);
+									// Entry* e1 = current->searchEntry(const_cast<char*>($1->nodeType.data()));
+									// Entry* e2 = current->searchEntry(const_cast<char*>($3->nodeType.data()));
 
 									$1->nodeType = std::to_string(std::stoi(e1->value) - std::stoi(e2->value));
 									AST* n = New_Tree($1->nodeType, NULL, NULL);
@@ -799,7 +805,8 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 									if(!$1->isNumber && $3->isNumber) {
 										// check if the left side is a variable then add the variable value to the number
 										if($1->isIntVar) {
-											Entry* e = current->searchEntry(const_cast<char*>($1->nodeType.data()));
+											Entry* e = checkExistance(current, const_cast<char*>($1->nodeType.data()), parameterVector);
+											//Entry* e = current->searchEntry(const_cast<char*>($1->nodeType.data()));
 											$1->nodeType = std::to_string(std::stoi(e->value) - std::stoi($3->nodeType));
 											AST* n = New_Tree($1->nodeType, NULL, NULL);
 											n->isNumber = true;
@@ -819,7 +826,8 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 									} else if (!$3->isNumber && $1->isNumber) {
 										// check if the left side is a variable then add the variable value to the number
 										if($3->isIntVar) {
-											Entry* e = current->searchEntry(const_cast<char*>($3->nodeType.data()));
+											Entry* e = checkExistance(current, const_cast<char*>($3->nodeType.data()), parameterVector);
+											//Entry* e = current->searchEntry(const_cast<char*>($3->nodeType.data()));
 											$1->nodeType = std::to_string(std::stoi(e->value) - std::stoi($1->nodeType));
 											AST* n = New_Tree($1->nodeType, NULL, NULL);
 											n->isNumber = true;
