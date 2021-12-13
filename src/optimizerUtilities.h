@@ -13,7 +13,7 @@ std::string returnExpr(AST* mathExpr1, AST* mathExpr2, std::string op);
 */
 void redundantFunctionElimination(Table* root);
 
-void findUnusedEntries(Table* root, std::vector<std::string> &deadLabels, std::vector<std::string> &unusedVariables);
+void findUnusedEntries(Table* root, std::vector<std::string> &deadLabels);
 
 
 /** 
