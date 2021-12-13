@@ -473,8 +473,9 @@ Expr:	ID  {
 						} else {
 							gen->freeRegister($3->reg);
 							argumentVector.clear();
+							gen->printIrCodeCommand("move", reg + ",", $3->reg, "");
 						}
-						// gen->printIrCodeCommand("move", reg + ",", $3->reg, "");
+						
 						/* --- SEMANTIC CHECKS --- */
 						// checkExistance(current, $1, parameterVector);
 						// checkIntType(current, $1);
