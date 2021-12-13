@@ -488,50 +488,6 @@ Expr:	ID  {
 						eq = New_Tree("=", id, $3);
 						$$ = eq;
 					}
-| ID EQ ID 	{
-				/* --- SEMANTIC CHECKS --- */
-				checkExistance(current, $1, parameterVector);
-				checkExistance(current, $3, parameterVector);
-
-				/* ---- IR Code Generation ---- */
-				// TODO: fix this to check both global variables exist
-				std::string reg_1 = gen->getMappedRegister($1);
-				std::string reg_2 = gen->getMappedRegister($3);
-				// Both global vars
-				if(reg_1 == "" && reg_2 == ""){
-					reg_2 = gen->getRegister();
-					std::string gp = "($gp)";
-					std::string id($1);
-					std::string id_2($3);
-					gen->printIrCodeCommand("lw", reg_2 + ",", id_2.append(gp), "");
-					gen->printIrCodeCommand("sw", reg_2 + ",", id.append(gp), "");
-					int reg_1_index = reg_2[2] - 48;
-					gen->registers[reg_1_index] = false;
-				}
-				else if (reg_1 != "" && reg_2 == ""){
-					std::string gp = "($gp)";
-					std::string id_2($3);
-					gen->printIrCodeCommand("li", reg_1 + ",", id_2.append(gp), "");
-				}
-				else if (reg_1 == "" && reg_2 != ""){
-					std::string gp = "($gp)";
-					std::string id_1($1);
-					gen->printIrCodeCommand("li", reg_2 + ", ", id_1.append(gp), "");
-				}else{
-					gen->printIrCodeCommand("li", reg_2 + ",", reg_1, "");
-				}
-
-				/* ---- AST ACTIONS by PARSER ---- */
-				if(debug)
-					std::cout << "\n RECOGNIZED RULE: ID EQ ID\nTOKENS: " << $1 << " " << $2 << " " << $3 << std::endl;
-				struct AST* id_1 = (AST*)malloc(sizeof(struct AST));
-				struct AST* id_2 = (AST*)malloc(sizeof(struct AST));
-				struct AST* eq = (AST*)malloc(sizeof(struct AST));
-				id_1 = New_Tree($1, NULL, NULL);
-				id_2 = New_Tree($3, NULL, NULL);
-				eq = New_Tree("=", id_1, id_2);
-				$$ = eq;
-			}
 | ID EQ NUMBER 	{
 					/* --- SEMANTIC CHECKS --- */
 					argumentVector.clear();
@@ -707,18 +663,36 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 											$$ = n;
 										} else {
 											/* ---- IR Code Generator ---- */
-											std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType); // if the register is empty, load the global variable
-											std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
-											std::string result_reg = gen->getRegister();
-											
-											gen->printIrCodeCommand("add", result_reg + ",", arg1 + ",", arg2);
+											if($1->isNumber){
+												std::string reg = gen->getRegister();
+												gen->printIrCodeCommand("li", reg + ",", $1->nodeType, "");
+												std::string arg1 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType); 
+												std::string result_reg = gen->getRegister();
+												gen->printIrCodeCommand("add", result_reg + ",", arg1 + ",", $3->reg);
+												gen->freeRegister(reg);
+												AST* op = New_Tree($2, $1, $3, result_reg);
+												$$ = op;
+											}
+											else if($3->isNumber){
+												std::string reg = gen->getRegister();
+												gen->printIrCodeCommand("li", reg + ",", $3->nodeType, "");
+												std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType);
+												std::string result_reg = gen->getRegister();
+												gen->printIrCodeCommand("add", result_reg + ",", $1->reg + ",", arg1);
+												gen->freeRegister(reg);
+												AST* op = New_Tree($2, $1, $3, result_reg);
+												$$ = op;
+											}
+											else {
+												std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType); // if the register is empty, load the global variable
+												std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
+												std::string result_reg = gen->getRegister();
+												
+												gen->printIrCodeCommand("add", result_reg + ",", arg1 + ",", arg2);
 
-											// Free any registers that were used to store a constant number
-											if($1->isNumber) gen->freeRegister(arg1);
-											if($3->isNumber) gen->freeRegister(arg2);
-
-											AST* op = New_Tree($2, $1, $3, result_reg);
-											$$ = op;
+												AST* op = New_Tree($2, $1, $3, result_reg);
+												$$ = op;
+											}
 										}
 									}
 | MathExpr MINUS MathExpr 	{
@@ -735,18 +709,36 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 									$$ = n;
 								} else {
 									/* ---- IR Code Generator ---- */
-									std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType); // if the register is empty, load the global variable
-									std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
-									std::string result_reg = gen->getRegister();
-									
-									gen->printIrCodeCommand("sub", result_reg + ",", arg1 + ",", arg2);
+									if($1->isNumber){
+										std::string reg = gen->getRegister();
+										gen->printIrCodeCommand("li", reg + ",", $1->nodeType, "");
+										std::string arg1 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType); 
+										std::string result_reg = gen->getRegister();
+										gen->printIrCodeCommand("sub", result_reg + ",", arg1 + ",", $3->reg);
+										gen->freeRegister(reg);
+										AST* op = New_Tree($2, $1, $3, result_reg);
+										$$ = op;
+									}
+									else if($3->isNumber){
+										std::string reg = gen->getRegister();
+										gen->printIrCodeCommand("li", reg + ",", $3->nodeType, "");
+										std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType);
+										std::string result_reg = gen->getRegister();
+										gen->printIrCodeCommand("sub", result_reg + ",", $1->reg + ",", arg1);
+										gen->freeRegister(reg);
+										AST* op = New_Tree($2, $1, $3, result_reg);
+										$$ = op;
+									}
+									else {
+										std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType); // if the register is empty, load the global variable
+										std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
+										std::string result_reg = gen->getRegister();
+										
+										gen->printIrCodeCommand("sub", result_reg + ",", arg1 + ",", arg2);
 
-									// Free any registers that were used to store a constant number
-									if($1->isNumber) gen->freeRegister(arg1);
-									if($3->isNumber) gen->freeRegister(arg2);
-
-									AST* op = New_Tree($2, $1, $3, result_reg);
-									$$ = op;
+										AST* op = New_Tree($2, $1, $3, result_reg);
+										$$ = op;
+									}
 								}
 							}
 | MathExpr DIV MathExpr 	{
@@ -763,18 +755,36 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 									$$ = n;
 								} else {
 									/* ---- IR Code Generator ---- */
-									std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType); // if the register is empty, load the global variable
-									std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
-									std::string result_reg = gen->getRegister();
-									
-									gen->printIrCodeCommand("div", result_reg + ",", arg1 + ",", arg2);
+									if($1->isNumber){
+										std::string reg = gen->getRegister();
+										gen->printIrCodeCommand("li", reg + ",", $1->nodeType, "");
+										std::string arg1 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType); 
+										std::string result_reg = gen->getRegister();
+										gen->printIrCodeCommand("div", result_reg + ",", arg1 + ",", $3->reg);
+										gen->freeRegister(reg);
+										AST* op = New_Tree($2, $1, $3, result_reg);
+										$$ = op;
+									}
+									else if($3->isNumber){
+										std::string reg = gen->getRegister();
+										gen->printIrCodeCommand("li", reg + ",", $3->nodeType, "");
+										std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType);
+										std::string result_reg = gen->getRegister();
+										gen->printIrCodeCommand("div", result_reg + ",", $1->reg + ",", arg1);
+										gen->freeRegister(reg);
+										AST* op = New_Tree($2, $1, $3, result_reg);
+										$$ = op;
+									}
+									else {
+										std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType); // if the register is empty, load the global variable
+										std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
+										std::string result_reg = gen->getRegister();
+										
+										gen->printIrCodeCommand("div", result_reg + ",", arg1 + ",", arg2);
 
-									// Free any registers that were used to store a constant number
-									if($1->isNumber) gen->freeRegister(arg1);
-									if($3->isNumber) gen->freeRegister(arg2);
-
-									AST* op = New_Tree($2, $1, $3, result_reg);
-									$$ = op;
+										AST* op = New_Tree($2, $1, $3, result_reg);
+										$$ = op;
+									}
 								}
 							}
 | MathExpr MULT MathExpr 	{
@@ -791,18 +801,36 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 									$$ = n;
 								} else {
 									/* ---- IR Code Generator ---- */
-									std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType); // if the register is empty, load the global variable
-									std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
-									std::string result_reg = gen->getRegister();
-									
-									gen->printIrCodeCommand("mul", result_reg + ",", arg1 + ",", arg2);
+									if($1->isNumber){
+										std::string reg = gen->getRegister();
+										gen->printIrCodeCommand("li", reg + ",", $1->nodeType, "");
+										std::string arg1 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType); 
+										std::string result_reg = gen->getRegister();
+										gen->printIrCodeCommand("mult", result_reg + ",", arg1 + ",", $3->reg);
+										gen->freeRegister(reg);
+										AST* op = New_Tree($2, $1, $3, result_reg);
+										$$ = op;
+									}
+									else if($3->isNumber){
+										std::string reg = gen->getRegister();
+										gen->printIrCodeCommand("li", reg + ",", $3->nodeType, "");
+										std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType);
+										std::string result_reg = gen->getRegister();
+										gen->printIrCodeCommand("mult", result_reg + ",", $1->reg + ",", arg1);
+										gen->freeRegister(reg);
+										AST* op = New_Tree($2, $1, $3, result_reg);
+										$$ = op;
+									}
+									else {
+										std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType); // if the register is empty, load the global variable
+										std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
+										std::string result_reg = gen->getRegister();
+										
+										gen->printIrCodeCommand("mult", result_reg + ",", arg1 + ",", arg2);
 
-									// Free any registers that were used to store a constant number
-									if($1->isNumber) gen->freeRegister(arg1);
-									if($3->isNumber) gen->freeRegister(arg2);
-
-									AST* op = New_Tree($2, $1, $3, result_reg);
-									$$ = op;
+										AST* op = New_Tree($2, $1, $3, result_reg);
+										$$ = op;
+									}
 								}
 							}
 |	OPAR MathExpr CPAR	{
@@ -811,7 +839,6 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 						}
 | NUMBER	{
 				/* ---- Code Generation ---- */
-				std::string reg = gen->getRegister();
 				std::string num = std::to_string($1);
 				// gen->printIrCodeCommand("li", reg + ",", num, "");
 
@@ -825,7 +852,7 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 					printf("\n RECOGNIZED RULE: NUMBER\nTOKENS: %d\n", $1);
 				char num_s[100];
 				sprintf(num_s, "%d", $1);
-				AST* n = New_Tree(num_s, NULL, NULL, reg);
+				AST* n = New_Tree(num_s, NULL, NULL);
 				n->isNumber = true;
 				$$ = n;
 			}
