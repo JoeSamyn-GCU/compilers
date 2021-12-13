@@ -826,7 +826,7 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 										std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
 										std::string result_reg = gen->getRegister();
 										
-										gen->printIrCodeCommand("mult", result_reg + ",", arg1 + ",", arg2);
+										gen->printIrCodeCommand("mul", result_reg + ",", arg1 + ",", arg2);
 
 										AST* op = New_Tree($2, $1, $3, result_reg);
 										$$ = op;
