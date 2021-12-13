@@ -68,19 +68,18 @@ bool checkIntType(Table table, char* id) {
 }
 
 bool checkParameters(Entry* function, std::vector<Entry*> &arguments) {
-    if (function == nullptr) {
+    if (function == nullptr) 
         return false;
-    }
+    
     if (function->params.size() != arguments.size()) {
         printf(FRED("SEMANTIC ERROR::Function called with incorrect number of elements\n"));
         std::cout << "VECTORS WRONG SIZE. " << function->params.size() << " != " << arguments.size() << std::endl;
         return false;
-    }
-    else {
+    } else {
         // check if parameters correct
         for (int i = 0; i < function->params.size(); i++) {
-            std::cout<<"parameter: "<< function->params.at(i)->dtype<<" argument: "<<arguments.at(function->params.size()-i-1)->dtype << std::endl;
-            if (function->params.at(i)->dtype != arguments.at(function->params.size() - i-1)->dtype) {
+            std::cout << "parameter: " << function->params.at(i)->dtype << " argument: " << arguments.at(function->params.size() - i - 1)->dtype << std::endl;
+            if (function->params.at(i)->dtype != arguments.at(function->params.size() - i - 1)->dtype) {
                 //std::cout<<"THEY ARE DIFFERENT"<<std::endl;
                 printf(FRED("SEMANTIC ERROR::Function called with incorrect elements\n"));
                 return false;

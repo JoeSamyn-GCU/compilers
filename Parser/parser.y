@@ -594,15 +594,11 @@ Expr:	ID  {
 										if( f == nullptr ) {
 											std::cout << FRED("ERROR: ID " << $3 << " does not exist in the current scope. ");
 											std::cout << FRED("LINE ") << lines << FRED(" CHARACTER ") << chars << std::endl;
-										}
-										else{
+										} else {
 											// check for correct parameters to function
-											if( !checkParameters(f, argumentVector) )
-											{
+											if(!checkParameters(f, argumentVector)) {
 												std::cout << FRED("ERROR: Incorrect parameters in function call") << std::endl;
-
 											}
-
 
 											argumentVector.clear();
 
@@ -632,7 +628,6 @@ Expr:	ID  {
 														if( f == nullptr || f->returntype != "int" )
 															std::cout << FRED("ERROR: ID " << $6 << " does not exist in tablee or has a type mismatch in assignment statement") << std::endl;
 
-														std::cout << "Here" << std::endl;
 														// check for correct parameters to function
 														if( !checkParameters(f, argumentVector) )
 															std::cout << FRED("ERROR: Incorrect parameters in function call") << std::endl;
@@ -709,74 +704,20 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 											AST* n = New_Tree($1->nodeType, NULL, NULL);
 											n->isNumber = true;
 											$$ = n;
-										} else if ($1->isIntVar && $3->isIntVar) {
-											Entry* e1 = checkExistance(current, const_cast<char*>($1->nodeType.data()), parameterVector);
-											Entry* e2 = checkExistance(current, const_cast<char*>($3->nodeType.data()), parameterVector);
-											//Entry* e1 = current->searchEntry(const_cast<char*>($1->nodeType.data()));
-											//Entry* e2 = current->searchEntry(const_cast<char*>($3->nodeType.data()));
-
-											$1->nodeType = std::to_string(std::stoi(e1->value) + std::stoi(e2->value));
-											AST* n = New_Tree($1->nodeType, NULL, NULL);
-											n->isNumber = true;
-											$$ = n;
 										} else {
-											if(!$1->isNumber && $3->isNumber) {
-												// check if the left side is a variable then add the variable value to the number
-												if($1->isIntVar) {
-													Entry* e = checkExistance(current, const_cast<char*>($1->nodeType.data()), parameterVector);
-													//Entry* e = current->searchEntry(const_cast<char*>($1->nodeType.data()));
-													$1->nodeType = std::to_string(std::stoi(e->value) + std::stoi($3->nodeType));
-													AST* n = New_Tree($1->nodeType, NULL, NULL);
-													n->isNumber = true;
-													$$ = n;
-												} else {
-													/* ---- Code Generation ---- */
-													std::string reg = gen->getRegister();
-													std::string num = $1->nodeType;
-													gen->printIrCodeCommand("li", reg + ",", num, "");
+											/* ---- IR Code Generator ---- */
+											std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType); // if the register is empty, load the global variable
+											std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
+											std::string result_reg = gen->getRegister();
+											
+											gen->printIrCodeCommand("add", result_reg + ",", arg1 + ",", arg2);
 
-													AST* n = New_Tree($3->nodeType, NULL, NULL, gen->getRegister());
-													if($3->isNumber) gen->freeRegister(reg);
+											// Free any registers that were used to store a constant number
+											if($1->isNumber) gen->freeRegister(arg1);
+											if($3->isNumber) gen->freeRegister(arg2);
 
-													n->isNumber = true;
-													$$ = n;
-												}
-											} else if (!$3->isNumber && $1->isNumber) {
-												// check if the left side is a variable then add the variable value to the number
-												if($3->isIntVar) {
-													Entry* e = checkExistance(current, const_cast<char*>($3->nodeType.data()), parameterVector);
-													//Entry* e = current->searchEntry(const_cast<char*>($3->nodeType.data()));
-													$1->nodeType = std::to_string(std::stoi(e->value) + std::stoi($1->nodeType));
-													AST* n = New_Tree($1->nodeType, NULL, NULL);
-													n->isNumber = true;
-													$$ = n;
-												} else {
-													/* ---- Code Generation ---- */
-													std::string reg = gen->getRegister();
-													std::string num = $3->nodeType;
-													gen->printIrCodeCommand("li", reg + ",", num, "");
-
-													AST* n = New_Tree($1->nodeType, NULL, NULL, gen->getRegister());
-													if($1->isNumber) gen->freeRegister(reg);
-
-													n->isNumber = true;
-													$$ = n;
-												}
-											} else {
-												/* ---- IR Code Generator ---- */
-												std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType); // if the register is empty, load the global variable
-												std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
-												std::string result_reg = gen->getRegister();
-												
-												gen->printIrCodeCommand("add", result_reg + ",", arg1 + ",", arg2);
-
-												// Free any registers that were used to store a constant number
-												if($1->isNumber) gen->freeRegister(arg1);
-												if($3->isNumber) gen->freeRegister(arg2);
-
-												AST* op = New_Tree($2, $1, $3, result_reg);
-												$$ = op;
-											}
+											AST* op = New_Tree($2, $1, $3, result_reg);
+											$$ = op;
 										}
 									}
 | MathExpr MINUS MathExpr 	{
@@ -791,74 +732,20 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 									AST* n = New_Tree($1->nodeType, NULL, NULL);
 									n->isNumber = true;
 									$$ = n;
-								} else if ($1->isIntVar && $3->isIntVar) {
-									Entry* e1 = checkExistance(current, const_cast<char*>($1->nodeType.data()), parameterVector);
-									Entry* e2 = checkExistance(current, const_cast<char*>($3->nodeType.data()), parameterVector);
-									// Entry* e1 = current->searchEntry(const_cast<char*>($1->nodeType.data()));
-									// Entry* e2 = current->searchEntry(const_cast<char*>($3->nodeType.data()));
-
-									$1->nodeType = std::to_string(std::stoi(e1->value) - std::stoi(e2->value));
-									AST* n = New_Tree($1->nodeType, NULL, NULL);
-									n->isNumber = true;
-									$$ = n;
 								} else {
-									if(!$1->isNumber && $3->isNumber) {
-										// check if the left side is a variable then add the variable value to the number
-										if($1->isIntVar) {
-											Entry* e = checkExistance(current, const_cast<char*>($1->nodeType.data()), parameterVector);
-											//Entry* e = current->searchEntry(const_cast<char*>($1->nodeType.data()));
-											$1->nodeType = std::to_string(std::stoi(e->value) - std::stoi($3->nodeType));
-											AST* n = New_Tree($1->nodeType, NULL, NULL);
-											n->isNumber = true;
-											$$ = n;
-										} else {
-											/* ---- Code Generation ---- */
-											std::string reg = gen->getRegister();
-											std::string num = $1->nodeType;
-											gen->printIrCodeCommand("li", reg + ",", num, "");
+									/* ---- IR Code Generator ---- */
+									std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType); // if the register is empty, load the global variable
+									std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
+									std::string result_reg = gen->getRegister();
+									
+									gen->printIrCodeCommand("sub", result_reg + ",", arg1 + ",", arg2);
 
-											AST* n = New_Tree($3->nodeType, NULL, NULL, gen->getRegister());
-											if($3->isNumber) gen->freeRegister(reg);
+									// Free any registers that were used to store a constant number
+									if($1->isNumber) gen->freeRegister(arg1);
+									if($3->isNumber) gen->freeRegister(arg2);
 
-											n->isNumber = true;
-											$$ = n;
-										}
-									} else if (!$3->isNumber && $1->isNumber) {
-										// check if the left side is a variable then add the variable value to the number
-										if($3->isIntVar) {
-											Entry* e = checkExistance(current, const_cast<char*>($3->nodeType.data()), parameterVector);
-											//Entry* e = current->searchEntry(const_cast<char*>($3->nodeType.data()));
-											$1->nodeType = std::to_string(std::stoi(e->value) - std::stoi($1->nodeType));
-											AST* n = New_Tree($1->nodeType, NULL, NULL);
-											n->isNumber = true;
-											$$ = n;
-										} else {
-											/* ---- Code Generation ---- */
-											std::string reg = gen->getRegister();
-											std::string num = $3->nodeType;
-											gen->printIrCodeCommand("li", reg + ",", num, "");
-
-											AST* n = New_Tree($1->nodeType, NULL, NULL, gen->getRegister());
-											if($1->isNumber) gen->freeRegister(reg);
-
-											n->isNumber = true;
-											$$ = n;
-										}
-									} else {
-										/* ---- IR Code Generator ---- */
-										std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType); // if the register is empty, load the global variable
-										std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
-										std::string result_reg = gen->getRegister();
-										
-										gen->printIrCodeCommand("sub", result_reg + ",", arg1 + ",", arg2);
-
-										// Free any registers that were used to store a constant number
-										if($1->isNumber) gen->freeRegister(arg1);
-										if($3->isNumber) gen->freeRegister(arg2);
-
-										AST* op = New_Tree($2, $1, $3, result_reg);
-										$$ = op;
-									}
+									AST* op = New_Tree($2, $1, $3, result_reg);
+									$$ = op;
 								}
 							}
 | MathExpr DIV MathExpr 	{
@@ -873,70 +760,20 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 									AST* n = New_Tree($1->nodeType, NULL, NULL);
 									n->isNumber = true;
 									$$ = n;
-								} else if ($1->isIntVar && $3->isIntVar) {
-									Entry* e1 = current->searchEntry(const_cast<char*>($1->nodeType.data()));
-									Entry* e2 = current->searchEntry(const_cast<char*>($3->nodeType.data()));
-
-									$1->nodeType = std::to_string(std::stoi(e1->value) / std::stoi(e2->value));
-									AST* n = New_Tree($1->nodeType, NULL, NULL);
-									n->isNumber = true;
-									$$ = n;
 								} else {
-									if(!$1->isNumber && $3->isNumber) {
-										// check if the left side is a variable then add the variable value to the number
-										if($1->isIntVar) {
-											Entry* e = current->searchEntry(const_cast<char*>($1->nodeType.data()));
-											$1->nodeType = std::to_string(std::stoi(e->value) / std::stoi($3->nodeType));
-											AST* n = New_Tree($1->nodeType, NULL, NULL);
-											n->isNumber = true;
-											$$ = n;
-										} else {
-											/* ---- Code Generation ---- */
-											std::string reg = gen->getRegister();
-											std::string num = $1->nodeType;
-											gen->printIrCodeCommand("li", reg + ",", num, "");
+									/* ---- IR Code Generator ---- */
+									std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType); // if the register is empty, load the global variable
+									std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
+									std::string result_reg = gen->getRegister();
+									
+									gen->printIrCodeCommand("div", result_reg + ",", arg1 + ",", arg2);
 
-											AST* n = New_Tree($3->nodeType, NULL, NULL, gen->getRegister());
-											if($3->isNumber) gen->freeRegister(reg);
+									// Free any registers that were used to store a constant number
+									if($1->isNumber) gen->freeRegister(arg1);
+									if($3->isNumber) gen->freeRegister(arg2);
 
-											n->isNumber = true;
-											$$ = n;
-										}
-									} else if (!$3->isNumber && $1->isNumber) {
-										// check if the left side is a variable then add the variable value to the number
-										if($3->isIntVar) {
-											Entry* e = current->searchEntry(const_cast<char*>($3->nodeType.data()));
-											$1->nodeType = std::to_string(std::stoi(e->value) / std::stoi($1->nodeType));
-											AST* n = New_Tree($1->nodeType, NULL, NULL);
-											n->isNumber = true;
-											$$ = n;
-										} else {
-											/* ---- Code Generation ---- */
-											std::string reg = gen->getRegister();
-											std::string num = $3->nodeType;
-											gen->printIrCodeCommand("li", reg + ",", num, "");
-
-											AST* n = New_Tree($1->nodeType, NULL, NULL, gen->getRegister());
-											if($1->isNumber) gen->freeRegister(reg);
-
-											n->isNumber = true;
-											$$ = n;
-										}
-									} else {
-										/* ---- IR Code Generator ---- */
-										std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType); // if the register is empty, load the global variable
-										std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
-										std::string result_reg = gen->getRegister();
-										
-										gen->printIrCodeCommand("div", result_reg + ",", arg1 + ",", arg2);
-
-										// Free any registers that were used to store a constant number
-										if($1->isNumber) gen->freeRegister(arg1);
-										if($3->isNumber) gen->freeRegister(arg2);
-
-										AST* op = New_Tree($2, $1, $3, result_reg);
-										$$ = op;
-									}
+									AST* op = New_Tree($2, $1, $3, result_reg);
+									$$ = op;
 								}
 							}
 | MathExpr MULT MathExpr 	{
@@ -951,70 +788,20 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 									AST* n = New_Tree($1->nodeType, NULL, NULL);
 									n->isNumber = true;
 									$$ = n;
-								} else if ($1->isIntVar && $3->isIntVar) {
-									Entry* e1 = current->searchEntry(const_cast<char*>($1->nodeType.data()));
-									Entry* e2 = current->searchEntry(const_cast<char*>($3->nodeType.data()));
-
-									$1->nodeType = std::to_string(std::stoi(e1->value) * std::stoi(e2->value));
-									AST* n = New_Tree($1->nodeType, NULL, NULL);
-									n->isNumber = true;
-									$$ = n;
 								} else {
-									if(!$1->isNumber && $3->isNumber) {
-										// check if the left side is a variable then add the variable value to the number
-										if($1->isIntVar) {
-											Entry* e = current->searchEntry(const_cast<char*>($1->nodeType.data()));
-											$1->nodeType = std::to_string(std::stoi(e->value) * std::stoi($3->nodeType));
-											AST* n = New_Tree($1->nodeType, NULL, NULL);
-											n->isNumber = true;
-											$$ = n;
-										} else {
-											/* ---- Code Generation ---- */
-											std::string reg = gen->getRegister();
-											std::string num = $1->nodeType;
-											gen->printIrCodeCommand("li", reg + ",", num, "");
+									/* ---- IR Code Generator ---- */
+									std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType); // if the register is empty, load the global variable
+									std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
+									std::string result_reg = gen->getRegister();
+									
+									gen->printIrCodeCommand("mult", result_reg + ",", arg1 + ",", arg2);
 
-											AST* n = New_Tree($3->nodeType, NULL, NULL, gen->getRegister());
-											if($3->isNumber) gen->freeRegister(reg);
+									// Free any registers that were used to store a constant number
+									if($1->isNumber) gen->freeRegister(arg1);
+									if($3->isNumber) gen->freeRegister(arg2);
 
-											n->isNumber = true;
-											$$ = n;
-										}
-									} else if (!$3->isNumber && $1->isNumber) {
-										// check if the left side is a variable then add the variable value to the number
-										if($3->isIntVar) {
-											Entry* e = current->searchEntry(const_cast<char*>($3->nodeType.data()));
-											$1->nodeType = std::to_string(std::stoi(e->value) * std::stoi($1->nodeType));
-											AST* n = New_Tree($1->nodeType, NULL, NULL);
-											n->isNumber = true;
-											$$ = n;
-										} else {
-											/* ---- Code Generation ---- */
-											std::string reg = gen->getRegister();
-											std::string num = $3->nodeType;
-											gen->printIrCodeCommand("li", reg + ",", num, "");
-
-											AST* n = New_Tree($1->nodeType, NULL, NULL, gen->getRegister());
-											if($1->isNumber) gen->freeRegister(reg);
-
-											n->isNumber = true;
-											$$ = n;
-										}
-									} else {
-										/* ---- IR Code Generator ---- */
-										std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType); // if the register is empty, load the global variable
-										std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
-										std::string result_reg = gen->getRegister();
-										
-										gen->printIrCodeCommand("mult", result_reg + ",", arg1 + ",", arg2);
-
-										// Free any registers that were used to store a constant number
-										if($1->isNumber) gen->freeRegister(arg1);
-										if($3->isNumber) gen->freeRegister(arg2);
-
-										AST* op = New_Tree($2, $1, $3, result_reg);
-										$$ = op;
-									}
+									AST* op = New_Tree($2, $1, $3, result_reg);
+									$$ = op;
 								}
 							}
 |	OPAR MathExpr CPAR	{
@@ -1066,7 +853,6 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 			if(debug)
 				printf("\nRECOGNIZED RULE: ID\n");
 			AST* n = New_Tree($1, NULL, NULL, reg);
-			n->isIntVar = true;
 			$$ = n;
 }
 | ID OSB MathExpr CSB 	{
