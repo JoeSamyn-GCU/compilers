@@ -795,7 +795,7 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 									std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
 									std::string result_reg = gen->getRegister();
 									
-									gen->printIrCodeCommand("mult", result_reg + ",", arg1 + ",", arg2);
+									gen->printIrCodeCommand("mul", result_reg + ",", arg1 + ",", arg2);
 
 									// Free any registers that were used to store a constant number
 									if($1->isNumber) gen->freeRegister(arg1);
