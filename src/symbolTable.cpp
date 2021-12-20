@@ -111,7 +111,10 @@ void Table::printEntries(bool verbose) {
     for(const std::pair<std::string, Entry*>& n : entries){
         std::cout << n.first << "\t" << n.second->dtype << "\t" << n.second->scope << "\t" << n.second->nelements << "\t" << n.second->nparams << "\t" << n.second->returntype << std::endl; 
         if (n.second->params.size() > 0) {
-            std::cout << n.second->params.size() << std::endl;
+            std::cout <<"n params: "<< n.second->params.size() << std::endl;
+        }
+        if (n.second->uses > 0) {
+            std::cout <<"uses: " << n.second->uses << std::endl;
         }
     }
 }

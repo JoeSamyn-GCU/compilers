@@ -12,6 +12,8 @@
 #include "symbolTable.cpp"
 #include "semanticUtilities.h"
 #include "semanticUtilities.cpp"
+#include "optimizerUtilities.h"
+#include "optimizerUtilities.cpp"
 
 #include "AST.h"
 #include "irgen.h"
@@ -81,11 +83,11 @@ char currentScope[50]; // global or the name of the function
 %token <string> READ
 %token <string> RETURN
 %token <string> COMMA
-%token <string> GTE 
+%token <string> GTE
 %token <string> LTE
 %token <string> GT
 %token <string> LT
-%token <string> EQEQ 
+%token <string> EQEQ
 %token <string> NOTEQ
 %token <string> WHILE
 %token <string> IF
@@ -105,16 +107,16 @@ char currentScope[50]; // global or the name of the function
 %%
 
 Program: {
-			gen->ofile << ".data" << std::endl; 
-			gen->ofile << "ln: .asciiz \"\\n\"" << std::endl; 
+			gen->ofile << ".data" << std::endl;
+			gen->ofile << "ln: .asciiz \"\\n\"" << std::endl;
 
-		} 
-DeclList   { 
+		}
+DeclList   {
 				/* ---- AST ACTIONS by PARSER ---- */
 				printf("\n--- Abstract Syntax Tree ---\n\n");
 				print_tree($2, 0);
 
-				// DUMP SYMBOL TABLE 
+				// DUMP SYMBOL TABLE
 				printf("\n--- Symbol Table ---\n\n");
 				symbolTable->printTables();
 				printf("Total tables created: %i\n", tempCounter);
@@ -125,11 +127,11 @@ DeclList   {
 ;
 
 DeclList: Decl { $$ = $1; }
-| Decl DeclList	{ 	
+| Decl DeclList	{
 					/* ---- AST ACTIONS by PARSER ---- */
 					insert_node_right($1, $2);
 					$$ = $1;
-				}	
+				}
 ;
 
 Decl: VarDecl { $$ = $1; }
@@ -144,7 +146,7 @@ FunDecl:	TYPE ID OPAR 	{
 								gen->ofile << $2 << ": \n";
 								gen->scope_counter++;
 								curr_func_name = $2;
-								
+
 							} CPAR Block 	{
 												// ---- IR CODE GENERATION ----
 												std::cout << $2 << std::endl;
@@ -158,11 +160,11 @@ FunDecl:	TYPE ID OPAR 	{
 												current->insertEntry(e);
 
 												// ---- SEMANTIC ACTIONS by PARSER ----
-												if( $1 != returnTypeVar && strcmp($1, "void") ) 
+												if( $1 != returnTypeVar && strcmp($1, "void") )
 													std::cout << FRED("ERROR::Function type does not match RETURN type. LINE ") << lines << FRED(" CHARACTER ") << chars << std::endl;
-												
+
 												returnTypeVar = "";
-												
+
 												/* ---- AST ACTIONS by PARSER ---- */
 												if(debug)
 													std::cout << "\nRECOGNIZE RULE: Function Decl\n";
@@ -184,7 +186,7 @@ VarDeclList: /* empty */ { $$ = NULL; }
 						}
 ;
 
-VarDecl: TYPE ID SEMICOLON		{ 
+VarDecl: TYPE ID SEMICOLON		{
 
 								/* ---- Generate IR Code ---- */
 								if(is_global)
@@ -198,7 +200,7 @@ VarDecl: TYPE ID SEMICOLON		{
 								// ---- SYMBOL TABLE ACTIONS by PARSER ----
 								Entry* e = new Entry($2, $1);
 								current->insertEntry(e);
-								
+
 								// ---- AST ACTIONS by PARSER ----
 								struct AST* id = (AST*)malloc(sizeof(struct AST));
 								struct AST* type = (AST*)malloc(sizeof(struct AST));
@@ -216,7 +218,7 @@ VarDecl: TYPE ID SEMICOLON		{
 											// name, dtype, scope, nelements
 											Entry* e = new Entry($2, $1,"",$4);
 											current->insertEntry(e);
-											
+
 											/* ---- AST ACTIONS by PARSER ---- */
 											if(debug)
 												printf("RECOGNIZED RULE: Array Declaration\nTOKENS: %s %s %s %d %s\n", $1, $2, $3, $4, $5);
@@ -253,14 +255,14 @@ VarDecl: TYPE ID SEMICOLON		{
 											printf("\nLine %d Character %d::SYNTAX ERROR::Array size was not declared\n", lines, chars);
 											printf("\033[0m");
 										}
-	| FUN TYPE ID 	{ 
+	| FUN TYPE ID 	{
 						if(is_global){
 							is_global = false;
 							gen->ofile << "\n.text\n";
 						}
-						std::string s = $3; 
-						gen->printLabel(s + ":"); 
-						curr_func_name = $3; 
+						std::string s = $3;
+						gen->printLabel(s + ":");
+						curr_func_name = $3;
 					} Tail	{
 								std::cout << "HERE HIT";
 								/* ---- Code Generation ---- */
@@ -268,14 +270,14 @@ VarDecl: TYPE ID SEMICOLON		{
 									gen->printIrCodeCommand("jr", "$ra", "", "");
 								gen->ofile << std::endl;
 								/* --- SYMBOL TABLE ACTIONS --- */
-								Entry* e = new Entry($3, "", "", 0, 0, {}, $3);
+								Entry* e = new Entry($3, "", "", 0, 0, {}, $2);
 								while(!parameterVector.empty()) {
 									e->params.push_back(parameterVector.back());
 									parameterVector.pop_back();
 								}
 								current->insertEntry(e);
 
-								if( e->returntype != returnTypeVar ) 
+								if( e->returntype != returnTypeVar )
 									std::cout << FRED("ERROR: Function type does not match RETURN type") << std::endl;
 
 								returnTypeVar = "";
@@ -309,19 +311,19 @@ Stmt: /* empty */ { $$ = NULL; }
 							read = New_Tree($1, NULL, NULL);
 							$$ = New_Tree(in, read, id);
 						}
-	| WRITE ID 	SEMICOLON	{ 
+	| WRITE ID 	SEMICOLON	{
 								/* ---- Code Generation ---- */
 								// Check what type the ID is
 
 								std::cout << curr_func_name << std::endl;
-								
+
 								// Get the id register or load global var into memory
 								std::string reg = gen->getMappedRegister($2);
 								std::cout << "WRITING REG: " << reg << std::endl;
-								
-								
+
+
 								if(current == NULL) std::cout << "DEBUG: HERE\n";
-								
+
 								// Print integer using MIPS, no new line
 								gen->printIrCodeCommand("li", "$v0,", "1", "");
 								gen->printIrCodeCommand("move", "$a0,", reg, "");
@@ -403,12 +405,12 @@ Matched: IF OPAR RelExpr CPAR Matched ELSE {gen->printLabel(".L" + std::to_strin
 																														cond = New_Tree("COND", i, e);
 																														$$ = cond;
 																													}
-  | Block	{ 
+  | Block	{
 	  			/* ---- GENERATE IR CODE ---- */
 				curr_label = ".L" + std::to_string(lable_counter+1);
 				gen->printIrCodeCommand("j", curr_label, "", "");
 
-	  			$$ = $1; 
+	  			$$ = $1;
 			}
 ;
 
@@ -421,7 +423,7 @@ Unmatched: IF OPAR RelExpr CPAR Block	{
 											/* ---- AST ACTIONS by PARSER ---- */
 											if(debug)
 												printf("\nRECOGNIZED RULE: IF STATEMENT\n");
-											
+
 											$$ = New_Tree($1, $3, $5);
 										}
   | IF OPAR RelExpr CPAR Matched ELSE Unmatched	{
@@ -437,9 +439,9 @@ Unmatched: IF OPAR RelExpr CPAR Block	{
   												}
 ;
 
-Expr:	ID  { 
+Expr:	ID  {
 				if(debug)
-					printf("\n RECOGNIZED RULE: Simplest expression\n"); 
+					printf("\n RECOGNIZED RULE: Simplest expression\n");
 				argumentVector.clear();
 				/* ---- AST ACTIONS by PARSER ---- */
 				struct AST* id = (AST*)malloc(sizeof(struct AST));
@@ -459,14 +461,21 @@ Expr:	ID  {
 						AST* write = (AST*)malloc(sizeof(AST));
 						write = New_Tree($1, NULL, NULL);
 						$$ = New_Tree(out, write, $2);
-						
+
 					}
 | ID EQ MathExpr 	{
 						/* ------ CODE GENERATION ------ */
 						std::string reg = gen->getMappedRegister($1);
-						gen->printIrCodeCommand("move", reg + ",", $3->reg, "");
-						gen->freeRegister($3->reg);
-						argumentVector.clear();
+
+						if( $3->isNumber ) {
+							std::string reg = gen->getMappedRegister($1);
+							gen->printIrCodeCommand("li", reg + ",", $3->nodeType, "");
+						} else {
+							gen->freeRegister($3->reg);
+							argumentVector.clear();
+							gen->printIrCodeCommand("move", reg + ",", $3->reg, "");
+						}
+						
 						/* --- SEMANTIC CHECKS --- */
 						// checkExistance(current, $1, parameterVector);
 						// checkIntType(current, $1);
@@ -479,58 +488,16 @@ Expr:	ID  {
 						eq = New_Tree("=", id, $3);
 						$$ = eq;
 					}
-| ID EQ ID 	{
-				/* --- SEMANTIC CHECKS --- */
-				checkExistance(current, $1, parameterVector);
-				checkExistance(current, $3, parameterVector);
-
-				/* ---- IR Code Generation ---- */
-				// TODO: fix this to check both global variables exist
-				std::string reg_1 = gen->getMappedRegister($1);
-				std::string reg_2 = gen->getMappedRegister($3);
-				// Both global vars
-				if(reg_1 == "" && reg_2 == ""){
-					reg_2 = gen->getRegister();
-					std::string gp = "($gp)";
-					std::string id($1);
-					std::string id_2($3);
-					gen->printIrCodeCommand("lw", reg_2 + ",", id_2.append(gp), "");
-					gen->printIrCodeCommand("sw", reg_2 + ",", id.append(gp), "");
-					int reg_1_index = reg_2[2] - 48;
-					gen->registers[reg_1_index] = false;
-				}
-				else if (reg_1 != "" && reg_2 == ""){
-					std::string gp = "($gp)";
-					std::string id_2($3);
-					gen->printIrCodeCommand("li", reg_1 + ",", id_2.append(gp), "");
-				}
-				else if (reg_1 == "" && reg_2 != ""){
-					std::string gp = "($gp)";
-					std::string id_1($1);
-					gen->printIrCodeCommand("li", reg_2 + ", ", id_1.append(gp), "");
-				}else{
-					gen->printIrCodeCommand("li", reg_2 + ",", reg_1, "");
-				}
-
-				/* ---- AST ACTIONS by PARSER ---- */
-				if(debug)
-					std::cout << "\n RECOGNIZED RULE: ID EQ ID\nTOKENS: " << $1 << " " << $2 << " " << $3 << std::endl;
-				struct AST* id_1 = (AST*)malloc(sizeof(struct AST));
-				struct AST* id_2 = (AST*)malloc(sizeof(struct AST));
-				struct AST* eq = (AST*)malloc(sizeof(struct AST));
-				id_1 = New_Tree($1, NULL, NULL);
-				id_2 = New_Tree($3, NULL, NULL);
-				eq = New_Tree("=", id_1, id_2);
-				$$ = eq;
-			}
 | ID EQ NUMBER 	{
 					/* --- SEMANTIC CHECKS --- */
 					argumentVector.clear();
-					checkExistance(current,$1, parameterVector);
+					Entry* e = checkExistance(current, $1, parameterVector);
+					e->value = std::to_string($3);
+
 					/* ---- IR Code Generation ---- */
 					std::string id_reg = gen->getMappedRegister($1);
 					std::cout << "REGISTER: " << id_reg << std::endl;
-					// This is assumed to be a global variable 
+					// This is assumed to be a global variable
 					if(id_reg == ""){
 						id_reg = gen->getRegister();
 						gen->printIrCodeCommand("li", id_reg + ",", std::to_string($3), "");
@@ -541,12 +508,14 @@ Expr:	ID  {
 					}
 
 					/* ---- AST ACTIONS by PARSER ---- */
-				
+
 					if(debug)
 						std::cout << "\n RECOGNIZED RULE: ID EQ ID\nTOKENS: " << $1 << " " << $2 << " " << $3 << std::endl;
+
 					struct AST* id_1 = (AST*)malloc(sizeof(struct AST));
 					struct AST* num = (AST*)malloc(sizeof(struct AST));
 					struct AST* eq = (AST*)malloc(sizeof(struct AST));
+
 					id_1 = New_Tree($1, NULL, NULL);
 					num = New_Tree(std::to_string($3), NULL, NULL);
 					eq = New_Tree("=", id_1, num);
@@ -558,9 +527,9 @@ Expr:	ID  {
 							gen->clearArgumentRegister();
 
 							/* --- SEMANTIC CHECKS --- */
-							checkExistance(current, $1, parameterVector);
-
-							Entry* e = current->searchEntry($1);
+							Entry* e = checkExistance(current, $1, parameterVector);
+							e->uses++;
+							//Entry* e = current->searchEntry($1);
 							// check for correct parameters
 							checkParameters(e, argumentVector);
 							argumentVector.clear();
@@ -575,23 +544,19 @@ Expr:	ID  {
 										// check if first ID exists in table or parameters
 										Entry* e = checkExistance(current, $1, parameterVector);
 										Entry* f = checkExistance(current, $3, parameterVector);
-										
-										if( e == nullptr ) 
+
+										if( e == nullptr )
 											std::cout << FRED("ERROR::LINE ") << lines << FRED(" ::CHARACTER ") << chars << " " << $1 << FRED(" not declared in scope. ") << std::endl;
 
 										if( f == nullptr ) {
 											std::cout << FRED("ERROR: ID " << $3 << " does not exist in the current scope. ");
 											std::cout << FRED("LINE ") << lines << FRED(" CHARACTER ") << chars << std::endl;
-										}
-										else{
+										} else {
 											// check for correct parameters to function
-											if( !checkParameters(f, argumentVector) ) 
-											{
-												std::cout << FRED("ERROR: Incorrect parameters in function call") << std::endl;	
-														
-											}	
+											if(!checkParameters(f, argumentVector)) {
+												std::cout << FRED("ERROR: Incorrect parameters in function call") << std::endl;
+											}
 
-										
 											argumentVector.clear();
 
 											// Compare ID type and function return type
@@ -599,8 +564,8 @@ Expr:	ID  {
 												printf(FRED("SEMANTIC ERROR::Type mismatch\n"));
 											}
 										}
-									
-										
+
+
 										/* ---- AST ACTIONS by PARSER ---- */
 										AST* id_1 = (AST*) malloc(sizeof(AST));
 										AST* fun = (AST*) malloc(sizeof(AST));
@@ -613,26 +578,25 @@ Expr:	ID  {
 														// check if first ID exists in table or parameters
 														Entry* e = checkExistance(current, $1, parameterVector);
 														Entry* f = checkExistance(current, $6, parameterVector);
-														
-														if( e == nullptr || e->dtype != "int" ) 
+
+														if( e == nullptr || e->dtype != "int" )
 															std::cout << FRED("ERROR: ID " << $1 << " does not exist in table or has a type mismatch in assignment statement") << std::endl;
 
-														if( f == nullptr || f->returntype != "int" ) 
+														if( f == nullptr || f->returntype != "int" )
 															std::cout << FRED("ERROR: ID " << $6 << " does not exist in tablee or has a type mismatch in assignment statement") << std::endl;
-														
-														std::cout << "Here" << std::endl;
+
 														// check for correct parameters to function
-														if( !checkParameters(f, argumentVector) ) 
+														if( !checkParameters(f, argumentVector) )
 															std::cout << FRED("ERROR: Incorrect parameters in function call") << std::endl;
 
-														
+
 														argumentVector.clear();
-														
+
 														// Compare ID type and function return type
 														if (e->dtype != f->returntype) {
 															printf(FRED("SEMANTIC ERROR::Type mismatch\n"));
 														}
-														
+
 														/* ---- AST ACTIONS by PARSER ---- */
 														AST* id_1 = New_Tree($1, NULL, NULL);
 														AST* arr = New_Tree("ARRAY", id_1, $3);
@@ -643,7 +607,7 @@ Expr:	ID  {
 									/* --- SEMANTIC CHECKS --- */
 									checkIntType(current, $1);
 									checkIntType(current, $3);
-									
+
 									/* ---- AST ACTIONS by PARSER ---- */
 									AST* id_1 = (AST*) malloc(sizeof(AST));
 									AST* id_2 = (AST*) malloc(sizeof(AST));
@@ -654,7 +618,7 @@ Expr:	ID  {
 									id_2 = New_Tree($3, NULL, NULL);
 									index = New_Tree(std::to_string($5), NULL, NULL);
 									arr = New_Tree("ARRAY_AT", id_2, index);
-									
+
 									$$ = New_Tree($2, id_1, arr);
 								}
 	| ID OSB MathExpr CSB EQ MathExpr	{
@@ -686,84 +650,197 @@ ArgList: /* empty */ { $$ = NULL; }
 ;
 
 MathExpr:	MathExpr PLUS MathExpr 	{
-									/* ---- IR Code Generator ---- */
-									std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType);
-									std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
-									std::string result_reg = gen->getRegister();
-									gen->printIrCodeCommand("add", result_reg + ",", arg1 + ",", arg2);
+										/* ---- SEMANTIC ACTIONS by PARSER ---- */
+										if(debug)
+											std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " <<
+											$2<< " " << $3->nodeType << std::endl;
 
-									// Free any registers that were used to store a constant number
-									if($1->isNum) gen->freeRegister(arg1);
-									if($3->isNum) gen->freeRegister(arg2);
+										/* ---- AST ACTIONS by PARSER ---- */
+										if ($1->isNumber && $3->isNumber) {
+											$1->nodeType = std::to_string(std::stoi($1->nodeType) + std::stoi($3->nodeType));
+											AST* n = New_Tree($1->nodeType, NULL, NULL);
+											n->isNumber = true;
+											$$ = n;
+										} else {
+											/* ---- IR Code Generator ---- */
+											if($1->isNumber){
+												std::string reg = gen->getRegister();
+												gen->printIrCodeCommand("li", reg + ",", $1->nodeType, "");
+												std::string arg1 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType); 
+												std::string result_reg = gen->getRegister();
+												gen->printIrCodeCommand("add", result_reg + ",", arg1 + ",", $3->reg);
+												gen->freeRegister(reg);
+												AST* op = New_Tree($2, $1, $3, result_reg);
+												$$ = op;
+											}
+											else if($3->isNumber){
+												std::string reg = gen->getRegister();
+												gen->printIrCodeCommand("li", reg + ",", $3->nodeType, "");
+												std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType);
+												std::string result_reg = gen->getRegister();
+												gen->printIrCodeCommand("add", result_reg + ",", $1->reg + ",", arg1);
+												gen->freeRegister(reg);
+												AST* op = New_Tree($2, $1, $3, result_reg);
+												$$ = op;
+											}
+											else {
+												std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType); // if the register is empty, load the global variable
+												std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
+												std::string result_reg = gen->getRegister();
+												
+												gen->printIrCodeCommand("add", result_reg + ",", arg1 + ",", arg2);
 
-									/* ---- SEMANTIC ACTIONS by PARSER ---- */
-									if(debug)
-										std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " << 
-								   		 $2<< " " << $3->nodeType << std::endl;
-
-									/* ---- AST ACTIONS by PARSER ---- */
-									AST* op = New_Tree($2, $1, $3, result_reg);
-									$$ = op;
-								}
+												AST* op = New_Tree($2, $1, $3, result_reg);
+												$$ = op;
+											}
+										}
+									}
 | MathExpr MINUS MathExpr 	{
+								/* ---- SEMANTIC ACTIONS by PARSER ---- */
+								if(debug)
+									std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " <<
+										$2<< " " << $3->nodeType << std::endl;
+
+								/* ---- AST ACTIONS by PARSER ---- */
+								if ($1->isNumber && $3->isNumber) {
+									$1->nodeType = std::to_string(std::stoi($1->nodeType) - std::stoi($3->nodeType));
+									AST* n = New_Tree($1->nodeType, NULL, NULL);
+									n->isNumber = true;
+									$$ = n;
+								} else {
 									/* ---- IR Code Generator ---- */
-									std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType);
-									std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
-									std::string result_reg = gen->getRegister();
-									gen->printIrCodeCommand("sub", result_reg + ",", arg1 + ",", arg2);
+									if($1->isNumber){
+										std::string reg = gen->getRegister();
+										gen->printIrCodeCommand("li", reg + ",", $1->nodeType, "");
+										std::string arg1 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType); 
+										std::string result_reg = gen->getRegister();
+										gen->printIrCodeCommand("sub", result_reg + ",", arg1 + ",", $3->reg);
+										gen->freeRegister(reg);
+										AST* op = New_Tree($2, $1, $3, result_reg);
+										$$ = op;
+									}
+									else if($3->isNumber){
+										std::string reg = gen->getRegister();
+										gen->printIrCodeCommand("li", reg + ",", $3->nodeType, "");
+										std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType);
+										std::string result_reg = gen->getRegister();
+										gen->printIrCodeCommand("sub", result_reg + ",", $1->reg + ",", arg1);
+										gen->freeRegister(reg);
+										AST* op = New_Tree($2, $1, $3, result_reg);
+										$$ = op;
+									}
+									else {
+										std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType); // if the register is empty, load the global variable
+										std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
+										std::string result_reg = gen->getRegister();
+										
+										gen->printIrCodeCommand("sub", result_reg + ",", arg1 + ",", arg2);
 
-									/* ---- SEMANTIC ACTIONS by PARSER ---- */
-									if(debug)
-										std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " << 
-								   		 $2<< " " << $3->nodeType << std::endl;
-
-									/* ---- AST ACTIONS by PARSER ---- */
-									AST* op = New_Tree($2, $1, $3, result_reg);
-									$$ = op;
+										AST* op = New_Tree($2, $1, $3, result_reg);
+										$$ = op;
+									}
 								}
+							}
 | MathExpr DIV MathExpr 	{
+								/* ---- SEMANTIC ACTIONS by PARSER ---- */
+								if(debug)
+									std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " <<
+										$2 << " " << $3->nodeType << std::endl;
+
+								/* ---- AST ACTIONS by PARSER ---- */
+								if ($1->isNumber && $3->isNumber) {
+									$1->nodeType = std::to_string(std::stoi($1->nodeType) / std::stoi($3->nodeType));
+									AST* n = New_Tree($1->nodeType, NULL, NULL);
+									n->isNumber = true;
+									$$ = n;
+								} else {
 									/* ---- IR Code Generator ---- */
-									std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType);
-									std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
-									std::string result_reg = gen->getRegister();
-									gen->printIrCodeCommand("div", arg1 + ",", arg2, "");
-									gen->printIrCodeCommand("mflo", result_reg, "", "");
+									if($1->isNumber){
+										std::string reg = gen->getRegister();
+										gen->printIrCodeCommand("li", reg + ",", $1->nodeType, "");
+										std::string arg1 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType); 
+										std::string result_reg = gen->getRegister();
+										gen->printIrCodeCommand("div", result_reg + ",", arg1 + ",", $3->reg);
+										gen->freeRegister(reg);
+										AST* op = New_Tree($2, $1, $3, result_reg);
+										$$ = op;
+									}
+									else if($3->isNumber){
+										std::string reg = gen->getRegister();
+										gen->printIrCodeCommand("li", reg + ",", $3->nodeType, "");
+										std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType);
+										std::string result_reg = gen->getRegister();
+										gen->printIrCodeCommand("div", result_reg + ",", $1->reg + ",", arg1);
+										gen->freeRegister(reg);
+										AST* op = New_Tree($2, $1, $3, result_reg);
+										$$ = op;
+									}
+									else {
+										std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType); // if the register is empty, load the global variable
+										std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
+										std::string result_reg = gen->getRegister();
+										
+										gen->printIrCodeCommand("div", result_reg + ",", arg1 + ",", arg2);
 
-									/* ---- SEMANTIC ACTIONS by PARSER ---- */
-									if(debug)
-										std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " << 
-								   		 $2 << " " << $3->nodeType << std::endl;
-
-									/* ---- AST ACTIONS by PARSER ---- */
-									AST* op = New_Tree($2, $1, $3, result_reg);
-									$$ = op;
+										AST* op = New_Tree($2, $1, $3, result_reg);
+										$$ = op;
+									}
 								}
+							}
 | MathExpr MULT MathExpr 	{
+								/* ---- SEMANTIC ACTIONS by PARSER ---- */
+								if(debug)
+									std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " <<
+										$2 << " " << $3->nodeType << std::endl;
+
+								/* ---- AST ACTIONS by PARSER ---- */
+								if ($1->isNumber && $3->isNumber) {
+									$1->nodeType = std::to_string(std::stoi($1->nodeType) * std::stoi($3->nodeType));
+									AST* n = New_Tree($1->nodeType, NULL, NULL);
+									n->isNumber = true;
+									$$ = n;
+								} else {
 									/* ---- IR Code Generator ---- */
-									std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType);
-									std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
-									std::string result_reg = gen->getRegister();
-									gen->printIrCodeCommand("mult",  arg1 + ",", arg2, "");
-									gen->printIrCodeCommand("mflo", result_reg, "", "");
+									if($1->isNumber){
+										std::string reg = gen->getRegister();
+										gen->printIrCodeCommand("li", reg + ",", $1->nodeType, "");
+										std::string arg1 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType); 
+										std::string result_reg = gen->getRegister();
+										gen->printIrCodeCommand("mult", result_reg + ",", arg1 + ",", $3->reg);
+										gen->freeRegister(reg);
+										AST* op = New_Tree($2, $1, $3, result_reg);
+										$$ = op;
+									}
+									else if($3->isNumber){
+										std::string reg = gen->getRegister();
+										gen->printIrCodeCommand("li", reg + ",", $3->nodeType, "");
+										std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType);
+										std::string result_reg = gen->getRegister();
+										gen->printIrCodeCommand("mult", result_reg + ",", $1->reg + ",", arg1);
+										gen->freeRegister(reg);
+										AST* op = New_Tree($2, $1, $3, result_reg);
+										$$ = op;
+									}
+									else {
+										std::string arg1 = $1->reg != "" ? $1->reg : gen->loadGlobal($1->nodeType); // if the register is empty, load the global variable
+										std::string arg2 = $3->reg != "" ? $3->reg : gen->loadGlobal($3->nodeType);
+										std::string result_reg = gen->getRegister();
+										
+										gen->printIrCodeCommand("mul", result_reg + ",", arg1 + ",", arg2);
 
-									/* ---- SEMANTIC ACTIONS by PARSER ---- */
-									if(debug)
-										std::cout << "\nRECOGNIZED RULE: Math Expression\nTOKENS: " << $1->nodeType << " " << 
-								   		 $2 << " " << $3->nodeType << std::endl;
-
-									/* ---- AST ACTIONS by PARSER ---- */
-									AST* op = New_Tree($2, $1, $3, result_reg);
-									$$ = op;
+										AST* op = New_Tree($2, $1, $3, result_reg);
+										$$ = op;
+									}
 								}
+							}
 |	OPAR MathExpr CPAR	{
 							/* ---- AST ACTIONS by PARSER ---- */
 							$$ = $2;
 						}
 | NUMBER	{
 				/* ---- Code Generation ---- */
-				std::string reg = gen->getRegister();
 				std::string num = std::to_string($1);
-				gen->printIrCodeCommand("li", reg + ",", num, "");
+				// gen->printIrCodeCommand("li", reg + ",", num, "");
 
 				/* --- SYMBOL TABLE CHECKS  --- */
 				Entry* e = new Entry("Int", std::to_string($1));
@@ -775,8 +852,8 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 					printf("\n RECOGNIZED RULE: NUMBER\nTOKENS: %d\n", $1);
 				char num_s[100];
 				sprintf(num_s, "%d", $1);
-				AST* n = New_Tree(num_s, NULL, NULL, reg);
-				n->isNum = true;
+				AST* n = New_Tree(num_s, NULL, NULL);
+				n->isNumber = true;
 				$$ = n;
 			}
 | ID	{
@@ -796,14 +873,15 @@ MathExpr:	MathExpr PLUS MathExpr 	{
 			}
 			argumentVector.push_back(e);
 
-			
+
 			std::string reg = gen->getMappedRegister($1);
 			std::cout << "GETTING MAPPED REGISTER: " << reg << std::endl;
 
 			/* ---- AST ACTIONS by PARSER ---- */
 			if(debug)
 				printf("\nRECOGNIZED RULE: ID\n");
-			$$ = New_Tree($1, NULL, NULL, reg);
+			AST* n = New_Tree($1, NULL, NULL, reg);
+			$$ = n;
 }
 | ID OSB MathExpr CSB 	{
 							/* ---- AST ACTIONS by PARSER ---- */
@@ -922,7 +1000,7 @@ RelExpr: MathExpr GTE MathExpr	{
 							if(debug)
 								printf("\nRECOGNIZED RULE: Relational Expression\n");
 							$$ = New_Tree($2, $1, $3);
-						}	
+						}
 | RelExpr OR RelExpr	{
 							/* ---- GENERATE IR CODE ---- */
 
@@ -936,7 +1014,7 @@ RelExpr: MathExpr GTE MathExpr	{
 ;
 
 Tail: OPAR ParamDeclList CPAR Block 	{
-											
+
 											/* ---- AST ACTIONS by PARSER ---- */
 											if(debug)
 												printf("\nRECOGNIZE RULE: Function Decl\n");
@@ -949,15 +1027,15 @@ Tail: OPAR ParamDeclList CPAR Block 	{
 Block: OCB {
 				current = new Table(current);
 				tempCounter++;
-				
-			} 
+
+			}
 			VarDeclList StmtList {
 									if (current->parent != nullptr) {
 										//current->printEntries();
 										current = current->parent;
 										//std::cout << "MOVING UP A LEVEL" << std::endl;
 									}
-								} 
+								}
 			CCB 	{
 						/* ---- AST ACTIONS by PARSER ---- */
 						if(debug)
@@ -974,8 +1052,8 @@ ParamDeclList: ParamDecl COMMA ParamDeclList 	{
 													insert_node_left($1, $3);
 													$$ = $1;
 												}
-	| ParamDecl	{ 
-					$$ = $1; 
+	| ParamDecl	{
+					$$ = $1;
 				}
 ;
 
@@ -1004,7 +1082,7 @@ ParamDecl: /* empty */ { $$ = NULL; }
 							AST* id = New_Tree($2, NULL, NULL);
 							AST* type = New_Tree($1, NULL, NULL);
 							$$ = New_Tree("array", type, id);
-						}	
+						}
 %%
 
 int main(int argc, char**argv) {
@@ -1017,7 +1095,7 @@ int main(int argc, char**argv) {
 
 	std::cout << "##### Opening IR Code File #####\n";
 	gen->openFile();
-	
+
 	if (argc > 1){
 	  if(!(yyin = fopen(argv[1], "r")))
           {
@@ -1029,7 +1107,7 @@ int main(int argc, char**argv) {
 
 	std::cout << "#### Closing IR Code File ####\n";
 	gen->closeFile();
-	
+	redundantFunctionElimination(symbolTable);
 }
 
 void yyerror(const char* s) {

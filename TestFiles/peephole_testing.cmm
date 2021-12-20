@@ -1,0 +1,19 @@
+fun int addTwo(int x) {
+    int y;
+    y = 2;
+    return y;
+}
+
+void main() {
+    int x;
+    int y;
+    int z;
+    int w;
+    int u;
+    y = 12;
+    u = addTwo(1);
+    x = y;
+    z = y * u;
+    w = y * u;   
+    write(w);
+}
